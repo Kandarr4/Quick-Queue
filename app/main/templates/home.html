@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Welcome to the Electronic Queue System</h1>
+    {% if current_user.is_authenticated %}
+        <p>Hello, {{ current_user.username }}! You are logged in as {{ current_user.role }}.</p>
+        {% if current_user.role == 'main_admin' %}
+            <a href="{{ url_for('main_admin.admin_dashboard') }}" class="btn">Admin Dashboard</a>
+        {% elif current_user.role == 'secondary_admin' %}
+            <a href="{{ url_for('secondary_admin.admin_dashboard') }}" class="btn">Admin Dashboard</a>
+        {% elif current_user.role == 'terminal' %}
+            <a href="{{ url_for('terminal.terminal_dashboard') }}" class="btn">Terminal Dashboard</a>
+        {% elif current_user.role == 'tablo' %}
+            <a href="{{ url_for('tablo.tablo_dashboard') }}" class="btn">Tablo Dashboard</a>
+        {% endif %}
+        <a href="{{ url_for('main.logout') }}" class="btn">Logout</a>
+    {% else %}
+        <p>You are not logged in. <a href="{{ url_for('main.login') }}">Click here to login</a></p>
+    {% endif %}
+</div>
+{% endblock %}

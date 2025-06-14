@@ -1,0 +1,146 @@
+ 
+<div id="terminal-demo-wrapper"> 
+
+    <div class="main-container">
+
+
+        <h1 class="page-title fade-in fade-in-delay-1">Выберите услугу</h1>
+
+        <div class="cards-container fade-in fade-in-delay-2" id="service-cards">
+            
+            <!-- Демо-карточка 1: Доступная услуга -->
+            <div class="service-card" data-service-name="Прием терапевта" data-cabinet="101">
+                <div class="card-icon">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <h5 class="card-title">Прием терапевта</h5>
+                <p class="card-info">Кабинет: 101</p>
+            </div>
+
+            <!-- Демо-карточка 2: Доступная услуга -->
+            <div class="service-card" data-service-name="Сдача анализов" data-cabinet="205">
+                <div class="card-icon">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <h5 class="card-title">Сдача анализов</h5>
+                <p class="card-info">Кабинет: 205</p>
+            </div>
+            
+        </div>
+    </div>
+
+
+    <!-- Блок для уведомлений -->
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2 class="notification-title">Талон №000 взят</h2>
+        <p class="notification-message">Пожалуйста, ожидайте вызова на табло</p>
+    </div>
+</div>
+
+<!-- JavaScript адаптирован для демонстрации -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Находим только те карточки, которые находятся внутри этого конкретного блока
+    const serviceContainer = document.getElementById('service-cards');
+    if (!serviceContainer) return; // Если контейнер не найден, ничего не делаем
+
+    const cards = serviceContainer.querySelectorAll('.service-card');
+    const notification = document.getElementById('notification');
+    const refreshButton = document.getElementById('refresh-button');
+    
+    // Обработчик кнопки обновления
+    if (refreshButton) {
+        refreshButton.addEventListener('click', function() {
+            const refreshIcon = this.querySelector('.refresh-icon');
+            refreshIcon.style.animation = 'rotate 0.6s linear';
+            setTimeout(() => {
+                location.reload();
+            }, 600);
+        });
+    }
+    
+    // Обработчики кликов по карточкам
+    cards.forEach(card => {
+        card.addEventListener('click', function() {
+            if (this.classList.contains('unavailable')) {
+                return; // Не реагируем на недоступные карточки
+            }
+            
+            // Анимация клика
+            this.style.animation = 'clickAnimation 0.5s ease forwards';
+            setTimeout(() => { this.style.animation = ''; }, 500);
+            
+            // --- ДЕМОНСТРАЦИОННАЯ ЛОГИКА ---
+            // Вместо fetch-запроса генерируем данные на лету
+            
+            // Получаем данные из атрибутов карточки
+            const serviceName = this.getAttribute('data-service-name');
+            const cabinetNumber = this.getAttribute('data-cabinet');
+            
+            // Генерируем случайные данные для талона
+            const ticketNumber = String(Math.floor(100 + Math.random() * 900)); // Случайный номер от 100 до 999
+            const issueTime = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            const activeTicketsBehind = Math.floor(Math.random() * 10); // Случайное число людей в очереди
+
+            // Формируем HTML для печати
+            const ticketContent = `
+                <div style="font-family: Arial, sans-serif; color: #000; margin: 0; padding: 0; width: 280px;">
+                    <div style="text-align: center; padding: 5px; background-color: #fff;">
+                        <div style="border-bottom: 3px solid #000; margin-bottom: 5px; padding-bottom: 2px;">
+                            <h3 style="margin: 0; padding: 0; font-size: 14px; font-weight: 900;">ПОЛИКЛИНИКА №2 Г. ТЕМИРТАУ</h3>
+                        </div>
+                        <div style="margin: 5px 0;">
+                            <h2 style="margin: 0; padding: 0; font-size: 36px; font-weight: 900;">Талон №${ticketNumber}</h2>
+                        </div>
+                        <div style="border: 1px solid #000; padding: 1px; margin: 2px 0; text-align: left;">
+                            <p style="margin: 2px 0; padding: 0; font-size: 10px;">Услуга: ${serviceName}</p>
+                            <p style="margin: 2px 0; padding: 0; font-size: 10px;">Кабинет: ${cabinetNumber}</p>
+                            <p style="margin: 2px 0; padding: 0; font-size: 10px;">Время: ${issueTime}</p>
+                            <p style="margin: 2px 0; padding: 0; font-size: 10px;">Клиентов в очереди: ${activeTicketsBehind}</p>
+                        </div>
+                        <div style="border: 1px solid #000; background-color: #fff; padding: 1px; margin: 2px 0;">
+                            <p style="margin: 0; padding: 0; font-size: 14px; font-weight: 500;">ОЖИДАЙТЕ ВЫЗОВА НА ТАБЛО</p>
+                        </div>
+                        <div style="margin-top: 10px; border-top: 2px dashed #000; padding-top: 5px;">
+                            <p style="margin: 0; padding: 0; font-size: 14px; font-weight: 900;">БУДЬТЕ ЗДОРОВЫ!</p>
+                            <p style="margin: 5px 0 0 0; padding: 0; font-size: 14px; font-weight: 900;">https://pol2temirtau.kz</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Печатаем талон
+            if (typeof printJS !== 'undefined') {
+                printJS({
+                    printable: ticketContent,
+                    type: 'raw-html',
+                    style: `@page { margin: 0; size: 80mm auto; } body { font-family: Arial, sans-serif !important; }`
+                });
+            } else {
+                console.error('PrintJS library is not loaded.');
+            }
+            
+            // Показываем уведомление
+            showNotification(ticketNumber);
+        });
+    });
+
+    function showNotification(ticket_number) {
+        if (!notification) return;
+        
+        const title = notification.querySelector('.notification-title');
+        if (title) {
+            title.textContent = 'Талон №' + ticket_number + ' взят';
+        }
+        
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 5000);
+    }
+});
+</script>

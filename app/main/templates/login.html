@@ -1,0 +1,286 @@
+{% extends 'base/base.html' %}
+
+{% block extra_css %}
+<style>
+/* Дополнительные стили для выпадающего списка */
+.autocomplete-header {
+    padding: 8px 15px;
+    background: #1a2530;
+    color: #ecf0f1;
+    font-weight: 500;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Контейнер выпадающего списка, который будет перемещен в body */
+#autocompleteDropdownContainer {
+    position: absolute;
+    z-index: 9999;
+    display: none;
+}
+
+#autocompleteDropdownContainer.show {
+    display: block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='img/logo_organization.png') }}" class="logo" alt="Логотип организации">
+                <img src="{{ url_for('static', filename='img/logo_qq.gif') }}" class="logo" alt="Логотип QQ">
+            </div>
+            <h2>Вход в систему</h2>
+            <p class="login-subtitle">Введите учетные данные для доступа к панели управления</p>
+        </div>
+        
+        <div class="login-hint">
+            <i class="fas fa-info-circle"></i> Для входа как администратор, введите свой логин.<br>
+            Для входа как пользователь, введите логин в формате: <strong>логин_админа@имя_пользователя</strong>
+        </div>
+        
+        <form action="{{ url_for('main.login') }}" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.username.label }}
+                <div class="form-control-wrapper autocomplete-container">
+                    <i class="fas fa-user form-control-icon"></i>
+                    {{ form.username(class="form-control", placeholder="Введите имя пользователя", id="username") }}
+                    <!-- Этот div будет заменен в JavaScript на новый, перемещенный в body -->
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                </div>
+                {% for error in form.username.errors %}
+                <span class="error">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.password.label }}
+                <div class="form-control-wrapper">
+                    <i class="fas fa-lock form-control-icon"></i>
+                    {{ form.password(class="form-control", placeholder="Введите пароль") }}
+                </div>
+                {% for error in form.password.errors %}
+                <span class="error">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn-submit", value="Войти") }}
+            </div>
+        </form>
+        
+        <div class="footer-text">
+			<a href="https://somnium.kz" target="_blank" class="footer-text">
+				&copy; 2025 ИП Somnium, ИИН: 000104551353
+			</a>		
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Инициализация данных для автозаполнения
+        const adminUsernames = {{ admin_usernames|tojson }};
+        let selectedIndex = -1;
+        let showingAutocomplete = false;
+        
+        // Перемещаем выпадающий список в конец body для предотвращения проблем с z-index
+        $('body').append('<div id="autocompleteDropdownContainer" class="autocomplete-dropdown"></div>');
+        const originalDropdown = $('#autocompleteDropdown');
+        const newDropdown = $('#autocompleteDropdownContainer');
+        
+        // Заменяем оригинальный выпадающий список на новый
+        originalDropdown.remove();
+        
+        // Функция для отображения выпадающего списка
+        function showDropdown(input) {
+            const dropdown = $('#autocompleteDropdownContainer');
+            dropdown.empty();
+            
+            if (input.length < 2) { // Уменьшаем минимальную длину для поиска
+                hideDropdown();
+                return;
+            }
+            
+            const matches = adminUsernames.filter(username => 
+                username.toLowerCase().includes(input.toLowerCase())
+            );
+            
+            if (matches.length === 0) {
+                hideDropdown();
+                return;
+            }
+            
+            // Добавляем заголовок к выпадающему списку
+            dropdown.append('<div class="autocomplete-header">Выберите администратора</div>');
+            
+            matches.forEach((username, index) => {
+                const item = $('<div class="autocomplete-item"></div>')
+                    .html(`<i class="fas fa-user-shield"></i><span>${username}</span>`)
+                    .attr('data-username', username);
+                
+                item.click(function() {
+                    // Always append @ when selecting from dropdown for organization users
+                    $('#username').val($(this).attr('data-username') + '@');
+                    hideDropdown();
+                    // Установить курсор в конец строки
+                    const input = $('#username')[0];
+                    input.focus();
+                    input.selectionStart = input.selectionEnd = input.value.length;
+                });
+                
+                dropdown.append(item);
+            });
+            
+            dropdown.addClass('show');
+            showingAutocomplete = true;
+            selectedIndex = -1;
+            
+            // Позиционируем выпадающий список
+            positionDropdown();
+        }
+        
+        // Функция для позиционирования выпадающего списка
+        function positionDropdown() {
+            const input = $('#username');
+            const dropdown = $('#autocompleteDropdownContainer');
+            
+            // Получаем позицию и размеры поля ввода
+            const inputPos = input.offset();
+            const inputHeight = input.outerHeight();
+            const inputWidth = input.outerWidth();
+            
+            // Устанавливаем позицию выпадающего списка
+            dropdown.css({
+                'width': inputWidth + 'px',
+                'top': (inputPos.top + inputHeight + 5) + 'px',
+                'left': inputPos.left + 'px'
+            });
+        }
+        
+        // Функция для скрытия выпадающего списка
+        function hideDropdown() {
+            $('#autocompleteDropdownContainer').removeClass('show').empty();
+            showingAutocomplete = false;
+            selectedIndex = -1;
+        }
+        
+        // Отслеживание ввода в поле логина
+        $('#username').on('input', function() {
+            const value = $(this).val();
+            
+            // Если в поле есть @ или нет, показываем разные подсказки
+            if (value.includes('@')) {
+                // Не показываем автозаполнение после @
+            } else {
+                // Показываем автозаполнение для первой части (логин админа)
+                showDropdown(value);
+            }
+        });
+        
+        // Обработка клика вне выпадающего списка
+        $(document).on('click touchstart', function(e) {
+            if (!$(e.target).closest('.autocomplete-container').length && 
+                !$(e.target).closest('.autocomplete-dropdown').length) {
+                hideDropdown();
+            }
+        });
+        
+        // Обработка навигации по клавишам
+        $('#username').keydown(function(e) {
+            if (!showingAutocomplete) return;
+            
+            const items = $('.autocomplete-item');
+            
+            switch(e.keyCode) {
+                case 40: // Down arrow
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    break;
+                case 38: // Up arrow
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                    break;
+                case 13: // Enter
+                    e.preventDefault();
+                    if (selectedIndex > -1) {
+                        $(items[selectedIndex]).click();
+                    }
+                    return;
+                case 27: // Escape
+                    hideDropdown();
+                    return;
+                default:
+                    return;
+            }
+            
+            // Выделение выбранного элемента
+            items.removeClass('active');
+            if (selectedIndex > -1) {
+                $(items[selectedIndex]).addClass('active');
+                
+                // Прокручиваем до выбранного элемента, если он не видим
+                const selectedItem = $(items[selectedIndex]);
+                const dropdown = $('#autocompleteDropdownContainer');
+                
+                const dropdownTop = dropdown.scrollTop();
+                const dropdownBottom = dropdownTop + dropdown.height();
+                const itemTop = selectedItem.position().top + dropdownTop;
+                const itemBottom = itemTop + selectedItem.height();
+                
+                if (itemTop < dropdownTop) {
+                    dropdown.scrollTop(itemTop);
+                } else if (itemBottom > dropdownBottom) {
+                    dropdown.scrollTop(itemTop - dropdown.height() + selectedItem.height());
+                }
+            }
+        });
+        
+        // Добавляем простую анимацию при фокусе на поля
+        $('input').focus(function() {
+            $(this).parent().css('transform', 'translateX(5px)');
+            setTimeout(() => {
+                $(this).parent().css('transform', 'translateX(0)');
+            }, 300);
+        });
+        
+        // Анимация кнопки при наведении
+        $('input[type="submit"]').hover(
+            function() {
+                $(this).css('background', 'linear-gradient(to right, #16a085, #1abc9c)');
+            },
+            function() {
+                $(this).css('background', 'linear-gradient(to right, #1abc9c, #16a085)');
+            }
+        );
+        
+        // Проверка формы перед отправкой
+        $('form').submit(function() {
+            console.log('Form submitted');
+            // Проверяем наличие CSRF-токена
+            const csrfToken = $('input[name="csrf_token"]').val();
+            console.log('CSRF Token:', csrfToken);
+            
+            // Проверяем поля формы
+            const username = $('#username').val();
+            const password = $('input[type="password"]').val();
+            console.log('Username:', username);
+            console.log('Password length:', password ? password.length : 0);
+            
+            // Возвращаем true, чтобы форма отправилась
+            return true;
+        });
+        
+        // При изменении размера окна обновляем позицию выпадающего списка
+        $(window).resize(function() {
+            if (showingAutocomplete) {
+                positionDropdown();
+            }
+        });
+    });
+</script>
+{% endblock %}

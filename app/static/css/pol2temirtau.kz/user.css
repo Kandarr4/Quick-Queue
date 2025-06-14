@@ -1,0 +1,763 @@
+/* 
+ * Enhanced Operator Dashboard CSS
+ * Modified from operator_default.css
+ * Added logo styling and modern visual improvements
+ */
+
+/* Анимация активности для тикетов */
+.new-ticket-animation {
+  animation: pulseTicket 2s ease-in-out 3;
+  position: relative;
+}
+
+@keyframes pulseTicket {
+  0% {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 10px 25px rgba(46, 204, 113, 0.4);
+    transform: translateY(-5px);
+  }
+  100% {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transform: translateY(0);
+  }
+}
+
+/* Индикатор нового тикета */
+.new-ticket-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  animation: badgePulse 1.5s infinite;
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
+@keyframes badgePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Индикатор времени обновления */
+.refresh-timer {
+  position: fixed;
+  bottom: 50px;
+  right: 20px;
+  background-color: rgba(44, 62, 80, 0.8);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  z-index: 99;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Улучшенные уведомления */
+#notification-container .alert {
+  transition: all 0.3s ease-in-out;
+  animation: slideIn 0.5s forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Стиль активного счетчика обновлений */
+.countdown-active {
+  border-left: 4px solid #2ecc71;
+}
+  
+:root {
+  --primary: #2E7D32;       /* Темно-зеленый */
+  --secondary: #4CAF50;     /* Зеленый */
+  --accent: #FF6B35;        /* Оранжевый */
+  --warning: #F7931E;       /* Светло-оранжевый */
+  --light: #f8f9fa;         /* Светло-серый */
+  --dark: #1B5E20;          /* Очень темно-зеленый */
+  --success: #7ED321;       /* Яркий зеленый */
+  --danger: #e74c3c;        /* Красный */
+  --info: #3498db;          /* Синий */
+}
+
+/* Лого стили - с импортом изображения */
+.app-logo {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #000;
+  border-radius: 50%;
+  background: url('./logo-emhana.png') no-repeat center center; /* Изображение находится в той же директории, что и CSS */
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+  margin-right: 15px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+/* Запасной вариант, если изображение не загрузится */
+.app-logo.no-image {
+  background: linear-gradient(135deg, #7ED321 0%, #9ACD32 50%, #32CD32 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  color: #000;
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+}
+
+.app-logo::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: rotate(45deg);
+}
+
+/* Подпись EA показывается только если класс no-image применен */
+.app-logo.no-image::after {
+  content: 'EA';
+  position: relative;
+  z-index: 1;
+}
+
+body {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  color: var(--dark);
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  padding-bottom: 50px;
+}
+
+.container {
+  padding-top: 20px;
+  max-width: 1400px;
+  width: 95%;
+}
+
+.row-flex {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  width: 100%;
+  padding: 10px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary) transparent;
+}
+
+.row-flex::-webkit-scrollbar {
+  height: 8px;
+}
+
+.row-flex::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.row-flex::-webkit-scrollbar-thumb {
+  background-color: var(--secondary);
+  border-radius: 10px;
+}
+
+.ticket-column {
+  flex: 0 0 auto;
+  margin-right: 20px;
+  min-width: 360px;
+  max-width: 420px;
+  transition: all 0.3s ease;
+}
+
+.ticket-column:last-child {
+  margin-right: 0;
+}
+
+.ticket-column:hover {
+  transform: translateY(-5px);
+}
+
+.section-header {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: var(--primary);
+  border-bottom: 2px solid var(--secondary);
+  padding-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.section-header i {
+  margin-right: 8px;
+  color: var(--secondary);
+}
+
+.current-ticket, 
+.ticket-container {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  border-top: 4px solid var(--secondary);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.current-ticket {
+  border-top-color: var(--info);
+}
+
+.current-ticket:hover, 
+.ticket-container:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.current-ticket::before, 
+.ticket-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0) 70%);
+  transform: translateX(-100%);
+  animation: shine 5s infinite;
+  pointer-events: none;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  20%, 100% {
+    transform: translateX(100%);
+  }
+}
+
+.current-ticket h3 {
+  margin-bottom: 1rem;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.service-name {
+  font-size: 0.9rem;
+  color: var(--info);
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.ticket-number {
+  display: inline-block;
+  font-size: 1.8rem;
+  padding: 5px 15px;
+  background-color: var(--light);
+  border-radius: 8px;
+  margin: 5px 0;
+  border: 2px solid var(--secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  letter-spacing: 1px;
+}
+
+.btn {
+  margin: 5px;
+  border-radius: 6px;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn i {
+  margin-right: 6px;
+  font-size: 1rem;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  background-color: var(--info);
+  border-color: var(--info);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+}
+
+.btn-next {
+  background: linear-gradient(45deg, var(--success), var(--secondary));
+  border-color: var(--success);
+  color: white;
+}
+
+.btn-next:hover {
+  background: linear-gradient(45deg, #27ae60, #2E7D32);
+  border-color: #27ae60;
+}
+
+.btn-refresh {
+  background-color: var(--info);
+  border-color: var(--info);
+  color: white;
+}
+
+.btn-refresh:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+}
+
+.btn-delete {
+  background-color: var(--danger);
+  border-color: var(--danger);
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+}
+
+.btn-delete:hover {
+  background-color: #c0392b;
+  border-color: #c0392b;
+}
+
+.btn-disabled {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.btn-disabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.4);
+  background-image: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.2) 25%, 
+    rgba(255, 255, 255, 0.5) 50%, 
+    rgba(255, 255, 255, 0.2) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s linear infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.table {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: var(--dark);
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.table thead th {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-top: none;
+  border-bottom: 2px solid var(--secondary);
+  color: var(--primary);
+  font-weight: 600;
+  padding: 12px 15px;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(76, 175, 80, 0.05);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table td {
+  padding: 12px 15px;
+  vertical-align: middle;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.status.issued {
+  background-color: rgba(247, 147, 30, 0.2);
+  color: #FF6B35;
+}
+
+.status.at-work {
+  background-color: rgba(126, 211, 33, 0.2);
+  color: #2E7D32;
+}
+
+.alert {
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-top: 15px;
+  font-size: 0.9rem;
+  border: none;
+  display: flex;
+  align-items: center;
+}
+
+.alert i {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.alert-info {
+  background-color: rgba(52, 152, 219, 0.1);
+  color: #2980b9;
+}
+
+footer {
+  background-color: var(--dark);
+  color: var(--light);
+  text-align: center;
+  padding: 10px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  font-size: 0.85rem;
+}
+
+.highlight {
+  animation: highlight 1.5s ease-in-out infinite;
+}
+
+@keyframes highlight {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(247, 147, 30, 0.2);
+  }
+}
+
+#loading-animation {
+  display: none; /* Изначально скрываем анимацию */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  backdrop-filter: blur(5px);
+}
+
+.loader {
+  width: 80px;
+  height: 80px;
+  border: 5px solid var(--light);
+  border-bottom-color: var(--secondary);
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1.5s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  color: white;
+  font-size: 1.2rem;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.badge {
+  padding: 5px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.badge-info {
+  background-color: var(--info);
+  color: white;
+}
+
+.badge-warning {
+  background-color: var(--warning);
+  color: white;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 20px;
+  color: #7f8c8d;
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  opacity: 0.5;
+}
+
+.service-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: var(--secondary);
+  background-color: rgba(76, 175, 80, 0.1);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px auto;
+}
+
+.buttons-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.time-info {
+  font-size: 0.75rem;
+  color: #7f8c8d;
+  margin-top: 5px;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(135deg, rgba(248, 249, 250, 0.95) 0%, rgba(233, 236, 239, 0.95) 100%);
+  padding: 15px;
+  z-index: 10;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--secondary);
+}
+
+.app-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.app-title i {
+  margin-right: 10px;
+  color: var(--secondary);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.user-info .avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.user-info .user-name {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.user-info .cabinet {
+  font-size: 0.8rem;
+  color: var(--secondary);
+  margin-left: 5px;
+}
+
+/* Анимации */
+.fade-in {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стилизация кнопки "Вызвать следующего" */
+.btn-next {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-next::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shineEffect 2s infinite;
+  z-index: -1;
+}
+
+@keyframes shineEffect {
+  100% {
+    left: 100%;
+  }
+}
+
+/* Улучшенные адаптивные стили */
+@media (max-width: 992px) {
+  .container {
+    width: 97%;
+  }
+  
+  .ticket-column {
+    min-width: 320px;
+  }
+  
+  .buttons-container {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+    margin: 5px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .sticky-header {
+    flex-direction: column;
+  }
+  
+  .user-info {
+    margin-top: 10px;
+    justify-content: center;
+  }
+  
+  .app-title {
+    justify-content: center;
+  }
+  
+  .app-logo {
+    margin-right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .ticket-column {
+    min-width: 100%;
+    margin-right: 0;
+  }
+  
+  .row-flex {
+    flex-direction: column;
+  }
+}

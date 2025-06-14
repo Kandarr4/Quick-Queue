@@ -1,0 +1,32 @@
+{% block tickets_table %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Ticket Number</th>
+            <th>Issue Time</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="ticketsTableBody">
+        {% for ticket in tickets %}
+        <tr>
+            <td>{{ ticket.number }}</td>
+            <td>{{ ticket.issue_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>{{ ticket.status }}</td>
+            <td>
+                {% if ticket.status == 'waiting' %}
+                <button class="btn btn-primary" onclick="callNext({{ ticket.id }});">Call Next</button>
+                {% else %}
+                <span>—</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4">No tickets available</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

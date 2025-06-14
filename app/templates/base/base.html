@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}Quick Queue - Мультитенантная система электронной очереди для масштабируемого роста вашего бизнеса{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/terminal_demo.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/operator_demo.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tablo_demo.css') }}">
+
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-dark text-light">
+<!-- Навигационная панель -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-admin">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <span>Quick Queue</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminNavbar" aria-controls="adminNavbar" aria-expanded="false" aria-label="Переключить навигацию">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="adminNavbar">
+            <ul class="navbar-nav ml-auto">
+                <!-- Динамический блок для статуса входа -->
+                <li class="nav-item dropdown" id="auth-dropdown">
+                    <!-- Контент будет загружен через JavaScript -->
+                </li>             
+            </ul>
+        </div>
+    </div>  
+    <!-- ИСПРАВЛЕННЫЙ БЛОК С ЛОГОТИПАМИ -->
+    <div class="logo_div">
+        <img src="{{ url_for('static', filename='img/logo_organization.png') }}" class="logo logo-left" alt="Логотип организации">
+        <img src="{{ url_for('static', filename='img/logo_qq.gif') }}" class="logo logo-right" alt="Логотип QQ">
+    </div>        
+</nav>
+
+<!-- Основной контент -->
+<div class="container-fluid fade-in content-wrapper">
+    {% block content %}
+    <!-- Контент дочерних шаблонов будет здесь -->
+    {% endblock %}
+</div>
+    {% block modals %}{% endblock %}
+<!-- Footer -->
+<footer class="mainfooter py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h4>Quick Queue</h4>
+                <p>Мультитенантная система электронной очереди для масштабируемого роста вашего бизнеса.</p>
+                <div class="social-links mt-3">
+                    <a href="https://vk.com/somnium_ie" class="mr-2"><i class="fab fa-vk"></i></a>
+                    <a href="https://wa.me/77081287246" class="mr-2"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://www.instagram.com/somnium_ie/" class="mr-2"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            
+            <div class="col-md-2 mb-4">
+                <h5>Компания</h5>
+                <ul class="list-unstyled">
+                    <li><a href="https://somnium.kz/about" class="footer-link">О нас</a></li>
+                    <li><a href="#" class="footer-link">https://somnium.kz/</a></li>
+                    <li><a href="#" class="footer-link">https://somnium.kz/about</a></li>
+                </ul>
+            </div>
+            
+            <div class="col-md-2 mb-4">
+                <h5>Продукт</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#features" class="footer-link">Возможности</a></li>
+                    <li><a href="#how-it-works" class="footer-link">Как это работает</a></li>
+                    <li><a href="#pricing" class="footer-link">Тарифы</a></li>
+                    <li><a href="#faq" class="footer-link">FAQ</a></li>
+                </ul>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <h5>Связаться с нами</h5>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-map-marker-alt mr-2"></i> Казахстан, г. Темиртау</li>
+                    <li><i class="fas fa-phone mr-2"></i> +7 (708) 128-72-46</li>
+                    <li><i class="fas fa-envelope mr-2"></i> https://somnium.kz </li>
+                </ul>
+               
+            </div>
+        </div>
+        
+        <hr class="mt-4 mb-4" style="border-color: rgba(255, 255, 255, 0.1);">
+        
+        <div class="row">
+            <div class="col-md-6">
+                <p class="mb-0">&copy; 2025 Quick Queue. Все права защищены.</p>
+            </div>
+            <div class="col-md-6 text-md-right">
+                <a href="#" class="footer-link mr-3">Политика конфиденциальности</a>
+                <a href="#" class="footer-link">Условия использования</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.min.js"></script>
+
+
+<!-- Скрипт для динамического обновления статуса авторизации -->
+<script>
+$(document).ready(function() {
+    // Функция для обновления статуса авторизации
+    function updateAuthStatus() {
+        $.ajax({
+            url: "{{ url_for('main.check_auth_status') }}",
+            method: 'GET',
+            success: function(data) {
+                const authDropdown = $('#auth-dropdown');
+                
+                if (data.authenticated) {
+                    // Пользователь авторизован
+                    const userType = data.user_type === 'org_user' ? 'Пользователь' : 'Администратор';
+                    const roleText = data.role ? ` (${data.role})` : '';
+                    
+                    authDropdown.html(`
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user-check text-success mr-2"></i>
+                            <span class="d-none d-md-inline">${data.username}</span>
+                            <span class="d-md-none">Вход выполнен</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                            <div class="dropdown-header">
+                                <small class="text-muted">${userType}${roleText}</small>
+                                <br>
+                                <strong>${data.username}</strong>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url_for('main.home') }}">
+                                <i class="fas fa-home mr-2"></i>Главная страница
+                            </a>
+                            <a class="dropdown-item" href="{{ url_for('main.logout') }}">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Выйти
+                            </a>
+                        </div>
+                    `);
+                } else {
+                    // Пользователь не авторизован
+                    authDropdown.html(`
+                        <a class="nav-link" href="{{ url_for('main.login') }}">
+                            <i class="fas fa-right-to-bracket mr-1"></i>
+                            <span>Вход</span>
+                        </a>
+                    `);
+                }
+            },
+            error: function() {
+                // В случае ошибки показываем кнопку входа
+                const authDropdown = $('#auth-dropdown');
+                authDropdown.html(`
+                    <a class="nav-link" href="{{ url_for('main.login') }}">
+                        <i class="fas fa-right-to-bracket mr-1"></i>
+                        <span>Вход</span>
+                    </a>
+                `);
+            }
+        });
+    }
+    
+    // Обновляем статус при загрузке страницы
+    updateAuthStatus();
+    
+    // Обновляем статус каждые 30 секунд (для случаев истечения сессии)
+    setInterval(updateAuthStatus, 30000);
+    
+    // Обновляем статус при переходах между страницами (если используется AJAX)
+    $(window).on('focus', function() {
+        updateAuthStatus();
+    });
+});
+</script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

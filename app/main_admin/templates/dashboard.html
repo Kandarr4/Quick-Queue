@@ -1,0 +1,1890 @@
+{% extends "base/base.html" %}
+
+{% block title %}Панель администратора{% endblock %}
+
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Панель управления</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card bg-dark mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Организации</h5>
+                <span class="badge badge-info">{{ secondary_admins|length }}</span>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#createOrgModal">
+                    <i class="fas fa-plus"></i> Добавить организацию
+                </button>                
+            </div>
+            <div class="card-body p-0">
+                <div class="input-group p-2">
+                    <input type="text" id="adminSearch" class="form-control bg-dark text-light border-secondary" placeholder="Поиск организации...">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="list-group admin-list">
+                    {% for admin in secondary_admins %}
+                    <a href="#" data-admin-id="{{ admin.id }}" class="list-group-item list-group-item-action admin-item d-flex justify-content-between align-items-center {{ 'active' if loop.first }}">
+                        <div>
+                            <span class="admin-name">{{ admin.organization_name }}</span>
+                            <small class="d-block text-muted">{{ admin.username }}</small>
+                        </div>
+                        <span class="status-badge {{ 'status-active' if admin.active else 'status-inactive' }}">
+                            {{ 'Активен' if admin.active else 'Неактивен' }}
+                        </span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card bg-dark mb-4">
+            <div class="card-header">
+                <h5 class="mb-0" id="orgDetailsTitle">Детали организации</h5>
+            </div>
+            <div class="card-body" id="orgDetailsContent">
+                {% if secondary_admins %}
+                <div id="organization-details">
+                    <div class="org-info mb-4">
+                        <h4>Информация об организации</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Название:</strong> <span id="org-name">{{ secondary_admins[0].organization_name }}</span></p>
+                                <p><strong>Логин админа:</strong> <span id="org-username">{{ secondary_admins[0].username }}</span></p>
+                                <p><strong>Дата создания:</strong> <span id="org-created">{{ secondary_admins[0].created_at.strftime('%d.%m.%Y %H:%M') }}</span></p>
+                                <p><strong>Лимит диска:</strong> <span id="org-disk-limit">{{ (secondary_admins[0].disk_space_limit // (1024*1024*1024)) if secondary_admins[0].disk_space_limit else 1 }} ГБ</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Адрес:</strong> <span id="org-address">{{ secondary_admins[0].organization_address or 'Не указан' }}</span></p>
+                                <p><strong>Активность:</strong> <span id="org-active" class="status-badge {{ 'status-active' if secondary_admins[0].active else 'status-inactive' }}">{{ 'Активен' if secondary_admins[0].active else 'Неактивен' }}</span></p>
+                                <p><strong>Срок действия:</strong> <span id="org-expiry">{{ secondary_admins[0].access_expiry_date.strftime('%d.%m.%Y') if secondary_admins[0].access_expiry_date else 'Бессрочно' }}</span></p>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <strong>Дополнительная информация:</strong>
+                            <p id="org-info">{{ secondary_admins[0].additional_info or 'Нет дополнительной информации' }}</p>
+                        </div>
+                        <div class="btn-group mt-3">
+                            <button type="button" class="btn btn-warning" id="edit-org-btn">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </button>
+                            <button type="button" class="btn btn-danger" id="toggle-active-btn">
+                                <i class="fas fa-power-off"></i> {{ 'Деактивировать' if secondary_admins[0].active else 'Активировать' }}
+                            </button>
+                            <button type="button" class="btn btn-info" id="style-settings-btn">
+                                <i class="fas fa-palette"></i> Настройки стилей
+                            </button>                            
+                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#resetPasswordModal">
+                                <i class="fas fa-key"></i> Сбросить пароль
+                            </button>
+                        </div>
+                    </div>
+
+                    <ul class="nav nav-tabs" id="orgTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="users-tab" data-toggle="tab" href="#users" role="tab">
+                                <i class="fas fa-users"></i> Пользователи
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="services-tab" data-toggle="tab" href="#services" role="tab">
+                                <i class="fas fa-concierge-bell"></i> Услуги
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="stats-tab" data-toggle="tab" href="#stats" role="tab">
+                                <i class="fas fa-chart-pie"></i> Статистика
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content py-3" id="orgTabContent">
+                        <div class="tab-pane fade show active" id="users" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Список пользователей</h5>
+                                <div id="user-count" class="badge badge-info">0</div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Имя пользователя</th>
+                                            <th>Роль</th>
+                                            <th>Кабинет</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="services" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Список услуг</h5>
+                                <div id="service-count" class="badge badge-info">0</div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Название</th>
+                                            <th>Диапазон номеров</th>
+                                            <th>Кабинет</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="services-table-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="stats" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="stats-card">
+                                        <div class="stats-title">Всего талонов</div>
+                                        <div id="tickets-count" class="stats-value">0</div>
+                                        <i class="fas fa-ticket-alt stats-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="stats-card">
+                                        <div class="stats-title">Талонов сегодня</div>
+                                        <div id="tickets-today" class="stats-value">0</div>
+                                        <i class="fas fa-calendar-day stats-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="stats-card">
+                                        <div class="stats-title">Талонов за неделю</div>
+                                        <div id="tickets-week" class="stats-value">0</div>
+                                        <i class="fas fa-calendar-week stats-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="stats-card">
+                                        <div class="stats-title">Талонов за месяц</div>
+                                        <div id="tickets-month" class="stats-value">0</div>
+                                        <i class="fas fa-calendar-alt stats-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="chart-loading" class="text-center py-3" style="display: none;">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Загрузка...</span>
+                                        </div>
+                                        <p class="mt-2">Загрузка данных...</p>
+                                    </div>
+                                    <div id="chart-error" class="alert alert-danger" style="display: none;">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                                        <span id="chart-error-message">Ошибка при загрузке данных</span>
+                                    </div>
+                                    <div id="chart-empty" class="text-center py-3" style="display: none;">
+                                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                        <p>Нет данных для отображения графика</p>
+                                    </div>
+                                    <canvas id="ticketChart" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-building fa-4x mb-3 text-muted"></i>
+                    <h4>Нет организаций</h4>
+                    <p>Добавьте новую организацию, чтобы начать работу</p>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#createOrgModal">
+                        <i class="fas fa-plus"></i> Добавить организацию
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-dark mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Информация о системе</h5>
+            </div>
+            <div class="card-body">
+                <div class="stats-card mb-3">
+                    <div class="stats-title">Всего организаций</div>
+                    <div class="stats-value">{{ secondary_admins|length }}</div>
+                    <i class="fas fa-building stats-icon"></i>
+                </div>
+                <div class="stats-card mb-3">
+                    <div class="stats-title">Всего пользователей</div>
+                    <div class="stats-value" id="total-users">...</div>
+                    <i class="fas fa-users stats-icon"></i>
+                </div>
+                <div class="stats-card mb-3">
+                    <div class="stats-title">Всего услуг</div>
+                    <div class="stats-value" id="total-services">...</div>
+                    <i class="fas fa-concierge-bell stats-icon"></i>
+                </div>
+                <div class="stats-card mb-3">
+                    <div class="stats-title">Свободное место</div>
+                    <div class="stats-value" id="disk-space">...</div>
+                    <i class="fas fa-hdd stats-icon"></i>
+                </div>
+                <div class="stats-card mb-3">
+                    <div class="stats-title">Загрузка CPU</div>
+                    <div class="stats-value" id="cpu-load">...</div>
+                    <i class="fas fa-microchip stats-icon"></i>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-title">Использование RAM</div>
+                    <div class="stats-value" id="ram-usage">...</div>
+                    <i class="fas fa-memory stats-icon"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card bg-dark">
+            <div class="card-header">
+                <h5 class="mb-0">Последние действия</h5>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group activity-list" id="recent-activities">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted">07.06.2025 14:23</small>
+                            <span class="d-block">Создана организация "ООО Пример"</span>
+                        </div>
+                        <span class="badge badge-success">Создание</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted">07.06.2025 13:45</small>
+                            <span class="d-block">Изменен пароль "МедЦентр"</span>
+                        </div>
+                        <span class="badge badge-warning">Изменение</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted">07.06.2025 12:10</small>
+                            <span class="d-block">Деактивирована "Старая Орг"</span>
+                        </div>
+                        <span class="badge badge-danger">Деактивация</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="styleSettingsModal" tabindex="-1" role="dialog" aria-labelledby="styleSettingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="styleSettingsModalLabel">Настройки стилей</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="styleSettingsForm" method="POST" action="">
+                    <!-- Здесь будет CSRF токен -->
+                    <input type="hidden" id="style-settings-csrf" name="csrf_token" value="">
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Настройки стилей по ролям:</h5>
+                            <div class="form-group">
+                                <label for="admin_style">Стиль для Администраторов</label>
+                                <select class="form-control" id="admin_style" name="admin_style">
+                                    <option value="default">Стандартный</option>
+                                    <option value="custom">Кастомный</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="user_style">Стиль для Пользователей</label>
+                                <select class="form-control" id="user_style" name="user_style">
+                                    <option value="default">Стандартный</option>
+                                    <option value="custom">Кастомный</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="tablo_style">Стиль для Табло</label>
+                                <select class="form-control" id="tablo_style" name="tablo_style">
+                                    <option value="default">Стандартный</option>
+                                    <option value="custom">Кастомный</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="terminal_style">Стиль для Терминалов</label>
+                                <select class="form-control" id="terminal_style" name="terminal_style">
+                                    <option value="default">Стандартный</option>
+                                    <option value="custom">Кастомный</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Содержимое папки стилей:</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <p><strong>Путь:</strong> <span id="style-folder-path">app/static/css/...</span></p>
+                                    <div id="style-files-list">
+                                        <ul class="list-group" id="style-files-container">
+                                            <!-- Здесь будет список файлов стилей -->
+                                        </ul>
+                                        <p id="no-style-files" class="text-warning">Папка не существует или не содержит файлов стилей.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <button type="button" id="create-style-folder-btn" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-folder-plus"></i> Создать папку для стилей
+                                </button>
+                                <button type="button" id="refresh-style-files-btn" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-sync-alt"></i> Обновить список
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="style-files-warning" class="alert alert-warning" style="display: none;">
+                        <h6>Внимание! Отсутствуют необходимые файлы стилей:</h6>
+                        <ul id="missing-files-list">
+                            <!-- Здесь будет список отсутствующих файлов -->
+                        </ul>
+                        <p>
+                            Вы не сможете сохранить настройки, пока все необходимые файлы не будут добавлены в папку стилей.
+                            Создайте файлы стилей для выбранных ролей в указанной выше директории.
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="save-style-settings-btn">Сохранить настройки</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetPasswordModalLabel">Сброс пароля</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="resetPasswordForm">
+                    <input type="hidden" id="reset-admin-id" name="admin_id" value="{{ secondary_admins[0].id if secondary_admins }}">
+                    <div class="form-group">
+                        <label for="new-password">Новый пароль</label>
+                        <input type="password" class="form-control" id="new-password" name="new_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Подтвердите пароль</label>
+                        <input type="password" class="form-control" id="confirm-password" name="confirm_password" required>
+                        <div id="password-match-error" class="text-danger mt-2 d-none">Пароли не совпадают</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="reset-password-submit">Сбросить пароль</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createOrgModal" tabindex="-1" role="dialog" aria-labelledby="createOrgModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createOrgModalLabel">Создание новой организации</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createOrgForm" action="{{ url_for('main_admin.create_secondary_admin') }}" method="POST">
+                    {% if form and form.csrf_token %}
+                    {{ form.csrf_token() }}
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="organization_name">Название организации</label>
+                                <input type="text" class="form-control" id="organization_name" name="organization_name" required>
+                                <div class="invalid-feedback">Пожалуйста, введите название организации.</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="organization_address">Адрес организации</label>
+                                <input type="text" class="form-control" id="organization_address" name="organization_address">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="access_expiry_date">Срок действия доступа</label>
+                                <input type="date" class="form-control" id="access_expiry_date" name="access_expiry_date">
+                                <small class="form-text text-muted">Оставьте пустым для бессрочного доступа.</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="disk_space_limit">
+                                    <i class="fas fa-hdd mr-1"></i> Лимит дискового пространства
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="disk_space_limit" name="disk_space_limit" 
+                                           value="1" min="1" step="1" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">ГБ</span>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">
+                                    Максимальный объем дискового пространства, доступный организации.
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="username">Логин администратора</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                                <div class="invalid-feedback">Пожалуйста, введите логин администратора.</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password">Пароль</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <div class="invalid-feedback">Пожалуйста, введите пароль.</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="confirm_password">Подтверждение пароля</label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                <div class="invalid-feedback">Пароли должны совпадать.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="additional_info">Дополнительная информация</label>
+                        <textarea class="form-control" id="additional_info" name="additional_info" rows="4"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="create-org-submit">Создать организацию</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editOrgModal" tabindex="-1" role="dialog" aria-labelledby="editOrgModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editOrgModalLabel">Редактирование организации</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editOrgForm" method="POST">
+          {% if form and form.csrf_token %}
+          {{ form.csrf_token() }}
+          {% endif %}
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="edit-organization_name">Название организации</label>
+                <input type="text" class="form-control" id="edit-organization_name" name="organization_name" required>
+                <div class="invalid-feedback">Пожалуйста, введите название организации.</div>
+              </div>
+              <div class="form-group">
+                <label for="edit-organization_address">Адрес организации</label>
+                <input type="text" class="form-control" id="edit-organization_address" name="organization_address">
+              </div>
+              <div class="form-group">
+                <label for="edit-access_expiry_date">Срок действия доступа</label>
+                <input type="date" class="form-control" id="edit-access_expiry_date" name="access_expiry_date">
+                <small class="form-text text-muted">Оставьте пустым для бессрочного доступа.</small>
+              </div>
+              
+              <div class="form-group">
+                <label for="edit-disk_space_limit">
+                    <i class="fas fa-hdd mr-1"></i> Лимит дискового пространства
+                </label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="edit-disk_space_limit" name="disk_space_limit" 
+                           min="1" step="1" required>
+                    <div class="input-group-append">
+                        <span class="input-group-text">ГБ</span>
+                    </div>
+                </div>
+                <small class="form-text text-muted">
+                    Максимальный объем дискового пространства, доступный организации.
+                </small>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="edit-username">Логин администратора</label>
+                <input type="text" class="form-control" id="edit-username" name="username" required>
+                <div class="invalid-feedback">Пожалуйста, введите логин администратора.</div>
+              </div>
+              <div class="form-group">
+                <label for="edit-password">Новый пароль</label>
+                <input type="password" class="form-control" id="edit-password" name="password">
+              </div>
+              <div class="form-group">
+                <label for="edit-confirm_password">Подтверждение пароля</label>
+                <input type="password" class="form-control" id="edit-confirm_password" name="confirm_password">
+                <div id="edit-password-match-error" class="text-danger mt-2 d-none">Пароли не совпадают</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="edit-additional_info">Дополнительная информация</label>
+            <textarea class="form-control" id="edit-additional_info" name="additional_info" rows="4"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-primary" id="edit-org-submit">Сохранить изменения</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<script>
+    $(document).ready(function() {
+    // Функция для отображения уведомлений с новыми стилями
+    function showNotification(message, type = 'info', duration = 5000) {
+        // Определяем заголовок и иконку в зависимости от типа уведомления
+        let title, icon;
+        switch (type) {
+            case 'success':
+                title = 'Успешно';
+                icon = 'fas fa-check-circle';
+                break;
+            case 'danger':
+            case 'error':
+                title = 'Ошибка';
+                icon = 'fas fa-exclamation-circle';
+                type = 'danger'; // Приводим error к danger для согласованности
+                break;
+            case 'warning':
+                title = 'Предупреждение';
+                icon = 'fas fa-exclamation-triangle';
+                break;
+            case 'info':
+            default:
+                title = 'Информация';
+                icon = 'fas fa-info-circle';
+                type = 'info'; // Устанавливаем тип по умолчанию
+                break;
+        }
+        
+        // Создаем уникальный ID для уведомления
+        const notificationId = 'notification-' + new Date().getTime();
+        
+        // Создаем HTML структуру уведомления
+        const notificationHTML = `
+            <div id="${notificationId}" class="custom-notification notification-${type}">
+                <div class="notification-header">
+                    <div class="notification-icon">
+                        <i class="${icon}"></i>
+                        <span>${title}</span>
+                    </div>
+                    <button type="button" class="close-notification" aria-label="Закрыть">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="notification-content">
+                    ${message}
+                </div>
+                <div class="notification-progress">
+                    <div class="notification-progress-bar"></div>
+                </div>
+            </div>
+        `;
+        
+        // Добавляем стили, если их еще нет
+        if ($('#custom-notification-styles').length === 0) {
+            $('head').append(`
+                <style id="custom-notification-styles">
+                    /* Основной контейнер уведомления */
+                    .custom-notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 1050;
+                    min-width: 300px;
+                    max-width: 400px;
+                    border-radius: 8px;
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                    overflow: hidden;
+                    background: white;
+                    transform: translateX(400px);
+                    opacity: 0;
+                    transition: all 0.3s ease-out;
+                    }
+                    
+                    /* Состояние активного уведомления */
+                    .custom-notification.active {
+                    transform: translateX(0);
+                    opacity: 1;
+                    }
+                    
+                    /* Заголовок уведомления - общие стили */
+                    .notification-header {
+                    color: white;
+                    padding: 12px 15px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    }
+                    
+                    /* Стили для разных типов уведомлений */
+                    .notification-success .notification-header {
+                    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+                    }
+                    
+                    .notification-danger .notification-header {
+                   background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+                   }
+                   
+                   .notification-warning .notification-header {
+                   background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
+                   }
+                   
+                   .notification-info .notification-header {
+                   background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+                   }
+                   
+                   /* Иконка и заголовок */
+                   .notification-icon {
+                   display: flex;
+                   align-items: center;
+                   }
+                   
+                   .notification-icon i {
+                   font-size: 18px;
+                   margin-right: 10px;
+                   }
+                   
+                   /* Кнопка закрытия */
+                   .close-notification {
+                   background: none;
+                   border: none;
+                   color: white;
+                   opacity: 0.8;
+                   font-size: 20px;
+                   cursor: pointer;
+                   padding: 0;
+                   line-height: 1;
+                   }
+                   
+                   .close-notification:hover {
+                   opacity: 1;
+                   }
+                   
+                   /* Содержимое уведомления */
+                   .notification-content {
+                   padding: 15px;
+                   color: #333;
+                   font-size: 14px;
+                   line-height: 1.5;
+                   }
+                   
+                   /* Контейнер для индикатора прогресса */
+                   .notification-progress {
+                   height: 3px;
+                   width: 100%;
+                   background: rgba(255, 255, 255, 0.3);
+                   }
+                   
+                   /* Полоса прогресса */
+                   .notification-progress-bar {
+                   height: 100%;
+                   width: 100%;
+                   transition: width 5s linear;
+                   }
+                   
+                   .notification-success .notification-progress-bar {
+                   background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+                   }
+                   
+                   .notification-danger .notification-progress-bar {
+                   background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+                   }
+                   
+                   .notification-warning .notification-progress-bar {
+                   background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
+                   }
+                   
+                   .notification-info .notification-progress-bar {
+                   background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+                   }
+                   
+                   /* Пауза анимации при наведении курсора */
+                   .custom-notification:hover .notification-progress-bar {
+                   transition: none;
+                   }
+                   
+                   /* Вертикальное расположение множественных уведомлений */
+                   .custom-notification-container {
+                   position: fixed;
+                   top: 20px;
+                   right: 20px;
+                   z-index: 1050;
+                   display: flex;
+                   flex-direction: column;
+                   gap: 10px;
+                   pointer-events: none;
+                   }
+                   
+                   .custom-notification {
+                   pointer-events: auto;
+                   margin-bottom: 10px;
+                   }
+               </style>
+           `);
+       }
+       
+       // Создаем контейнер для уведомлений, если его еще нет
+       if ($('.custom-notification-container').length === 0) {
+           $('body').append('<div class="custom-notification-container"></div>');
+       }
+       
+       // Добавляем уведомление в контейнер
+       $('.custom-notification-container').append(notificationHTML);
+       const $notification = $(`#${notificationId}`);
+       
+       // Применяем анимацию появления (requestAnimationFrame для лучшей производительности)
+       requestAnimationFrame(() => {
+           $notification.addClass('active');
+           
+           // Запускаем анимацию прогресс-бара
+           const $progressBar = $notification.find('.notification-progress-bar');
+           setTimeout(() => {
+               $progressBar.css('width', '0');
+           }, 100);
+       });
+       
+       // Обработчик закрытия
+       $notification.find('.close-notification').on('click', function() {
+           closeNotification($notification);
+       });
+       
+       // Автоматическое закрытие через указанное время
+       let autoCloseTimeout = setTimeout(() => {
+           closeNotification($notification);
+       }, duration);
+       
+       // Останавливаем автозакрытие при наведении
+       $notification.on('mouseenter', function() {
+           clearTimeout(autoCloseTimeout);
+           $notification.find('.notification-progress-bar').css('width', '');
+       }).on('mouseleave', function() {
+           // Возобновляем автозакрытие при уходе курсора
+           const remainingTime = duration * ($notification.find('.notification-progress-bar').width() / $notification.width());
+           $notification.find('.notification-progress-bar').css('width', '0');
+           
+           autoCloseTimeout = setTimeout(() => {
+               closeNotification($notification);
+           }, remainingTime);
+       });
+       
+       // Функция закрытия уведомления
+       function closeNotification($notification) {
+           $notification.removeClass('active');
+           setTimeout(() => {
+               $notification.remove();
+           }, 300); // Время соответствует transition в CSS
+       }
+       
+       return $notification; // Возвращаем jQuery объект для возможного дальнейшего взаимодействия
+   }
+
+   // Обработчик для кнопки активации/деактивации
+   $(document).on('click', '#toggle-active-btn', function(e) {
+       e.preventDefault(); // Предотвращаем стандартное поведение
+       
+       const adminId = $('.admin-item.active').data('admin-id');
+       if (!adminId) {
+           showNotification('Не удалось определить ID организации', 'danger');
+           return;
+       }
+       
+       console.log('Отправка запроса для admin_id:', adminId);
+       
+       // Показываем индикатор загрузки
+       $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Обработка...');
+       
+       // Добавляем заголовок CSRF, если он используется в Flask
+       const csrfToken = $('meta[name="csrf-token"]').attr('content');
+       const headers = {};
+       if (csrfToken) {
+           headers['X-CSRFToken'] = csrfToken;
+       }
+       
+       $.ajax({
+           url: `/main_admin/api/toggle_secondary_admin/${adminId}`,
+           type: 'POST',
+           headers: headers,
+           contentType: 'application/json',  // Укажем явно content type
+           data: JSON.stringify({}),         // Пустой объект, но в формате JSON
+           success: function(response) {
+               console.log('Ответ от сервера:', response);
+               
+               // Обновляем состояние интерфейса
+               const isActive = response.active;
+               
+               // Обновляем текст и класс статуса в панели деталей
+               $('#org-active')
+                   .text(isActive ? 'Активен' : 'Неактивен')
+                   .removeClass('status-active status-inactive')
+                   .addClass(isActive ? 'status-active' : 'status-inactive');
+               
+               // Обновляем текст на кнопке
+               $('#toggle-active-btn')
+                   .prop('disabled', false)
+                   .html(`<i class="fas fa-power-off"></i> ${isActive ? 'Деактивировать' : 'Активировать'}`);
+               
+               // Обновляем статус в списке организаций
+               $(`.admin-item[data-admin-id="${adminId}"] .status-badge`)
+                   .text(isActive ? 'Активен' : 'Неактивен')
+                   .removeClass('status-active status-inactive')
+                   .addClass(isActive ? 'status-active' : 'status-inactive');
+               
+               // Показываем уведомление
+               showNotification(response.message, 'success');
+           },
+           error: function(xhr, status, error) {
+               // Восстанавливаем кнопку
+               $('#toggle-active-btn')
+                   .prop('disabled', false)
+                   .html(`<i class="fas fa-power-off"></i> ${$('#org-active').text() === 'Активен' ? 'Деактивировать' : 'Активировать'}`);
+               
+               console.error('Ошибка при выполнении запроса:', xhr);
+               console.error('Статус:', status);
+               console.error('Ошибка:', error);
+               console.error('Ответ сервера:', xhr.responseText);
+               
+               let errorMsg = 'Произошла ошибка при изменении статуса организации';
+               try {
+                   if (xhr.responseJSON && xhr.responseJSON.error) {
+                       errorMsg = xhr.responseJSON.error;
+                   } else if (xhr.responseText) {
+                       const response = JSON.parse(xhr.responseText);
+                       if (response.error) errorMsg = response.error;
+                   }
+               } catch (e) {
+                   console.error('Ошибка при парсинге ответа:', e);
+               }
+               
+               showNotification(errorMsg, 'danger');
+           }
+       });
+   });
+
+   // Обработчик для кнопки редактирования
+   $(document).on('click', '#edit-org-btn', function() {
+       const adminId = $('.admin-item.active').data('admin-id');
+       if (!adminId) {
+           showNotification('Не удалось определить ID организации', 'danger');
+           return;
+       }
+       
+       console.log('Открытие модального окна редактирования для admin_id:', adminId);
+       
+       // Показываем индикатор загрузки на кнопке
+       $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Загрузка...');
+       
+       const form = $('#editOrgForm');
+       form.attr('action', `/main_admin/api/organization/${adminId}`);
+       
+       $.ajax({
+           url: `/main_admin/api/organization/${adminId}`,
+           type: 'GET',
+           success: function(resp) {
+               // Восстанавливаем кнопку
+               $('#edit-org-btn').prop('disabled', false).html('<i class="fas fa-edit"></i> Редактировать');
+               
+               const org = resp.organization;
+               $('#edit-organization_name').val(org.organization_name);
+               $('#edit-organization_address').val(org.organization_address || '');
+               $('#edit-access_expiry_date').val(org.access_expiry_date ? org.access_expiry_date.substring(0,10) : '');
+               $('#edit-username').val(org.username);
+               $('#edit-additional_info').val(org.additional_info || '');
+               
+               const diskLimitGB = org.disk_space_limit 
+                   ? Math.floor(org.disk_space_limit / (1024*1024*1024)) 
+                   : 1;
+               $('#edit-disk_space_limit').val(diskLimitGB);
+               
+               $('#edit-password, #edit-confirm_password').val('');
+               $('#edit-password-match-error').addClass('d-none');
+               
+               // Открываем модальное окно
+               $('#editOrgModal').modal('show');
+           },
+           error: function(xhr) {
+               // Восстанавливаем кнопку
+               $('#edit-org-btn').prop('disabled', false).html('<i class="fas fa-edit"></i> Редактировать');
+               
+               showNotification(xhr.responseJSON?.error || 'Не удалось загрузить данные для редактирования.', 'danger');
+               console.error('Ошибка при загрузке данных для редактирования:', xhr);
+           }
+       });
+   });
+
+
+
+// Функции для работы с настройками стилей
+$(document).ready(function() {
+    // Добавляем кнопку настройки стилей в панель управления организацией
+    if ($('#style-settings-btn').length === 0) {
+        $('.org-info .btn-group').append(`
+            <button type="button" class="btn btn-info" id="style-settings-btn">
+                <i class="fas fa-palette"></i> Настройки стилей
+            </button>
+        `);
+    }
+    
+    // Получаем CSRF-токен из мета-тегов
+    const getCSRFToken = function() {
+        return $('meta[name="csrf-token"]').attr('content');
+    };
+    
+    // Настраиваем глобальные параметры AJAX для передачи CSRF-токена
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", getCSRFToken());
+            }
+        }
+    });
+    
+    // Обработчик открытия модального окна настройки стилей
+    $(document).on('click', '#style-settings-btn', function() {
+        const adminId = $('.admin-item.active').data('admin-id');
+        if (!adminId) {
+            showNotification('Не удалось определить ID организации', 'danger');
+            return;
+        }
+        
+        // Получаем информацию о стилях организации
+        loadStyleSettings(adminId);
+    });
+    
+    // Обработчик сохранения настроек стилей
+    $(document).on('click', '#save-style-settings-btn', function() {
+        const adminId = $('.admin-item.active').data('admin-id');
+        if (!adminId) {
+            showNotification('Не удалось определить ID организации', 'danger');
+            return;
+        }
+        
+        // Проверяем наличие необходимых файлов стилей
+        const rolesToCheck = [];
+        
+        if ($('#admin_style').val() === 'custom') {
+            rolesToCheck.push('admin');
+        }
+        if ($('#user_style').val() === 'custom') {
+            rolesToCheck.push('user');
+        }
+        if ($('#tablo_style').val() === 'custom') {
+            rolesToCheck.push('tablo');
+        }
+        if ($('#terminal_style').val() === 'custom') {
+            rolesToCheck.push('terminal');
+        }
+        
+        // Получаем список существующих файлов
+        const existingFiles = [];
+        $('#style-files-container li').each(function() {
+            existingFiles.push($(this).text());
+        });
+        
+        // Проверяем наличие необходимых файлов
+        const missingFiles = [];
+        rolesToCheck.forEach(function(role) {
+            const fileName = `${role}.css`;
+            if (existingFiles.indexOf(fileName) === -1) {
+                missingFiles.push(fileName);
+            }
+        });
+        
+        // Если есть отсутствующие файлы, показываем предупреждение и не выполняем сохранение
+        if (missingFiles.length > 0) {
+            // Формируем список отсутствующих файлов для сообщения
+            const missingFilesList = missingFiles.join(', ');
+            
+            // Показываем уведомление
+            showNotification(`Отсутствуют необходимые файлы стилей: ${missingFilesList}. Создайте файлы перед сохранением.`, 'danger');
+            
+            // Обновляем список отсутствующих файлов в модальном окне
+            $('#missing-files-list').empty();
+            missingFiles.forEach(function(file) {
+                $('#missing-files-list').append(`<li>${file}</li>`);
+            });
+            $('#style-files-warning').show();
+            
+            return; // Прерываем выполнение
+        }
+        
+        // Если нет отсутствующих файлов, отправляем форму для сохранения настроек
+        saveStyleSettings(adminId);
+    });
+
+    // Обработчик создания папки для стилей
+    $(document).on('click', '#create-style-folder-btn', function() {
+        const adminId = $('.admin-item.active').data('admin-id');
+        if (!adminId) {
+            showNotification('Не удалось определить ID организации', 'danger');
+            return;
+        }
+        
+        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Создание...');
+        
+        $.ajax({
+            url: `/main_admin/create_style_folder/${adminId}`,
+            type: 'POST',
+            data: JSON.stringify({ csrf_token: getCSRFToken() }),
+            contentType: 'application/json',
+            success: function(response) {
+                $('#create-style-folder-btn').prop('disabled', false).html('<i class="fas fa-folder-plus"></i> Создать папку для стилей');
+                
+                if (response.success) {
+                    showNotification(response.message, 'success');
+                    // Обновляем список файлов
+                    loadStyleFilesList(adminId);
+                } else {
+                    showNotification(response.message, 'danger');
+                }
+            },
+            error: function(xhr) {
+                console.error('Ошибка при создании папки для стилей:', xhr);
+                $('#create-style-folder-btn').prop('disabled', false).html('<i class="fas fa-folder-plus"></i> Создать папку для стилей');
+                showNotification('Ошибка при создании папки для стилей', 'danger');
+            }
+        });
+    });
+    
+    // Обработчик обновления списка файлов стилей
+    $(document).on('click', '#refresh-style-files-btn', function() {
+        const adminId = $('.admin-item.active').data('admin-id');
+        if (!adminId) {
+            showNotification('Не удалось определить ID организации', 'danger');
+            return;
+        }
+        
+        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        loadStyleFilesList(adminId, function() {
+            $('#refresh-style-files-btn').prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Обновить список');
+        });
+    });
+    
+    // Обработчик изменения выбора стиля
+    $(document).on('change', '#admin_style, #user_style, #tablo_style, #terminal_style', function() {
+        checkStyleFiles();
+    });
+    
+    // Функция загрузки настроек стилей
+    function loadStyleSettings(adminId) {
+        // Сбрасываем форму
+        $('#styleSettingsForm')[0].reset();
+        $('#style-files-warning').hide();
+        
+        // Устанавливаем действие формы
+        $('#styleSettingsForm').attr('action', `/main_admin/update_org_styles/${adminId}`);
+        
+        // Устанавливаем CSRF токен
+        $('#style-settings-csrf').val(getCSRFToken());
+        
+        // Получаем данные стилей
+        $.ajax({
+            url: `/main_admin/style_settings/${adminId}`,
+            type: 'GET',
+            success: function(response) {
+                const orgUsername = response.org_admin.username;
+                
+                // Устанавливаем путь к папке стилей
+                $('#style-folder-path').text(`app/static/css/${orgUsername}`);
+                
+                // Устанавливаем значения в форму
+                $('#admin_style').val(response.style_settings.admin);
+                $('#user_style').val(response.style_settings.user);
+                $('#tablo_style').val(response.style_settings.tablo);
+                $('#terminal_style').val(response.style_settings.terminal);
+                
+                // Обновляем список файлов
+                $('#style-files-container').empty();
+                
+                if (response.style_files && response.style_files.length > 0) {
+                    response.style_files.forEach(function(file) {
+                        $('#style-files-container').append(`<li class="list-group-item">${file}</li>`);
+                    });
+                    $('#no-style-files').hide();
+                    $('#style-files-container').show();
+                } else {
+                    $('#no-style-files').show();
+                    $('#style-files-container').hide();
+                }
+                
+                // Проверяем наличие необходимых файлов стилей
+                checkStyleFiles();
+                
+                // Открываем модальное окно
+                $('#styleSettingsModal').modal('show');
+            },
+            error: function(xhr) {
+                console.error('Ошибка при загрузке настроек стилей:', xhr);
+                showNotification('Ошибка при загрузке настроек стилей', 'danger');
+            }
+        });
+    }
+    
+    // Функция загрузки списка файлов стилей
+    function loadStyleFilesList(adminId, callback) {
+        $.ajax({
+            url: `/main_admin/style_settings/${adminId}`,
+            type: 'GET',
+            success: function(response) {
+                // Обновляем список файлов
+                $('#style-files-container').empty();
+                
+                if (response.style_files && response.style_files.length > 0) {
+                    response.style_files.forEach(function(file) {
+                        $('#style-files-container').append(`<li class="list-group-item">${file}</li>`);
+                    });
+                    $('#no-style-files').hide();
+                    $('#style-files-container').show();
+                } else {
+                    $('#no-style-files').show();
+                    $('#style-files-container').hide();
+                }
+                
+                // Проверяем наличие необходимых файлов стилей
+                checkStyleFiles();
+                
+                if (callback) callback();
+            },
+            error: function(xhr) {
+                console.error('Ошибка при загрузке списка файлов стилей:', xhr);
+                showNotification('Ошибка при загрузке списка файлов стилей', 'danger');
+                if (callback) callback();
+            }
+        });
+    }
+    
+    // Функция проверки наличия необходимых файлов стилей
+    function checkStyleFiles() {
+        const rolesToCheck = [];
+        
+        if ($('#admin_style').val() === 'custom') {
+            rolesToCheck.push('admin');
+        }
+        if ($('#user_style').val() === 'custom') {
+            rolesToCheck.push('user');
+        }
+        if ($('#tablo_style').val() === 'custom') {
+            rolesToCheck.push('tablo');
+        }
+        if ($('#terminal_style').val() === 'custom') {
+            rolesToCheck.push('terminal');
+        }
+        
+        // Если нет кастомных стилей, скрываем предупреждение
+        if (rolesToCheck.length === 0) {
+            $('#style-files-warning').hide();
+            return;
+        }
+        
+        // Получаем список файлов в папке стилей
+        const existingFiles = [];
+        $('#style-files-container li').each(function() {
+            existingFiles.push($(this).text());
+        });
+        
+        // Проверяем наличие необходимых файлов
+        const missingFiles = [];
+        
+        rolesToCheck.forEach(function(role) {
+            const fileName = `${role}.css`;
+            if (existingFiles.indexOf(fileName) === -1) {
+                missingFiles.push(fileName);
+            }
+        });
+        
+        // Показываем предупреждение, если есть отсутствующие файлы
+        if (missingFiles.length > 0) {
+            $('#missing-files-list').empty();
+            missingFiles.forEach(function(file) {
+                $('#missing-files-list').append(`<li>${file}</li>`);
+            });
+            $('#style-files-warning').show();
+        } else {
+            $('#style-files-warning').hide();
+        }
+    }
+    
+    // Функция сохранения настроек стилей с улучшенной обработкой ошибок
+    function saveStyleSettings(adminId) {
+        // Показываем индикатор загрузки на кнопке
+        $('#save-style-settings-btn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Сохранение...');
+        
+        // Формируем данные формы
+        const formData = new FormData($('#styleSettingsForm')[0]);
+        
+        // Проверяем наличие необходимых файлов стилей перед отправкой
+        const rolesToCheck = [];
+        let missingFilesWarning = '';
+        
+        if ($('#admin_style').val() === 'custom') rolesToCheck.push('admin');
+        if ($('#user_style').val() === 'custom') rolesToCheck.push('user');
+        if ($('#tablo_style').val() === 'custom') rolesToCheck.push('tablo');
+        if ($('#terminal_style').val() === 'custom') rolesToCheck.push('terminal');
+        
+        // Получаем список существующих файлов
+        const existingFiles = [];
+        $('#style-files-container li').each(function() {
+            existingFiles.push($(this).text());
+        });
+        
+        // Проверяем наличие необходимых файлов
+        const missingFiles = [];
+        rolesToCheck.forEach(function(role) {
+            const fileName = `${role}.css`;
+            if (existingFiles.indexOf(fileName) === -1) {
+                missingFiles.push(fileName);
+            }
+        });
+        
+        // Если есть отсутствующие файлы, выводим предупреждение и не отправляем запрос
+        if (missingFiles.length > 0) {
+            $('#save-style-settings-btn').prop('disabled', false).html('Сохранить настройки');
+            
+            missingFilesWarning = 'Отсутствуют необходимые файлы стилей: ' + missingFiles.join(', ') + 
+                '. Создайте эти файлы перед сохранением настроек.';
+            
+            showNotification(missingFilesWarning, 'danger');
+            
+            // Показываем предупреждение в модальном окне
+            $('#missing-files-list').empty();
+            missingFiles.forEach(function(file) {
+                $('#missing-files-list').append(`<li>${file}</li>`);
+            });
+            $('#style-files-warning').show();
+            
+            return; // Прерываем выполнение функции
+        }
+        
+        // Отправляем запрос на сервер
+        $.ajax({
+            url: `/main_admin/update_org_styles/${adminId}`,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                // Восстанавливаем кнопку
+                $('#save-style-settings-btn').prop('disabled', false).html('Сохранить настройки');
+                
+                // Проверяем успешность операции
+                if (response.success) {
+                    // Закрываем модальное окно
+                    $('#styleSettingsModal').modal('hide');
+                    
+                    // Показываем уведомление об успешном сохранении
+                    showNotification(response.message || 'Настройки стилей успешно сохранены', 'success');
+                } else {
+                    // Показываем уведомление об ошибке
+                    showNotification(response.error || 'Не удалось сохранить настройки стилей', 'danger');
+                }
+            },
+            error: function(xhr) {
+                // Восстанавливаем кнопку
+                $('#save-style-settings-btn').prop('disabled', false).html('Сохранить настройки');
+                
+                // Показываем уведомление об ошибке
+                let errorMessage = 'Ошибка при сохранении настроек стилей';
+                
+                try {
+                    if (xhr.responseJSON) {
+                        if (xhr.responseJSON.error) {
+                            errorMessage = xhr.responseJSON.error;
+                        } else if (xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                    } else if (xhr.responseText) {
+                        // Пытаемся распарсить текст ответа
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.error) {
+                                errorMessage = response.error;
+                            } else if (response.message) {
+                                errorMessage = response.message;
+                            }
+                        } catch (e) {
+                            // Если не можем распарсить, просто логируем ошибку
+                            console.error('Не удалось распарсить ответ:', e);
+                        }
+                    }
+                    
+                    // Проверка на наличие отсутствующих файлов в сообщении об ошибке
+                    if (errorMessage.includes('Отсутствуют необходимые файлы стилей')) {
+                        // Извлекаем список файлов из сообщения
+                        const missingFilesMatch = errorMessage.match(/Отсутствуют необходимые файлы стилей: (.*?)\./);
+                        if (missingFilesMatch && missingFilesMatch[1]) {
+                            const missingFiles = missingFilesMatch[1].split(', ');
+                            
+                            // Обновляем список в предупреждении
+                            $('#missing-files-list').empty();
+                            missingFiles.forEach(function(file) {
+                                $('#missing-files-list').append(`<li>${file}</li>`);
+                            });
+                            $('#style-files-warning').show();
+                        }
+                    }
+                } catch (e) {
+                    console.error('Ошибка при обработке ответа:', e);
+                }
+                
+                console.error('Ошибка при сохранении настроек стилей:', xhr);
+                showNotification(errorMessage, 'danger');
+            }
+        });
+    }
+});
+
+
+   // Обработчик отправки формы редактирования
+   $(document).on('click', '#edit-org-submit', function() {
+       let isValid = true;
+       const nameInput = $('#edit-organization_name');
+       const userInput = $('#edit-username');
+       const pwdInput = $('#edit-password');
+       const confirmInput = $('#edit-confirm_password');
+       const diskLimitInput = $('#edit-disk_space_limit');
+       const pwdError = $('#edit-password-match-error');
+       const form = $('#editOrgForm');
+       
+       // Проверяем, установлен ли action для формы
+       if (!form.attr('action')) {
+           showNotification('Ошибка: не указан URL для отправки данных', 'danger');
+           console.error('Отсутствует атрибут action в форме редактирования');
+           return;
+       }
+
+       if (!nameInput.val().trim()) {
+           nameInput.addClass('is-invalid');
+           isValid = false;
+       } else {
+           nameInput.removeClass('is-invalid');
+       }
+       
+       if (!userInput.val().trim()) {
+           userInput.addClass('is-invalid');
+           isValid = false;
+       } else {
+           userInput.removeClass('is-invalid');
+       }
+       
+       if (!diskLimitInput.val() || parseInt(diskLimitInput.val()) < 1) {
+           diskLimitInput.addClass('is-invalid');
+           isValid = false;
+       } else {
+           diskLimitInput.removeClass('is-invalid');
+       }
+       
+       if (pwdInput.val() && pwdInput.val() !== confirmInput.val()) {
+           pwdError.removeClass('d-none');
+           isValid = false;
+       } else {
+           pwdError.addClass('d-none');
+       }
+
+       if (!isValid) return;
+
+       // Показываем индикатор загрузки на кнопке
+       $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Сохранение...');
+
+       const diskSpaceGB = parseInt(diskLimitInput.val());
+       const diskSpaceBytes = diskSpaceGB * 1024 * 1024 * 1024;
+       
+       const formData = new FormData(form[0]);
+       
+       formData.set('disk_space_limit', diskSpaceBytes);
+
+       $.ajax({
+           url: form.attr('action'),
+           type: 'POST',
+           data: formData,
+           processData: false,
+           contentType: false,
+           success: function(resp) {
+               // Восстанавливаем кнопку
+               $('#edit-org-submit').prop('disabled', false).html('Сохранить изменения');
+               
+               $('#editOrgModal').modal('hide');
+               showNotification('Организация успешно обновлена!', 'success');
+               
+               // Обновляем информацию на странице без перезагрузки
+               const adminId = $('.admin-item.active').data('admin-id');
+               loadOrgData(adminId);
+               
+               // Обновляем название в списке
+               $(`.admin-item[data-admin-id="${adminId}"] .admin-name`).text(nameInput.val());
+               $(`.admin-item[data-admin-id="${adminId}"] small`).text(userInput.val());
+           },
+           error: function(xhr) {
+               // Восстанавливаем кнопку
+               $('#edit-org-submit').prop('disabled', false).html('Сохранить изменения');
+               
+               showNotification(xhr.responseJSON?.error || 'Ошибка при сохранении изменений.', 'danger');
+               console.error('Ошибка при сохранении изменений:', xhr);
+           }
+       });
+   });
+
+   // Навигация по Enter в модальном окне редактирования
+   $('#editOrgModal input').on('keydown', function(e) {
+       if (e.key === 'Enter' && !e.shiftKey) {
+           e.preventDefault();
+           $('#edit-org-submit').click();
+       }
+   });
+
+   $('#editOrgModal textarea').on('keydown', function(e) {
+       if (e.key === 'Enter' && !e.shiftKey) {
+           e.preventDefault();
+           $('#edit-org-submit').click();
+       }
+   });
+
+   // Обработчик создания организации
+   $('#create-org-submit').on('click', function() {
+       let isValid = true;
+       
+       if ($('#organization_name').val().trim() === '') {
+           $('#organization_name').addClass('is-invalid');
+           isValid = false;
+       } else {
+           $('#organization_name').removeClass('is-invalid');
+       }
+       
+       if ($('#username').val().trim() === '') {
+           $('#username').addClass('is-invalid');
+           isValid = false;
+       } else {
+           $('#username').removeClass('is-invalid');
+       }
+       
+       if ($('#password').val().trim() === '') {
+           $('#password').addClass('is-invalid');
+           isValid = false;
+       } else {
+           $('#password').removeClass('is-invalid');
+       }
+       
+       if ($('#confirm_password').val() !== $('#password').val()) {
+           $('#confirm_password').addClass('is-invalid');
+           isValid = false;
+       } else {
+           $('#confirm_password').removeClass('is-invalid');
+       }
+       
+       if (isValid) {
+           // Показываем индикатор загрузки
+           $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Создание...');
+           
+           // Отправляем форму через AJAX
+           const formData = new FormData($('#createOrgForm')[0]);
+           
+           // Переводим ГБ в байты
+           const diskSpaceGB = parseInt($('#disk_space_limit').val());
+           const diskSpaceBytes = diskSpaceGB * 1024 * 1024 * 1024;
+           formData.set('disk_space_limit', diskSpaceBytes);
+           
+           $.ajax({
+               url: $('#createOrgForm').attr('action'),
+               type: 'POST',
+               data: formData,
+               processData: false,
+               contentType: false,
+               success: function(response) {
+                   $('#create-org-submit').prop('disabled', false).html('Создать организацию');
+                   $('#createOrgModal').modal('hide');
+                   showNotification('Организация успешно создана!', 'success');
+                   
+                   // Перезагружаем страницу для отображения новой организации
+                   location.reload();
+               },
+               error: function(xhr) {
+                   $('#create-org-submit').prop('disabled', false).html('Создать организацию');
+                   showNotification(xhr.responseJSON?.error || 'Ошибка при создании организации.', 'danger');
+               }
+           });
+           
+           return false; // Предотвращаем стандартную отправку формы
+       }
+   });
+   
+   $('#createOrgModal input, #createOrgModal textarea').on('keypress', function(e) {
+       if (e.which === 13) {
+           e.preventDefault();
+           $('#create-org-submit').click();
+       }
+   });
+   
+   // Обработчик выбора организации в списке
+   $('.admin-item').on('click', function(e) {
+       e.preventDefault();
+       
+       const adminId = $(this).data('admin-id');
+       
+       $('.admin-item').removeClass('active');
+       $(this).addClass('active');
+       
+       loadOrgData(adminId);
+   });
+   
+   // Поиск по организациям
+   $('#adminSearch').on('keyup', function() {
+       const searchText = $(this).val().toLowerCase();
+       
+       $('.admin-item').each(function() {
+           const orgName = $(this).find('.admin-name').text().toLowerCase();
+           const username = $(this).find('small').text().toLowerCase();
+           
+           if (orgName.includes(searchText) || username.includes(searchText)) {
+               $(this).show();
+           } else {
+               $(this).hide();
+           }
+       });
+   });
+   
+   // Обработчик сброса пароля
+   $('#reset-password-submit').on('click', function() {
+       const adminId = $('#reset-admin-id').val();
+       const newPassword = $('#new-password').val();
+       const confirmPassword = $('#confirm-password').val();
+       
+       if (newPassword !== confirmPassword) {
+           $('#password-match-error').removeClass('d-none');
+           return;
+       }
+       
+       $('#password-match-error').addClass('d-none');
+       
+       // Показываем индикатор загрузки
+       $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Сброс...');
+       
+       $.ajax({
+           url: `/main_admin/api/reset_password/${adminId}`,
+           type: 'POST',
+           data: JSON.stringify({
+               new_password: newPassword
+           }),
+           contentType: 'application/json',
+           success: function(data) {
+               $('#reset-password-submit').prop('disabled', false).html('Сбросить пароль');
+               $('#resetPasswordModal').modal('hide');
+               $('#new-password').val('');
+               $('#confirm-password').val('');
+               showNotification('Пароль успешно сброшен', 'success');
+           },
+           error: function(xhr, status, error) {
+               $('#reset-password-submit').prop('disabled', false).html('Сбросить пароль');
+               showNotification('Не удалось сбросить пароль. Пожалуйста, попробуйте позже.', 'danger');
+           }
+       });
+   });
+   
+   // Функция загрузки данных организации
+   function loadOrgData(adminId) {
+       console.log('Загрузка данных организации с ID:', adminId);
+       
+       $('#chart-loading').show();
+       $('#chart-error').hide();
+       $('#chart-empty').hide();
+       
+       $.ajax({
+           url: `/main_admin/api/organization/${adminId}`,
+           type: 'GET',
+           success: function(data) {
+               $('#org-name').text(data.organization.organization_name);
+               $('#org-username').text(data.organization.username);
+               $('#org-created').text(new Date(data.organization.created_at).toLocaleString('ru-RU'));
+               $('#org-address').text(data.organization.organization_address || 'Не указан');
+               
+               const diskLimitGB = data.organization.disk_space_limit 
+                   ? Math.floor(data.organization.disk_space_limit / (1024*1024*1024)) 
+                   : 1;
+               $('#org-disk-limit').text(diskLimitGB + ' ГБ');
+               
+               const isActive = data.organization.active;
+               $('#org-active')
+                   .text(isActive ? 'Активен' : 'Неактивен')
+                   .removeClass('status-active status-inactive')
+                   .addClass(isActive ? 'status-active' : 'status-inactive');
+               
+               // Обновляем текст на кнопке активации/деактивации
+               $('#toggle-active-btn')
+                   .html(`<i class="fas fa-power-off"></i> ${isActive ? 'Деактивировать' : 'Активировать'}`);
+               
+               // Обновляем ID для сброса пароля
+               $('#reset-admin-id').val(data.organization.id);
+               
+               $('#org-expiry').text(data.organization.access_expiry_date ? 
+                   new Date(data.organization.access_expiry_date).toLocaleDateString('ru-RU') : 'Бессрочно');
+               
+               $('#org-info').text(data.organization.additional_info || 'Нет дополнительной информации');                    
+               
+               const usersTable = $('#users-table-body');
+               usersTable.empty();
+               
+               data.users.forEach(user => {
+                   usersTable.append(`
+                       <tr>
+                           <td>${user.username}</td>
+                           <td>${user.role}</td>
+                           <td>${user.cabinet || '-'}</td>
+                       </tr>
+                   `);
+               });
+               
+               $('#user-count').text(data.users.length);
+               
+               const servicesTable = $('#services-table-body');
+               servicesTable.empty();
+               
+               data.services.forEach(service => {
+                   servicesTable.append(`
+                       <tr>
+                           <td>${service.name}</td>
+                           <td>${service.start_number} - ${service.end_number}</td>
+                           <td>${service.cabinet || '-'}</td>
+                       </tr>
+                   `);
+               });
+               
+               $('#service-count').text(data.services.length);
+               
+               $('#tickets-count').text(data.statistics.total_tickets || 0);
+               $('#tickets-today').text(data.statistics.tickets_today || 0);
+               $('#tickets-week').text(data.statistics.tickets_week || 0);
+               $('#tickets-month').text(data.statistics.tickets_month || 0);
+               
+               $('#chart-loading').hide();
+               
+               if (data.statistics.tickets_per_day && data.statistics.tickets_per_day.length > 0) {
+                   initTicketChart(data.statistics.tickets_per_day);
+               } else {
+                   $('#chart-empty').show();
+               }
+           },
+           error: function(xhr, status, error) {
+               $('#chart-loading').hide();
+               $('#chart-error').show();
+               $('#chart-error-message').text('Ошибка при загрузке данных: ' + error);
+               
+               showNotification('Не удалось загрузить данные организации. Пожалуйста, попробуйте позже.', 'danger');
+           }
+       });
+   }  
+         
+   // Инициализация графика
+   function initTicketChart(ticketsData) {
+       setTimeout(function() {
+           $('#chart-empty').hide();
+           
+           if (window.ticketChart && typeof window.ticketChart.destroy === 'function') {
+               window.ticketChart.destroy();
+           }
+           
+           const canvas = document.getElementById('ticketChart');
+           if (!canvas) {
+               return;
+           }
+           
+           const ctx = canvas.getContext('2d');
+           if (!ctx) {
+               return;
+           }
+           
+           canvas.style.display = 'block';
+           
+           const labels = ticketsData.map(item => item.date);
+           const data = ticketsData.map(item => item.count);
+           
+           try {
+               window.ticketChart = new Chart(ctx, {
+                   type: 'line',
+                   data: {
+                       labels: labels,
+                       datasets: [{
+                           label: 'Количество талонов',
+                           data: data,
+                           backgroundColor: 'rgba(26, 188, 156, 0.2)',
+                           borderColor: '#1abc9c',
+                           borderWidth: 2,
+                           pointBackgroundColor: '#1abc9c',
+                           pointBorderColor: '#fff',
+                           pointBorderWidth: 2,
+                           pointRadius: 4,
+                           pointHoverRadius: 6,
+                           tension: 0.4
+                       }]
+                   },
+                   options: {
+                       responsive: true,
+                       maintainAspectRatio: false,
+                       legend: {
+                           display: false
+                       },
+                       scales: {
+                           xAxes: [{
+                               gridLines: {
+                                   display: false,
+                                   color: 'rgba(255, 255, 255, 0.1)'
+                               },
+                               ticks: {
+                                   fontColor: 'rgba(255, 255, 255, 0.7)'
+                               }
+                           }],
+                           yAxes: [{
+                               gridLines: {
+                                   color: 'rgba(255, 255, 255, 0.1)'
+                               },
+                               ticks: {
+                                   beginAtZero: true,
+                                   fontColor: 'rgba(255, 255, 255, 0.7)'
+                               }
+                           }]
+                       },
+                       tooltips: {
+                           backgroundColor: '#2c3e50',
+                           titleFontColor: '#ecf0f1',
+                           bodyFontColor: '#ecf0f1',
+                           borderColor: '#1abc9c',
+                           borderWidth: 1,
+                           cornerRadius: 6,
+                           xPadding: 10,
+                           yPadding: 10
+                       }
+                   }
+               });
+           } catch (e) { 
+               console.error('Ошибка при инициализации графика:', e);
+           }
+       }, 100);
+   }
+   
+   // Загрузка информации о системе
+   function loadSystemInfo() {
+       $.ajax({
+           url: '/main_admin/api/system_info',
+           type: 'GET',
+           success: function(data) {
+               $('#total-users').text(data.total_users);
+               $('#total-services').text(data.total_services);
+               $('#disk-space').text(data.disk_space);
+               $('#cpu-load').text(data.cpu_load);
+               $('#ram-usage').text(data.ram_usage);
+               
+               const activitiesList = $('#recent-activities');
+               activitiesList.empty();
+               
+               data.recent_activities.forEach(activity => {
+                   let badgeClass = 'badge-info';
+                   
+                   switch (activity.type) {
+                       case 'create':
+                           badgeClass = 'badge-success';
+                           break;
+                       case 'update':
+                           badgeClass = 'badge-warning';
+                           break;
+                       case 'delete':
+                           badgeClass = 'badge-danger';
+                           break;
+                   }
+                   
+                   activitiesList.append(`
+                       <li class="list-group-item d-flex justify-content-between align-items-center">
+                           <div>
+                               <small class="text-muted">${new Date(activity.timestamp).toLocaleString('ru-RU')}</small>
+                               <span class="d-block">${activity.description}</span>
+                           </div>
+                           <span class="badge ${badgeClass}">${activity.type_text}</span>
+                       </li>
+                   `);
+               });
+           },
+           error: function(xhr, status, error) {
+               console.error('Ошибка при загрузке системной информации:', error);
+           }
+       });
+   }
+
+   // Инициализация страницы
+   {% if secondary_admins %}
+       loadOrgData({{ secondary_admins[0].id }});
+   {% endif %}
+   
+   loadSystemInfo();
+   
+   // Периодическое обновление системной информации
+   setInterval(loadSystemInfo, 30000);
+   
+   // Обновление графика при переключении на вкладку статистики
+   $('#orgTabs a').on('shown.bs.tab', function (e) {
+       if (e.target.id === 'stats-tab') {
+           if (window.ticketChart) {
+               window.ticketChart.update();
+               
+               const adminId = $('.admin-item.active').data('admin-id');
+               if (adminId) {
+                   $.ajax({
+                       url: `/main_admin/api/organization/${adminId}`,
+                       type: 'GET',
+                       success: function(data) {
+                           if (data.statistics.tickets_per_day && data.statistics.tickets_per_day.length > 0) {
+                               initTicketChart(data.statistics.tickets_per_day);
+                           }
+                       }
+                   });
+               }
+           }
+       }
+   });
+});
+</script>
+{% endblock %}

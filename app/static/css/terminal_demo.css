@@ -1,0 +1,409 @@
+/* 
+  ================================================================
+  Файл: terminal_demo.css
+  Модифицирован для полной изоляции внутри блока #terminal-demo-wrapper.
+  ================================================================
+*/
+
+/* 
+  Базовые стили и переменные, ранее применявшиеся глобально, 
+  теперь инкапсулированы в основной блок-обёртку.
+*/
+#terminal-demo-wrapper {
+  /* Переменные из :root */
+  --primary: #2c3e50;
+  --secondary: #1abc9c;
+  --accent: #e74c3c;
+  --light: #ecf0f1;
+  --dark: #2c3e50;
+
+  /* Стили из body */
+  background: linear-gradient(135deg, var(--primary) 0%, #1a2530 100%);
+  color: var(--light);
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  padding: 1rem; /* Добавлен базовый отступ */
+  box-sizing: border-box;
+}
+
+#terminal-demo-wrapper .main-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+}
+
+#terminal-demo-wrapper .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 2rem;
+  /* Для корректной работы внутри обертки можно убрать absolute позиционирование */
+  /* position: absolute; top: 0; left: 0; */
+  padding: 1rem;
+  z-index: 10;
+}
+
+#terminal-demo-wrapper .logo {
+  height: auto;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+#terminal-demo-wrapper .logo-left {
+  max-width: 160px;
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+#terminal-demo-wrapper .logo-right {
+  max-width: 220px;
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+#terminal-demo-wrapper .cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+#terminal-demo-wrapper .service-card {
+  width: 280px;
+  height: 280px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+#terminal-demo-wrapper .service-card:not(.unavailable):hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 15px 40px rgba(26, 188, 156, 0.4);
+  border-color: var(--secondary);
+}
+
+#terminal-demo-wrapper .service-card:not(.unavailable):active {
+  transform: scale(0.98);
+}
+
+#terminal-demo-wrapper .service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%);
+  z-index: -1;
+}
+
+#terminal-demo-wrapper .service-card:not(.unavailable)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: var(--secondary);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+#terminal-demo-wrapper .service-card:not(.unavailable):hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+#terminal-demo-wrapper .card-title {
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--light);
+}
+
+#terminal-demo-wrapper .card-info {
+  margin-bottom: 1rem;
+  color: var(--light);
+  opacity: 0.9;
+}
+
+#terminal-demo-wrapper .card-icon {
+  color: var(--secondary);
+  margin-bottom: 1rem;
+}
+
+#terminal-demo-wrapper .unavailable {
+  cursor: not-allowed;
+  opacity: 0.7;
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid var(--accent);
+}
+
+#terminal-demo-wrapper .unavailable .card-icon {
+  color: var(--accent);
+}
+
+#terminal-demo-wrapper .unavailable-text {
+  color: var(--accent);
+  font-weight: 700;
+  margin-top: 0.5rem;
+  max-width: 220px;
+}
+
+#terminal-demo-wrapper .notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, var(--secondary) 0%, #16a085 100%);
+  color: var(--light);
+  padding: 2rem;
+  border-radius: 15px;
+  width: 80%;
+  height: 80%;
+  max-width: 700px;
+  max-height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  z-index: -1000;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+#terminal-demo-wrapper .notification.show {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1000;
+}
+
+#terminal-demo-wrapper .notification-icon {
+  color: var(--light);
+  margin-bottom: 1rem;
+  animation: pulseAnimation 2s infinite;
+}
+
+#terminal-demo-wrapper .notification-title {
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+#terminal-demo-wrapper .notification-message {
+  margin-bottom: 2rem;
+}
+
+#terminal-demo-wrapper .page-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-weight: 300;
+  color: var(--light);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+#terminal-demo-wrapper .page-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: var(--secondary);
+  border-radius: 3px;
+}
+
+#terminal-demo-wrapper .fade-in {
+  opacity: 0;
+  animation: fadeIn 1s forwards;
+}
+
+#terminal-demo-wrapper .fade-in-delay-1 {
+  animation-delay: 0.2s;
+}
+
+#terminal-demo-wrapper .fade-in-delay-2 {
+  animation-delay: 0.4s;
+}
+
+#terminal-demo-wrapper .fade-in-delay-3 {
+  animation-delay: 0.6s;
+}
+
+/* Стили для кнопки обновления */
+#terminal-demo-wrapper .refresh-button {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--secondary) 0%, #16a085 100%);
+  color: var(--light);
+  border: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+#terminal-demo-wrapper .refresh-button:hover {
+  transform: translateY(-5px) rotate(10deg);
+  box-shadow: 0 8px 25px rgba(26, 188, 156, 0.6);
+}
+
+#terminal-demo-wrapper .refresh-button:active {
+  transform: scale(0.95);
+}
+
+#terminal-demo-wrapper .refresh-icon {
+  animation: spin 1s ease infinite;
+  animation-play-state: paused;
+}
+
+#terminal-demo-wrapper .refresh-button:hover .refresh-icon {
+  animation-play-state: running;
+}
+
+/* 
+  Ключевые кадры анимации остаются глобальными, 
+  но применяются только через изолированные классы.
+*/
+@keyframes pulseAnimation {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes clickAnimation {
+  0% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); }
+  50% { transform: scale(1.1); box-shadow: 0 15px 40px rgba(26, 188, 156, 0.5); }
+  100% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from {transform: rotate(0deg);}
+  to {transform: rotate(360deg);}
+}
+
+
+/* Адаптивный дизайн */
+@media (max-width: 992px) {
+  #terminal-demo-wrapper .cards-container {
+    gap: 1.5rem;
+  }
+  #terminal-demo-wrapper .service-card {
+    width: 250px;
+    height: 250px;
+  }
+  #terminal-demo-wrapper .card-title {
+  }
+}
+
+@media (max-width: 768px) {
+  #terminal-demo-wrapper .cards-container {
+    gap: 1rem;
+  }
+  #terminal-demo-wrapper .service-card {
+    width: 220px;
+    height: 220px;
+    padding: 1rem;
+  }
+  #terminal-demo-wrapper .card-title {
+    margin-bottom: 0.5rem;
+  }
+  #terminal-demo-wrapper .card-icon {
+    margin-bottom: 0.5rem;
+  }
+  #terminal-demo-wrapper .logo-left,
+  #terminal-demo-wrapper .logo-right {
+    max-width: 120px;
+  }
+  #terminal-demo-wrapper .notification-title {
+  }
+  #terminal-demo-wrapper .notification-message {
+  }
+  #terminal-demo-wrapper .refresh-button {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+  }
+  #terminal-demo-wrapper .refresh-icon {
+  }
+}
+
+@media (max-width: 576px) {
+  #terminal-demo-wrapper .cards-container {
+    gap: 1rem;
+  }
+  #terminal-demo-wrapper .service-card {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    min-height: 200px;
+    padding: 1rem;
+  }
+  #terminal-demo-wrapper .logo-left,
+  #terminal-demo-wrapper .logo-right {
+    max-width: 80px;
+  }
+  #terminal-demo-wrapper .notification {
+    width: 90%;
+    height: 90%;
+  }
+  #terminal-demo-wrapper .notification-title {
+  }
+  #terminal-demo-wrapper .notification-message {
+  }
+  #terminal-demo-wrapper .refresh-button {
+    width: 45px;
+    height: 45px;
+    bottom: 15px;
+    right: 15px;
+  }
+}

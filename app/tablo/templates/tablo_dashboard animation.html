@@ -1,0 +1,1359 @@
+<tablo dashboard>
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Электронная очередь</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #1abc9c;
+      --accent: #e74c3c;
+      --light: #ecf0f1;
+      --dark: #2c3e50;
+    }
+    
+    body {
+      background: linear-gradient(135deg, var(--primary) 0%, #1a2530 100%);
+      color: var(--light);
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+    
+    .main-container {
+      width: 95%;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      height: 95vh;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      width: 100%;
+      position: relative;
+    }
+    
+    .clock-container {
+      text-align: center;
+      margin-bottom: 0;
+      position: relative;
+    }
+    
+    .clock {
+      font-size: 4.5rem;
+      font-weight: 700;
+      color: var(--light);
+      padding: 0.8rem 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      display: inline-block;
+      position: relative;
+      overflow: hidden;
+      min-width: 280px;
+    }
+    
+    .clock::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: rotate(45deg);
+      animation: clockShine 5s linear infinite;
+    }
+    
+    @keyframes clockShine {
+      0% {
+        left: -50%;
+        top: -50%;
+      }
+      100% {
+        left: 150%;
+        top: 150%;
+      }
+    }
+    
+    .logo {
+      height: auto;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .logo-left {
+      max-width: 140px;
+      padding: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      margin-right: 20px;
+    }
+    
+    .logo-right {
+      max-width: 180px;
+      padding: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      margin-left: 20px;
+    }
+    
+    /* Новый контейнер для содержимого */
+    .content-container {
+      display: flex;
+      gap: 1rem;
+      width: 100%;
+      flex-grow: 1;
+    }
+    
+    .tablo-container {
+      flex: 3;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .tablo-header {
+      display: flex;
+      justify-content: space-between;
+      background-color: var(--secondary);
+      padding: 0.8rem 1.5rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .tablo-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--light), transparent);
+    }
+    
+    .header-columns {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 0.5rem;
+      border-right: 1px dashed rgba(255, 255, 255, 0.3);
+    }
+    
+    .header-columns:last-child {
+      border-right: none;
+    }
+    
+    .column-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      flex: 1;
+      padding: 0 0.5rem;
+    }
+    
+    .tablo-items {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-content: flex-start;
+    }
+
+    .single-column .tablo-item {
+      width: 100%;
+    }
+
+    .two-columns .tablo-item {
+      width: calc(50% - 0.5rem);
+    }
+    
+    .tablo-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 1.8rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 0.5rem;
+      background: rgba(45, 55, 65, 0.7);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border-left: 5px solid var(--secondary);
+    }
+    
+    .tablo-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .tablo-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+      transform: skewX(-20deg) translateX(-100%);
+      transition: all 0.6s ease;
+    }
+    
+    .tablo-item:hover::before {
+      transform: skewX(-20deg) translateX(100%);
+    }
+    
+    .tablo-item div {
+      flex: 1;
+      text-align: center;
+      font-size: 3.5rem;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Разделитель внутри карточки */
+    .tablo-item::after {
+      content: '';
+      position: absolute;
+      top: 15%;
+      left: 50%;
+      height: 70%;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .ticket-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+    
+    .ticket-label {
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 0.3rem;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    
+    .ticket-number {
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+    }
+    
+    .ticket-number::before {
+      content: '№';
+      font-size: 1.8rem;
+      opacity: 0.7;
+      margin-right: 0.5rem;
+      transform: translateY(-5px);
+    }
+    
+    .ticket-cabinet {
+      font-weight: bold;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+    }
+    
+    .ticket-cabinet::before {
+      content: '\f3c5';
+      font-family: 'Font Awesome 5 Free';
+      margin-right: 0.5rem;
+      font-size: 1.5rem;
+    }
+    
+    .new-item {
+      border-left: 10px solid var(--accent);
+      position: relative;
+      z-index: 10;
+      background-color: rgba(231, 76, 60, 0.25);
+      animation: bounceInDown 0.8s, headShake 1.5s infinite 1s;
+    }
+
+    .tablo-item.stop-animation {
+      animation: none;
+      border-left: 5px solid var(--secondary);
+      background-color: rgba(255, 255, 255, 0.05);
+      transition: all 0.5s ease;
+    }
+    
+    .tablo-item.stop-animation::after {
+      animation: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    /* Видеоплеер (справа) */
+    .video-container {
+      flex: 2;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .video-header {
+      background-color: var(--secondary);
+      padding: 0.8rem 1.5rem;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .video-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--light), transparent);
+    }
+  
+    .video-player-wrapper {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+    }
+    
+    .video-player {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 0.5rem;
+    }
+
+    /* Декоративные элементы */
+    .decorative-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--secondary), transparent);
+      opacity: 0.2;
+      z-index: -1;
+    }
+    
+    .circle-1 {
+      width: 300px;
+      height: 300px;
+      top: -100px;
+      left: -100px;
+      animation: floatAnimation 8s ease-in-out infinite;
+    }
+    
+    .circle-2 {
+      width: 200px;
+      height: 200px;
+      bottom: -50px;
+      right: 10%;
+      animation: floatAnimation 10s ease-in-out infinite reverse;
+    }
+    
+    .circle-3 {
+      width: 150px;
+      height: 150px;
+      top: 30%;
+      right: -50px;
+      animation: floatAnimation 7s ease-in-out infinite 1s;
+    }
+    
+    @keyframes floatAnimation {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      50% {
+        transform: translate(20px, 20px) rotate(5deg);
+      }
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+    }
+    
+    /* Анимация текущего времени */
+    .clock span {
+      display: inline-block;
+      position: relative;
+    }
+
+    .clock .seconds {
+      color: var(--secondary);
+      font-size: 0.8em;
+      animation: blinkAnimation 1s infinite;
+    }
+
+    @keyframes blinkAnimation {
+      0%, 49% {
+        opacity: 1;
+      }
+      50%, 100% {
+        opacity: 0.5;
+      }
+    }
+
+    /* Индикатор загрузки при ожидании данных */
+    .loading-indicator {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .loading-dots {
+      display: inline-block;
+    }
+
+    .loading-dots span {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--secondary);
+      margin: 0 3px;
+      animation: loadingDotsAnimation 1.4s infinite ease-in-out both;
+    }
+
+    .loading-dots span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .loading-dots span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes loadingDotsAnimation {
+      0%, 80%, 100% {
+        transform: scale(0);
+      }
+      40% {
+        transform: scale(1);
+      }
+    }
+
+    /* Дополнительная стилизация */
+    .date-display {
+      text-align: center;
+      font-size: 1rem;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.8;
+    }
+
+    .ticket-count {
+      text-align: right;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+
+    /* Улучшенная анимация появления при загрузке страницы */
+    .fade-in {
+      opacity: 0;
+      animation: fadeIn 1s forwards;
+    }
+
+    .fade-in-delay-1 {
+      animation-delay: 0.2s;
+    }
+
+    .fade-in-delay-2 {
+      animation-delay: 0.4s;
+    }
+
+    .fade-in-delay-3 {
+      animation-delay: 0.6s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Новый стиль для центрирования при отсутствии билетов */
+    #no-tickets-message {
+      width: 100%;
+      text-align: center;
+      padding: 2rem 0;
+    }
+    
+    /* Адаптивный дизайн */
+    @media (max-width: 1200px) {
+      .content-container {
+        flex-direction: column;
+      }
+      
+      .video-container {
+        height: 300px;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .clock {
+        font-size: 2.8rem;
+        min-width: 220px;
+      }
+      
+      .tablo-header div, .video-header {
+        font-size: 1.5rem;
+      }
+      
+      .ticket-number, .ticket-cabinet {
+        font-size: 3rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .main-container {
+        width: 98%;
+      }
+      
+      .logo-left, .logo-right {
+        max-width: 90px;
+      }
+      
+      .clock {
+        font-size: 2.2rem;
+        min-width: 180px;
+      }
+      
+      .tablo-header div, .video-header {
+        font-size: 1.3rem;
+      }
+      
+      .tablo-item {
+        padding: 1.2rem;
+      }
+      
+      .ticket-number, .ticket-cabinet {
+        font-size: 2.5rem;
+      }
+      
+      .two-columns .tablo-item {
+        width: 100%;
+      }
+      
+      .video-container {
+        height: 250px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .logo-left, .logo-right {
+        max-width: 80px;
+      }
+      
+      .clock {
+        font-size: 1.8rem;
+        min-width: 150px;
+      }
+      
+      .ticket-number, .ticket-cabinet {
+        font-size: 2.2rem;
+      }
+      
+      .two-columns .tablo-item {
+        width: 100%;
+      }
+      
+      .video-container {
+        height: 200px;
+      }
+    }
+
+    /* Стили для уведомлений */
+    .notification {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(26, 188, 156, 0.9);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: bottom 0.5s ease;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+    }
+    
+    .notification.show {
+      bottom: 20px;
+    }
+    
+    .notification.warning {
+      background: rgba(243, 156, 18, 0.9);
+    }
+    
+    .notification.danger {
+      background: rgba(231, 76, 60, 0.9);
+    }
+    
+    .notification.info {
+      background: rgba(52, 152, 219, 0.9);
+    }
+  </style>
+</head>
+<body>
+  <!-- Декоративные элементы -->
+  <div class="decorative-circle circle-1"></div>
+  <div class="decorative-circle circle-2"></div>
+  <div class="decorative-circle circle-3"></div>
+
+  <div class="main-container"> 
+    <div class="header fade-in">
+      <img src="{{ url_for('static', filename='img/logo_organization.png') }}" class="logo logo-left" alt="Логотип организации">
+      <div class="clock-container fade-in fade-in-delay-1">
+        <div class="clock" id="clock">
+          <span class="hours">00</span>:<span class="minutes">00</span>:<span class="seconds">00</span>
+        </div>
+        <div class="date-display" id="date-display"></div>
+      </div>
+      <img src="{{ url_for('static', filename='img/logo_qq.gif') }}" class="logo logo-right" alt="Логотип QQ">
+    </div>
+
+	<!-- Исправленный код для content-container в tablo_dashboard.html -->
+	<div class="content-container fade-in fade-in-delay-2">
+	  <!-- Таблица с билетами (адаптивный размер) -->
+	  <div class="tablo-container" {% if not show_video %}style="flex: 1;"{% else %}style="flex: 3;"{% endif %}>
+		<div class="tablo-header">
+		  <div class="header-columns">
+			<div class="column-title"><i class="fas fa-user mr-2"></i>Клиент</div>
+			<div class="column-title"><i class="fas fa-door-open mr-2"></i>Кабинет</div>
+		  </div>
+		  <div class="header-columns">
+			<div class="column-title"><i class="fas fa-user mr-2"></i>Клиент</div>
+			<div class="column-title"><i class="fas fa-door-open mr-2"></i>Кабинет</div>
+		  </div>
+		</div>
+		
+		<div id="ticketItems" class="tablo-items two-columns">
+		  <!-- Тикеты будут отображаться здесь -->
+		</div>
+		
+		<div class="loading-indicator" id="loading-indicator">
+		  <div class="loading-dots">
+			<span></span>
+			<span></span>
+			<span></span>
+		  </div>
+		  <p>Загрузка данных...</p>
+		</div>
+		
+		<div class="ticket-count" id="ticket-count">
+		  Активных вызовов: <span id="active-count">0</span>
+		</div>
+	  </div>
+	  
+	  <!-- Видеоплеер (справа) -->
+	  <div class="video-container fade-in fade-in-delay-3" {% if not show_video %}style="display: none;"{% endif %}>
+		<div class="video-header">
+		  <i class="fas fa-film mr-2"></i>Видео
+		  {% if video_folder and video_folder != '0' %}<small>({{ video_folder }})</small>{% endif %}
+		</div>
+		<div class="video-player-wrapper">
+		  <video id="videoPlayer" class="video-player" controls autoplay muted loop>
+			<source src="" type="video/mp4">
+			Ваш браузер не поддерживает видео.
+		  </video>
+		</div>
+	  </div>
+	</div>
+
+	<!-- Скрытые поля для передачи информации в JavaScript -->
+	<input type="hidden" id="video_setting" value="{{ 'true' if show_video else 'false' }}">
+	<input type="hidden" id="video_folder" value="{{ video_folder|default('') }}">
+
+	<!-- Отладочная информация (можно убрать в продакшене) -->
+	<div style="display: none;" id="debug-info">
+	  <p>show_video: {{ show_video }}</p>
+	  <p>video_folder: {{ video_folder }}</p>
+	</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+<script>
+$(document).ready(function() {
+  // Анимированные часы с форматированием
+  function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    $('.hours').text(hours);
+    $('.minutes').text(minutes);
+    $('.seconds').text(seconds);
+    
+    // Обновляем дату
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateString = now.toLocaleDateString('ru-RU', options);
+    $('#date-display').text(dateString);
+  }
+  
+  // Инициализируем часы и запускаем обновление
+  updateClock();
+  setInterval(updateClock, 1000);
+  
+  // Функция выхода
+  function logout() {
+    $.post('/logout', function() {
+      window.location.href = '/login';
+    }).fail(function() {
+      window.location.href = '/login';
+    });
+  }
+  
+  // Показываем индикатор загрузки
+  $('#loading-indicator').show();
+  
+  // Глобальные переменные для управления состоянием видео и аудио
+  var displayedTickets = {};
+  var assignedServices = [];
+  var playQueue = [];
+  var isPlaying = false;
+  var videoPlayer = document.getElementById('videoPlayer');
+  var videoVolume = 0.5; // Значение громкости по умолчанию
+  var showVideo = $('#video_setting').val() === 'true'; // Проверяем настройку отображения видео
+  
+  // ВАЖНО: устанавливаем глобальные переменные в window, чтобы они были доступны везде
+  window.audioPlaying = false; // Флаг активности аудио
+  
+  // Функция для включения/выключения звука в видеоплеере
+  function muteVideo() {
+    // Проверяем, существует ли видеоплеер
+    if (!showVideo || !videoPlayer) {
+      return;
+    }
+    
+    console.log("Отключаем звук видео");
+    videoPlayer.muted = true;
+    window.audioPlaying = true;
+    
+    // Отменяем предыдущий таймер, если он был
+    if (window.unmuteTimer) {
+      clearTimeout(window.unmuteTimer);
+      window.unmuteTimer = null;
+    }
+  }
+  
+  function unmuteVideo() {
+    // Проверяем, существует ли видеоплеер
+    if (!showVideo || !videoPlayer) {
+      return;
+    }
+    
+    // Включаем звук только если не воспроизводится аудио
+    if (!isPlaying && playQueue.length === 0) {
+      // Проверяем, не исчез ли флаг аудио между вызовами
+      if (window.audioPlaying) {
+        console.log("Включаем звук видео");
+        videoPlayer.muted = false;
+        videoPlayer.volume = videoVolume;
+        window.audioPlaying = false;
+      }
+    } else {
+      console.log("Не включаем звук - еще воспроизводится аудио");
+    }
+  }
+  
+  // Включаем звук видео через 5 секунд после загрузки страницы (только если есть видеоплеер)
+  if (showVideo && videoPlayer) {
+    setTimeout(function() {
+      videoPlayer.muted = false;
+      videoPlayer.volume = videoVolume;
+      window.audioPlaying = false; // Устанавливаем правильное начальное состояние
+      console.log("Первоначальная инициализация видео - звук включен");
+    }, 5000);
+  }
+  
+  // Подключаемся к Socket.IO
+  var socket = io.connect(window.location.origin + '/voicing', {
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    timeout: 20000
+  });
+  
+  // Получение назначенных услуг для табло
+  $.get('/get_assigned_services', function(data) {
+    assignedServices = data.assigned_services;
+    socket.emit('register_tab', { tabId: 'tablo1', assignedServices: assignedServices });
+    $('#loading-indicator').hide();
+  }).fail(function(jqXHR) {
+    if (jqXHR.status === 403) {
+      logout();
+    } else {
+      console.error('Ошибка при получении назначенных услуг:', jqXHR.statusText);
+      $('#loading-indicator').html('<p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Ошибка загрузки данных</p>');
+    }
+  });
+  
+  // Обработка событий сокета
+  socket.on('connect', function() {
+    console.log('Socket connected on /voicing namespace');
+  });
+  
+  socket.on('disconnect', function(reason) {
+    console.warn('Socket disconnected:', reason);
+    showNotification('Соединение потеряно. Перезагрузка...', 'warning');
+    setTimeout(logout, 3000);
+  });
+  
+  socket.on('connect_error', function(error) {
+    console.error('Socket connection error:', error);
+    showNotification('Ошибка соединения!', 'danger');
+    setTimeout(logout, 3000);
+  });
+  
+  // Функция для показа уведомлений
+  function showNotification(message, type) {
+    const notificationDiv = $('<div class="notification ' + type + '">' + message + '</div>');
+    $('body').append(notificationDiv);
+    
+    setTimeout(function() {
+      notificationDiv.addClass('show');
+      
+      setTimeout(function() {
+        notificationDiv.removeClass('show');
+        setTimeout(function() {
+          notificationDiv.remove();
+        }, 500);
+      }, 3000);
+    }, 100);
+  }
+  
+  // Обработка аудио
+  socket.on('play_audio', function(data) {
+    if (assignedServices.includes(data.serviceId)) {
+      console.log("Получен play_audio сигнал");
+      
+      // Приглушаем звук видео
+      muteVideo();
+      
+      // Обработка последовательности аудио
+      if (!isPlaying) {
+        isPlaying = true;
+        playAudioSequence(data.sequence);
+      } else {
+        // Если уже что-то играет, добавляем в очередь
+        playQueue.push(data.sequence);
+      }
+    }
+  });
+  
+  function processQueue() {
+    if (playQueue.length > 0) {
+      isPlaying = true;
+      const nextSequence = playQueue.shift();
+      playAudioSequence(nextSequence);
+    } else {
+      isPlaying = false;
+      console.log("Аудио очередь пуста, включаем звук видео через 1 секунду");
+      
+      // После завершения воспроизведения всех аудио, включаем звук с задержкой
+      // Задержка нужна для избежания эффекта эха от последнего аудио
+      setTimeout(function() {
+        unmuteVideo();
+        // Дополнительная проверка через 3 секунды для надежности
+        setTimeout(function() {
+          if (showVideo && videoPlayer && videoPlayer.muted && !isPlaying && playQueue.length === 0 && window.audioPlaying) {
+            console.log("Дополнительная проверка: видео все еще без звука - пробуем включить еще раз");
+            unmuteVideo();
+          }
+        }, 3000);
+      }, 1000);
+    }
+  }
+  
+  function playAudioSequence(sequence) {
+    console.log("Запуск последовательности: ", sequence);
+    
+    if (!sequence || sequence.length === 0) {
+      isPlaying = false;
+      processQueue();
+      return;
+    }
+    
+    // Создаем массив промисов загрузки аудио
+    const loadPromises = sequence.map(name => {
+      return new Promise((resolve, reject) => {
+        const encodedName = encodeURIComponent(name);
+        const url = window.location.origin + '/static/audio/' + encodedName;
+        
+        // Создаем аудио элемент только для загрузки
+        const tempAudio = new Audio();
+        tempAudio.src = url;
+        
+        // Слушаем событие canplaythrough
+        tempAudio.addEventListener('canplaythrough', () => {
+          resolve(url);
+        }, { once: true });
+        
+        // Обработка ошибки
+        tempAudio.addEventListener('error', () => {
+          console.error(`Ошибка загрузки аудио: ${name}`);
+          reject(new Error(`Не удалось загрузить: ${name}`));
+        }, { once: true });
+        
+        // Начинаем загрузку
+        tempAudio.load();
+      });
+    });
+    
+    // Когда все аудиофайлы загружены, создаем и проигрываем их последовательно
+    Promise.allSettled(loadPromises).then(results => {
+      console.log("Все файлы предзагружены");
+      
+      // Фильтруем только успешно загруженные URL
+      const validUrls = results
+        .filter(result => result.status === 'fulfilled')
+        .map(result => result.value);
+      
+      if (validUrls.length === 0) {
+        console.error("Ни один аудиофайл не был загружен");
+        isPlaying = false;
+        processQueue();
+        return;
+      }
+      
+      // Начинаем воспроизведение с использованием полностью предзагруженных файлов
+      let index = 0;
+      let audio = new Audio(validUrls[index]);
+      
+      function playNextLoaded() {
+        audio.play().then(() => {
+          console.log(`Воспроизводится файл: ${index + 1}/${validUrls.length}`);
+        }).catch(e => {
+          console.error("Ошибка воспроизведения:", e);
+          nextFile();
+        });
+      }
+      
+      function nextFile() {
+        index++;
+        if (index < validUrls.length) {
+          audio = new Audio(validUrls[index]);
+          audio.onended = nextFile;
+          audio.onerror = nextFile;
+          
+          // Воспроизводить следующий файл немедленно
+          playNextLoaded();
+        } else {
+          // Все файлы проиграны
+          console.log("Последовательность аудио завершена");
+          processQueue();
+        }
+      }
+      
+      // Установка обработчиков для первого файла
+      audio.onended = nextFile;
+      audio.onerror = nextFile;
+      
+      // Запускаем первый файл
+      playNextLoaded();
+    });
+  }
+  
+  // Обработка вызова билета
+  socket.on('call_ticket', function(data) {
+    if (assignedServices.includes(data.serviceId)) {
+      console.log("Получен call_ticket сигнал");
+      updateTicketsDisplay();
+    }
+  });
+  
+  // Проверка статуса авторизации
+  function checkLoginStatus() {
+    $.ajax({
+      url: '/check_auth_status',
+      method: 'GET',
+      success: function(data) {
+        if (!data.authenticated) {
+          showNotification('Сессия истекла. Перенаправление на страницу входа...', 'info');
+          setTimeout(function() {
+            window.location.href = '/login';
+          }, 2000);
+        }
+      },
+      error: function() {
+        showNotification('Ошибка проверки авторизации', 'danger');
+        setTimeout(function() {
+          window.location.href = '/login';
+        }, 2000);
+      }
+    });
+  }
+  
+  // Проверяем статус при загрузке и каждые 5 минут
+  checkLoginStatus();
+  setInterval(checkLoginStatus, 300000); // 5 минут
+  
+  // Функция для установки отображения в один или два столбца
+  function setColumnLayout(activeTickets) {
+    const ticketItemsContainer = document.getElementById('ticketItems');
+    
+    // Всегда отображаем в два столбца
+    if (ticketItemsContainer.classList.contains('single-column')) {
+      ticketItemsContainer.classList.remove('single-column');
+    }
+    if (!ticketItemsContainer.classList.contains('two-columns')) {
+      ticketItemsContainer.classList.add('two-columns');
+    }
+  }
+  
+  // Обновление отображения билетов
+  function updateTicketsDisplay() {
+    fetch('/tablo_data', { credentials: 'include' })
+      .then(response => {
+        if (response.status === 403) {
+          logout();
+          throw new Error('CSRF Token Mismatch');
+        }
+        return response.json();
+      })
+      .then(tickets => {
+        var ticketItems = document.getElementById('ticketItems');
+        var newDisplayedTickets = {};
+        
+        // Фильтруем и сортируем билеты
+        const activeTickets = tickets.filter(ticket => ticket.status === 'at work');
+        
+        // Устанавливаем отображение в два столбца
+        setColumnLayout(activeTickets);
+        
+        // Обновляем счетчик активных билетов
+        $('#active-count').text(activeTickets.length);
+        
+        // Если нет активных билетов, показываем сообщение
+        if (activeTickets.length === 0) {
+          if ($('#no-tickets-message').length === 0) {
+            const noTicketsMessage = $('<div id="no-tickets-message" class="text-center p-4 fade-in">'+
+                                      '<i class="fas fa-ticket-alt fa-3x mb-3" style="opacity: 0.5;"></i>'+
+                                      '<p>Нет активных вызовов</p></div>');
+            $('#ticketItems').html(noTicketsMessage);
+          }
+        } else {
+          // Удаляем сообщение о отсутствии билетов, если оно есть
+          $('#no-tickets-message').remove();
+          
+          // Обрабатываем каждый активный билет
+          activeTickets.forEach(ticket => {
+            if (displayedTickets[ticket.id]) {
+              // Билет уже отображается
+              newDisplayedTickets[ticket.id] = displayedTickets[ticket.id];
+              
+              // Обновляем данные, если они изменились
+              const ticketDiv = displayedTickets[ticket.id];
+              const numberElement = ticketDiv.querySelector('.ticket-number');
+              const cabinetElement = ticketDiv.querySelector('.ticket-cabinet');
+              
+              if (numberElement.textContent !== ticket.number) {
+                numberElement.textContent = ticket.number;
+              }
+              
+              if (cabinetElement.textContent !== ticket.cabinet) {
+                cabinetElement.textContent = ticket.cabinet;
+              }
+            } else {
+              // Создаем новый элемент для билета с более надежной анимацией
+              var ticketDiv = document.createElement('div');
+              ticketDiv.className = 'tablo-item new-item animate__animated animate__bounceInDown animate__headShake';
+              
+              // При появлении новых билетов отключаем звук
+              console.log("Новый тикет: отключаем звук видео");
+              muteVideo();
+              
+              // Только пытаемся воспроизвести звук, если есть пользовательское взаимодействие
+              if (document.documentElement.hasAttribute('data-user-interacted')) {
+                let audioNotice = new Audio();
+                audioNotice.src = window.location.origin + '/static/audio/notice.mp3';
+                try {
+                  audioNotice.play().catch(e => console.log('Автозапуск аудио заблокирован браузером'));
+                } catch(e) {
+                  console.log('Ошибка проигрывания аудио');
+                }
+              }
+              
+              // Добавляем визуальное оповещение с мигающим фоном
+              ticketDiv.innerHTML = `<div class="ticket-number">${ticket.number}</div><div class="ticket-cabinet">${ticket.cabinet}</div>`;
+              
+              // Добавляем в DOM
+              ticketItems.appendChild(ticketDiv);
+              newDisplayedTickets[ticket.id] = ticketDiv;
+              
+              // Убираем подсветку через 30 секунд
+              setTimeout(() => {
+                ticketDiv.classList.add('stop-animation');
+                ticketDiv.classList.remove('animate__headShake', 'animate__bounceInDown');
+              }, 30000);
+            }
+          });
+          
+          // Удаляем билеты, которых больше нет в активных
+          for (let ticketId in displayedTickets) {
+            if (!newDisplayedTickets[ticketId]) {
+              // Плавное удаление
+              const ticketToRemove = displayedTickets[ticketId];
+              ticketToRemove.style.transition = 'all 0.5s ease';
+              ticketToRemove.style.opacity = '0';
+              ticketToRemove.style.transform = 'translateX(50px)';
+              
+              setTimeout(() => {
+                ticketToRemove.remove();
+              }, 500);
+              
+              delete displayedTickets[ticketId];
+            }
+          }
+        }
+        
+        // Обновляем список отображаемых билетов
+        displayedTickets = newDisplayedTickets;
+      })
+      .catch(error => {
+        console.error('Fetch error:', error);
+      });
+  }
+  
+  // Обработка ошибок AJAX
+  $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
+    if (jqXHR.status === 403) {
+      logout();
+    }
+  });
+  
+  // Запускаем начальное обновление и настраиваем интервал
+  updateTicketsDisplay();
+  setInterval(updateTicketsDisplay, 2000);
+  
+  // Добавляем интерактивность при наведении
+  $(document).on('mouseenter', '.tablo-item', function() {
+    $(this).css('transform', 'translateY(-3px)');
+  }).on('mouseleave', '.tablo-item', function() {
+    $(this).css('transform', 'translateY(0)');
+  });
+  
+  // Регистрируем событие взаимодействия с пользователем для разрешения автозапуска аудио
+  document.addEventListener('click', function() {
+    document.documentElement.setAttribute('data-user-interacted', 'true');
+    
+    // Явно включаем звук после первого взаимодействия
+    if (showVideo && videoPlayer) {
+      videoPlayer.muted = false;
+      videoPlayer.volume = videoVolume;
+      console.log("Клик пользователя: включаем звук видео");
+    }
+  }, { once: true });
+  
+  // Дополнительная проверка состояния звука каждые 10 секунд
+  setInterval(function() {
+    // Проверяем логическое условие: если аудио не воспроизводится, но видео без звука
+    if (!isPlaying && playQueue.length === 0) {
+      // Если флаг audioPlaying активен, но не играется аудио - сбрасываем флаг
+      if (window.audioPlaying) {
+        console.log("Несоответствие состояния: аудио не играет, но флаг активен - сбрасываем");
+        window.audioPlaying = false;
+      }
+      
+      // Если видео заглушено, но аудио не активно - включаем звук
+      if (showVideo && videoPlayer && videoPlayer.muted) {
+        console.log("Периодическая проверка: видео без звука, хотя нет активного аудио - включаем звук");
+        videoPlayer.muted = false;
+        videoPlayer.volume = videoVolume;
+      }
+    }
+  }, 10000);
+});
+
+// Видеоплеер - инициализируем только если включен в настройках
+$(document).ready(function() {
+  // Проверяем, должен ли отображаться видеоплеер
+  var showVideo = $('#video_setting').val() === 'true';
+  
+  // Если видео не должно показываться, не инициализируем плеер
+  if (!showVideo) {
+    console.log('Воспроизведение видео отключено в настройках пользователя');
+    return;
+  }
+  
+  // Массив для хранения путей к видеофайлам
+  var videoFiles = [];
+  var currentVideoIndex = 0;
+  var videoPlayer = document.getElementById('videoPlayer');
+  
+  // Если плеер не найден, выходим
+  if (!videoPlayer) {
+    console.log('Элемент видеоплеера не найден в DOM');
+    return;
+  }
+  
+  // Отслеживаем изменения состояния звука видео
+  videoPlayer.addEventListener('volumechange', function() {
+    console.log('Изменение звука видео:', videoPlayer.muted ? 'заглушено' : 'звук включен', 'громкость:', videoPlayer.volume);
+  });
+  
+  // Получаем список доступных видео из директории
+  function fetchVideoList() {
+    $.ajax({
+      url: '/get_video_list',
+      method: 'GET',
+      success: function(data) {
+        if (data.videos && data.videos.length > 0) {
+          videoFiles = data.videos;
+          
+          // Перемешиваем массив с видео для случайного воспроизведения
+          shuffleArray(videoFiles);
+          
+          // Запускаем воспроизведение первого видео
+          playVideo(0);
+        } else {
+          // Скрыть контейнер если видео нет
+          $('.video-container').hide();
+          console.log('Видеофайлы не найдены в указанной директории');
+        }
+      },
+      error: function(error) {
+        console.error('Ошибка при получении списка видео:', error);
+        $('.video-container').hide();
+      }
+    });
+  }
+  
+  // Функция для перемешивания массива (алгоритм Фишера-Йейтса)
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+  
+  // Функция для воспроизведения видео по индексу
+  function playVideo(index) {
+    if (videoFiles.length === 0) return;
+    
+    // Проверяем границы индекса
+    if (index >= videoFiles.length) {
+      // Если достигли конца списка, перемешиваем и начинаем сначала
+      shuffleArray(videoFiles);
+      index = 0;
+    }
+    
+    currentVideoIndex = index;
+    const videoSrc = videoFiles[currentVideoIndex];
+    
+    // Запоминаем текущее состояние звука
+    const currentMuted = videoPlayer.muted || window.audioPlaying;
+    console.log("Загрузка нового видео, статус звука:", currentMuted ? "без звука" : "со звуком", 
+                "аудио активно:", window.audioPlaying ? "да" : "нет");
+    
+    // Устанавливаем источник видео
+    videoPlayer.querySelector('source').src = videoSrc;
+    videoPlayer.load();
+    
+    // Запускаем воспроизведение после загрузки с учетом текущего состояния
+    videoPlayer.oncanplaythrough = function() {
+      videoPlayer.muted = currentMuted;
+      videoPlayer.play().catch(e => {
+        console.log('Автоматическое воспроизведение заблокировано браузером:', e);
+        
+        // Добавляем обработчик клика для активации воспроизведения
+        if (!document.documentElement.hasAttribute('data-video-interacted')) {
+          $('body').one('click', function() {
+            videoPlayer.play().catch(e => console.log('Не удалось воспроизвести видео:', e));
+            document.documentElement.setAttribute('data-video-interacted', 'true');
+          });
+        }
+      });
+    };
+  }
+  
+  // Обработчик события окончания видео
+  videoPlayer.addEventListener('ended', function() {
+    console.log("Видео закончилось, статус звука:", videoPlayer.muted ? "без звука" : "со звуком");
+    
+    // Проверяем, должно ли следующее видео быть со звуком
+    const shouldMute = window.audioPlaying;
+    
+    // Воспроизводим следующее видео
+    playVideo(currentVideoIndex + 1);
+  });
+  
+  // Обработчик ошибки загрузки видео
+  videoPlayer.addEventListener('error', function() {
+    console.error('Ошибка при загрузке видео:', videoFiles[currentVideoIndex]);
+    // Пропускаем проблемное видео и переходим к следующему
+    playVideo(currentVideoIndex + 1);
+  });
+  
+  // Инициализация видеоплеера
+  fetchVideoList();
+});
+
+</script>

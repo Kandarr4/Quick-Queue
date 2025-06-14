@@ -1,0 +1,575 @@
+
+#tablo-demo-wrapper {
+  /* Переменные из :root */
+  --primary: #2c3e50;
+  --secondary: #1abc9c;
+  --accent: #e74c3c;
+  --light: #ecf0f1;
+  --dark: #2c3e50;
+
+  /* Стили из body */
+  background-color: var(--primary);
+  color: var(--light);
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+#tablo-demo-wrapper .main-container {
+  width: 95%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 65vh;
+}
+
+#tablo-demo-wrapper .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+#tablo-demo-wrapper .clock-container {
+  text-align: center;
+  margin-bottom: 0;
+}
+
+#tablo-demo-wrapper .clock {
+  font-size: clamp(2.2rem, 3vw, 4.5rem); /* Адаптивный размер шрифта */
+  font-weight: 700;
+  color: var(--light);
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  display: inline-block;
+  min-width: clamp(180px, 20vw, 280px); /* Адаптивная ширина */
+}
+
+#tablo-demo-wrapper .logo {
+  height: auto;
+  border-radius: 8px;
+}
+
+#tablo-demo-wrapper .logo-left {
+  max-width: clamp(80px, 10vw, 140px); /* Адаптивная ширина */
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  margin-right: 20px;
+}
+
+#tablo-demo-wrapper .logo-right {
+  max-width: clamp(80px, 12vw, 180px); /* Адаптивная ширина */
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  margin-left: 20px;
+}
+
+#tablo-demo-wrapper .content-container {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  flex-grow: 1;
+}
+
+#tablo-demo-wrapper .tablo-container {
+  flex: 3;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+#tablo-demo-wrapper .tablo-header {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--secondary);
+  padding: 0.8rem 1.5rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#tablo-demo-wrapper .header-columns {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.5rem;
+  border-right: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
+#tablo-demo-wrapper .header-columns:last-child {
+  border-right: none;
+}
+
+#tablo-demo-wrapper .column-title {
+  text-align: center;
+  font-weight: bold;
+  font-size: clamp(1rem, 2.5vw, 1.7rem);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  flex: 1;
+  padding: 0 0.5rem;
+}
+
+#tablo-demo-wrapper .tablo-items {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: flex-start;
+}
+
+#tablo-demo-wrapper .single-column .tablo-item {
+  width: 100%;
+}
+
+#tablo-demo-wrapper .two-columns .tablo-item {
+  width: calc(50% - 0.5rem);
+}
+
+#tablo-demo-wrapper .tablo-item {
+  display: flex;
+  justify-content: space-between;
+  padding: clamp(0.8rem, 2vw, 1.8rem) 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  background: rgba(45, 55, 65, 0.7);
+  border-left: 5px solid var(--secondary);
+}
+
+#tablo-demo-wrapper .new-item {
+  border-left: 10px solid var(--accent);
+  position: relative;
+  z-index: 10;
+  background-color: rgba(231, 76, 60, 0.25);
+  animation: bounceInDown 0.8s;
+}
+
+#tablo-demo-wrapper .tablo-item.stop-animation {
+  animation: none;
+  border-left: 5px solid var(--secondary);
+  background-color: rgba(255, 255, 255, 0.05);
+  transition: all 0.5s ease;
+}
+
+#tablo-demo-wrapper .ticket-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+#tablo-demo-wrapper .ticket-label {
+  font-size: clamp(0.8rem, 1.5vw, 1.2rem);
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-bottom: 0.3rem;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+#tablo-demo-wrapper .ticket-number {
+  font-weight: bold;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(2rem, 4vw, 2.5rem);
+}
+
+#tablo-demo-wrapper .ticket-number::before {
+  content: '№';
+  font-size: clamp(1rem, 1.5vw, 1.8rem);
+  opacity: 0.7;
+  margin-right: 0.5rem;
+  transform: translateY(-5px);
+}
+
+#tablo-demo-wrapper .ticket-cabinet {
+  font-weight: bold;
+  color: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(2rem, 4vw, 2.5rem);
+}
+
+#tablo-demo-wrapper .ticket-cabinet::before {
+  content: '\f3c5';
+  font-family: 'Font Awesome 5 Free';
+  margin-right: 0.5rem;
+  font-size: clamp(1rem, 1.5vw, 1.5rem);
+}
+
+#tablo-demo-wrapper .video-container {
+  flex: 2;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+#tablo-demo-wrapper .video-header {
+  background-color: var(--secondary);
+  padding: 0.8rem 1.5rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#tablo-demo-wrapper .video-player-wrapper {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  position: relative;
+}
+
+#tablo-demo-wrapper .video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 0.5rem;
+}
+
+#tablo-demo-wrapper .loading-indicator {
+  display: none;
+  text-align: center;
+  padding: 2rem;
+}
+
+#tablo-demo-wrapper .loading-dots {
+  display: inline-block;
+}
+
+#tablo-demo-wrapper .loading-dots span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--secondary);
+  margin: 0 3px;
+  animation: loadingDotsAnimation 1.4s infinite ease-in-out both;
+}
+
+#tablo-demo-wrapper .loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+#tablo-demo-wrapper .loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+#tablo-demo-wrapper .date-display {
+  text-align: center;
+  font-size: clamp(0.7rem, 1.2vw, 1rem);
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+#tablo-demo-wrapper .ticket-count {
+  text-align: right;
+  padding: 0.5rem 1rem;
+  font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+  opacity: 0.7;
+}
+
+#tablo-demo-wrapper #no-tickets-message {
+  width: 100%;
+  text-align: center;
+  padding: 2rem 0;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+}
+
+#tablo-demo-wrapper .notification {
+  position: fixed;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26, 188, 156, 0.9);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: bottom 0.5s ease;
+  z-index: 9999;
+  font-size: clamp(0.8rem, 1.2vw, 1rem);
+}
+
+#tablo-demo-wrapper .notification.show {
+  bottom: 20px;
+}
+
+#tablo-demo-wrapper .notification.warning {
+  background: rgba(243, 156, 18, 0.9);
+}
+
+#tablo-demo-wrapper .notification.danger {
+  background: rgba(231, 76, 60, 0.9);
+}
+
+#tablo-demo-wrapper .notification.info {
+  background: rgba(52, 152, 219, 0.9);
+}
+
+#tablo-demo-wrapper .marquee-container {
+  width: 100%;
+  background-color: rgba(26, 188, 156, 0.3);
+  overflow: hidden;
+  bottom: 0;
+  left: 0;
+  padding: 0.8rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 100;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+#tablo-demo-wrapper .marquee-content {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 80s linear infinite;
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  color: var(--light);
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+#tablo-demo-wrapper .marquee-content span {
+  display: inline-block;
+  padding-right: 120px;
+  position: relative;
+}
+
+#tablo-demo-wrapper .marquee-content span:not(:last-child)::after {
+  content: "•";
+  position: absolute;
+  right: 60px;
+  color: var(--accent);
+}
+
+#tablo-demo-wrapper .marquee-content strong {
+  color: var(--secondary);
+  font-weight: bold;
+}
+
+#tablo-demo-wrapper .marquee-content .accent {
+  color: var(--accent);
+  font-weight: bold;
+}
+
+#tablo-demo-wrapper .marquee-content i {
+  color: var(--secondary);
+  margin-right: 8px;
+}
+
+#tablo-demo-wrapper .volume-control {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+#tablo-demo-wrapper .volume-control:hover {
+  background: rgba(26, 188, 156, 0.8);
+}
+
+#tablo-demo-wrapper .video-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  display: none;
+}
+
+/* 
+  Ключевые кадры анимации остаются глобальными, 
+  но применяются только через изолированные классы.
+*/
+@keyframes loadingDotsAnimation {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Адаптивный дизайн */
+@media (max-width: 1400px) {
+  #tablo-demo-wrapper .ticket-number,
+  #tablo-demo-wrapper .ticket-cabinet {
+    font-size: clamp(3rem, 3.5vw, 5.5rem);
+  }
+}
+
+@media (max-width: 1200px) {
+  #tablo-demo-wrapper .content-container {
+    flex-direction: column;
+  }
+  #tablo-demo-wrapper .video-container {
+    height: min(300px, 30vh);
+  }
+  #tablo-demo-wrapper .ticket-number,
+  #tablo-demo-wrapper .ticket-cabinet {
+    font-size: clamp(2.5rem, 3vw, 4rem);
+  }
+}
+
+@media (max-width: 992px) {
+  #tablo-demo-wrapper .two-columns .tablo-item {
+    width: 100%;
+  }
+  #tablo-demo-wrapper .ticket-number,
+  #tablo-demo-wrapper .ticket-cabinet {
+    font-size: clamp(2.2rem, 2.5vw, 3rem);
+  }
+  #tablo-demo-wrapper .tablo-item {
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  #tablo-demo-wrapper .main-container {
+    width: 98%;
+    padding: 0.5rem;
+  }
+  #tablo-demo-wrapper .header {
+    margin-bottom: 0.5rem;
+  }
+  #tablo-demo-wrapper .clock {
+    padding: 0.4rem 0.8rem;
+  }
+  #tablo-demo-wrapper .tablo-header {
+    padding: 0.5rem 1rem;
+  }
+  #tablo-demo-wrapper .video-container {
+    height: min(250px, 25vh);
+  }
+  #tablo-demo-wrapper .header-columns {
+    padding: 0 0.3rem;
+  }
+}
+
+@media (max-width: 576px) {
+  #tablo-demo-wrapper .main-container {
+    height: auto;
+    min-height: 95vh;
+  }
+  #tablo-demo-wrapper .header {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  #tablo-demo-wrapper .logo-left {
+    order: 1;
+    margin-bottom: 0.5rem;
+  }
+  #tablo-demo-wrapper .clock-container {
+    order: 3;
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+  #tablo-demo-wrapper .logo-right {
+    order: 2;
+    margin-bottom: 0.5rem;
+  }
+  #tablo-demo-wrapper .video-container {
+    height: min(200px, 20vh);
+  }
+  #tablo-demo-wrapper .tablo-header {
+    flex-direction: column;
+  }
+  #tablo-demo-wrapper .header-columns {
+    padding: 0.3rem 0;
+    border-right: none;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+  }
+  #tablo-demo-wrapper .header-columns:last-child {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 400px) {
+  #tablo-demo-wrapper .clock {
+    font-size: 1.8rem;
+    min-width: 150px;
+    padding: 0.3rem 0.6rem;
+  }
+  #tablo-demo-wrapper .ticket-number,
+  #tablo-demo-wrapper .ticket-cabinet {
+    font-size: 1.8rem;
+  }
+  #tablo-demo-wrapper .ticket-number::before,
+  #tablo-demo-wrapper .ticket-cabinet::before {
+    font-size: 0.9rem;
+  }
+  #tablo-demo-wrapper .column-title {
+    font-size: 0.9rem;
+  }
+  #tablo-demo-wrapper .video-header {
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+  #tablo-demo-wrapper .tablo-item {
+    padding: 0.8rem 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  #tablo-demo-wrapper .marquee-content {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  #tablo-demo-wrapper .ticket-number,
+  #tablo-demo-wrapper .ticket-cabinet {
+    font-size: 6rem;
+  }
+  #tablo-demo-wrapper .column-title {
+    font-size: 2rem;
+  }
+  #tablo-demo-wrapper .ticket-label {
+    font-size: 1.5rem;
+  }
+  #tablo-demo-wrapper .marquee-content {
+    font-size: 1.5rem;
+  }
+}

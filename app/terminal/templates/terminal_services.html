@@ -1,0 +1,224 @@
+<!-- terminal_services.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Терминал электронной очереди</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename=css_path) }}">
+
+</head>
+<body>
+
+    <div class="main-container">
+        <header class="header fade-in">
+            <img src="{{ url_for('static', filename='img/logo_organization.png') }}" class="logo logo-left" alt="Логотип организации">
+            <img src="{{ url_for('static', filename='img/logo_qq.gif') }}" class="logo logo-right" alt="Логотип QQ">
+        </header>
+
+        <h1 class="page-title fade-in fade-in-delay-1">Выберите услугу</h1>
+
+        <div class="cards-container fade-in fade-in-delay-2" id="service-cards">
+            {% for service in services %}
+                <div class="service-card {{ 'unavailable' if not service.is_available else '' }}" id="card-{{ service.id }}" data-url="{{ url_for('terminal.generate_ticket', service_id=service.id) }}">
+                    <div class="card-icon">
+                        {% if service.is_available %}
+                            <i class="fas fa-ticket-alt"></i>
+                        {% else %}
+                            <i class="fas fa-ban"></i>
+                        {% endif %}
+                    </div>
+                    <h5 class="card-title">{{ service.name }}</h5>
+                    <p class="card-info">Кабинет: {{ service.cabinet }}</p>
+                    {% if not service.is_available %}
+                        <p class="unavailable-text">Бұл қызмет қазіргі уақытта қолжетімді емес/Услуга не доступна в данное время</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Кнопка обновления страницы -->
+    <button class="refresh-button fade-in fade-in-delay-3" id="refresh-button">
+        <i class="fas fa-sync-alt refresh-icon"></i>
+    </button>
+
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2 class="notification-title">Талон №000 взят</h2>
+        <p class="notification-message">Пожалуйста, ожидайте вызова на табло</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.min.js"></script>
+    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.service-card');
+    const notification = document.getElementById('notification');
+    const refreshButton = document.getElementById('refresh-button');
+    
+    // Добавляем обработчик события для кнопки обновления
+    refreshButton.addEventListener('click', function() {
+        // Добавляем анимацию вращения при клике
+        const refreshIcon = this.querySelector('.refresh-icon');
+        refreshIcon.style.animationPlayState = 'running';
+        
+        // Обновляем страницу после небольшой задержки
+        setTimeout(() => {
+            location.reload();
+        }, 600);
+    });
+    
+    cards.forEach(card => {
+        card.addEventListener('click', function() {
+            if (this.classList.contains('unavailable')) {
+                return;
+            }
+            
+            // Добавляем анимацию клика
+            this.style.animation = 'clickAnimation 0.5s ease forwards';
+            
+            // Удаляем анимацию после завершения
+            setTimeout(() => {
+                this.style.animation = '';
+            }, 500);
+            
+            const url = this.getAttribute('data-url');
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Если получен ответ с ошибкой, перезагружаем страницу
+                    if (data.error) {
+                        location.reload();
+                        return;
+                    }
+                    
+                    if (data.ticket_number) {
+                        const ticketContent = `
+                            <div style="font-family: Arial, sans-serif; color: #000; margin: 0; padding: 0; width: 280px;">
+                                <div style="text-align: center; padding: 5px; background-color: #fff;">
+                                    <!-- Заголовок -->
+                                    <div style="border-bottom: 3px solid #000; margin-bottom: 5px; padding-bottom: 2px;">
+                                        <h3 style="margin: 0; padding: 0; font-size: 14px; font-weight: 900;">ПОЛИКЛИНИКА №2 Г. ТЕМИРТАУ</h3>
+                                    </div>
+                                    
+                                    <!-- Номер талона - самый крупный и жирный -->
+                                    <div style="margin: 5px 0;">
+                                        <h2 style="margin: 0; padding: 0; font-size: 36px; font-weight: 900;">Талон №${data.ticket_number}</h2>
+                                    </div>
+                                    
+                                    <!-- Основная информация - всё жирным шрифтом -->
+                                    <div style="border: 1px solid #000; padding: 1px; margin: 2px 0;">
+                                        <p style="margin: 2px 0; padding: 0; font-size: 10px; text-align: left;">Услуги: ${data.service_name}</p>
+                                        <p style="margin: 2px 0; padding: 0; font-size: 10px; text-align: left;">Кабинет: ${data.cabinet_number}</p>
+                                        <p style="margin: 2px 0; padding: 0; font-size: 10px; text-align: left;">Время: ${data.issue_time}</p>
+                                        <p style="margin: 2px 0; padding: 0; font-size: 10px; text-align: left;">Клиентов позади: ${data.active_tickets_behind}</p>
+                                    </div>
+                                    
+                                    <!-- Инструкция в рамке -->
+                                    <div style="border: 1px solid #000; background-color: #fff; padding: 1px; margin: 2px 0;">
+                                        <p style="margin: 0; padding: 0; font-size: 14px; font-weight: 500;">ОЖИДАЙТЕ ВЫЗОВА НА ТАБЛО</p>
+                                    </div>
+                                    
+                                    <!-- Футер -->
+                                    <div style="margin-top: 10px; border-top: 2px dashed #000; padding-top: 5px;">
+                                        <p style="margin: 0; padding: 0; font-size: 14px; font-weight: 900;">БУДЬТЕ ЗДОРОВЫ!</p>
+                                        <p style="margin: 5px 0 0 0; padding: 0; font-size: 14px; font-weight: 900;">https://pol2temirtau.kz</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        printJS({
+                            printable: ticketContent,
+                            type: 'raw-html',
+                            style: `
+                                @page { margin: 0; size: 80mm auto; }
+                                @media print {
+                                    * { font-family: Arial, sans-serif !important; font-weight: 900 !important; }
+                                }
+                                body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+                                div { box-sizing: border-box; }
+                            `
+                        });
+                        
+                        showNotification(data.ticket_number);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // Функция для обновления карточек
+    function updateCards() {
+        // Использовать правильный URL с префиксом /terminal
+        fetch('{{ url_for("terminal.check_service_availability") }}')
+            .then(response => response.json())
+            .then(data => {
+                data.services.forEach(service => {
+                    const card = document.getElementById(`card-${service.id}`);
+                    if (card) {
+                        if (service.is_available) {
+                            card.classList.remove('unavailable');
+                            
+                            // Обновляем иконку
+                            const iconElement = card.querySelector('.card-icon i');
+                            if (iconElement) {
+                                iconElement.className = 'fas fa-ticket-alt';
+                            }
+                            
+                            const unavailableText = card.querySelector('.unavailable-text');
+                            if (unavailableText) {
+                                unavailableText.style.display = 'none';
+                            }
+                        } else {
+                            card.classList.add('unavailable');
+                            
+                            // Обновляем иконку
+                            const iconElement = card.querySelector('.card-icon i');
+                            if (iconElement) {
+                                iconElement.className = 'fas fa-ban';
+                            }
+                            
+                            const unavailableText = card.querySelector('.unavailable-text');
+                            if (unavailableText) {
+                                unavailableText.style.display = 'block';
+                            } else {
+                                const p = document.createElement('p');
+                                p.classList.add('unavailable-text');
+                                p.textContent = 'Бұл қызмет қазіргі уақытта қолжетімді емес/Услуга не доступна в данное время';
+                                card.appendChild(p);
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Обновляем карточки каждую минуту
+    setInterval(updateCards, 60000);
+    updateCards();
+
+    function showNotification(ticket_number) {
+        // Обновляем содержимое уведомления
+        document.querySelector('.notification-title').textContent = 'Талон №' + ticket_number + ' взят';
+        
+        // Показываем уведомление
+        notification.classList.add('show');
+        
+        // Скрываем уведомление через 5 секунд
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 5000);
+    }
+});
+</script>
+</body>
+</html>

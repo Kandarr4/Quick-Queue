@@ -1,0 +1,266 @@
+<!-- Демонстрационный блок панели оператора -->
+
+<div id="operator-demo-wrapper">  <!-- <--- Вот наша обёртка! -->
+  <!-- Панель для симуляции событий (только для демо) -->
+  <div class="alert alert-warning text-center" id="demo-controls">
+    <strong>Демо-панель:</strong>
+    <button class="btn btn-sm btn-success ml-2" onclick="simulateNewTicket()">Симулировать новый талон</button>
+    <small class="form-text text-muted">Нажмите, чтобы увидеть реакцию интерфейса на нового клиента.</small>
+  </div>
+
+
+  <div class="container-fluid">
+    <!-- Верхний заголовок с информацией о пользователе -->
+    <div class="row sticky-header mb-4 fade-in">
+      <div class="col-md-6">
+        <h1 class="app-title">
+          <div class="app-logo"></div> Панель оператора
+        </h1>
+      </div>
+      <div class="col-md-6">
+        <div class="user-info">
+          <div class="avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div>
+            <!-- Статические данные вместо Jinja -->
+            <div class="user-name">Оператор_01</div>
+            <div class="cabinet">Кабинет: 105</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-flex fade-in">
+      
+      <!-- Демо-колонка 1: Услуга с активной очередью -->
+      <div class="ticket-column" data-service-id="1">
+        <div class="current-ticket">
+          <div class="service-icon"><i class="fas fa-headset"></i></div>
+          <h3>
+            <span class="service-name">Прием терапевта</span>
+            <span class="ticket-number">Т-101</span>
+          </h3>
+          <div class="buttons-container">
+            <button onclick="callCurrentTicket(101, 'Т-101', '105', 1)" class="btn btn-primary call-button"><i class="fas fa-phone-alt"></i> Вызвать</button>
+            <button onclick="callNextTicket(101, 1)" class="btn btn-next call-button"><i class="fas fa-forward"></i> Вызвать следующего</button>
+            <button class="btn btn-refresh" onclick="location.reload();"><i class="fas fa-sync-alt"></i> Обновить</button>
+          </div>
+        </div>
+        <div class="ticket-container">
+          <div class="section-header">
+            <i class="fas fa-list"></i> Очередь
+            <span class="badge badge-info">3</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr><th>Номер</th><th>Статус</th><th>Время</th><th>Действие</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Т-101</td>
+                  <td><span class="status at-work">В работе</span></td>
+                  <td>09:30 <div class="time-info">15.07.2024</div></td>
+                  <td><button onclick="deleteTicket(this, 101)" class="btn btn-delete btn-sm"><i class="fas fa-trash-alt"></i></button></td>
+                </tr>
+                <tr>
+                  <td>Т-102</td>
+                  <td><span class="status issued">Выдан</span></td>
+                  <td>09:32 <div class="time-info">15.07.2024</div></td>
+                  <td><button onclick="deleteTicket(this, 102)" class="btn btn-delete btn-sm"><i class="fas fa-trash-alt"></i></button></td>
+                </tr>
+                <tr>
+                  <td>Т-103</td>
+                  <td><span class="status issued">Выдан</span></td>
+                  <td>09:35 <div class="time-info">15.07.2024</div></td>
+                  <td><button onclick="deleteTicket(this, 103)" class="btn btn-delete btn-sm"><i class="fas fa-trash-alt"></i></button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Демо-колонка 2: Услуга без очереди -->
+      <div class="ticket-column" data-service-id="2">
+        <div class="current-ticket">
+          <div class="service-icon"><i class="fas fa-vial"></i></div>
+          <h3>
+            <span class="service-name">Сдача анализов</span>
+            <span class="ticket-number">—</span>
+          </h3>
+          <div class="buttons-container">
+            <button onclick="callCurrentTicket(0, '—', '201', 2)" class="btn btn-primary call-button"><i class="fas fa-phone-alt"></i> Вызвать</button>
+            <button onclick="callNextTicket(0, 2)" class="btn btn-next call-button"><i class="fas fa-forward"></i> Вызвать следующего</button>
+            <button class="btn btn-refresh" onclick="location.reload();"><i class="fas fa-sync-alt"></i> Обновить</button>
+          </div>
+          <div class="alert alert-info mt-3"><i class="fas fa-info-circle"></i> Нет активных тикетов</div>
+        </div>
+        <div class="ticket-container">
+          <div class="section-header">
+            <i class="fas fa-list"></i> Очередь
+          </div>
+          <div class="empty-state">
+            <i class="fas fa-ticket-alt"></i>
+            <p>Нет активных тикетов в очереди</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div id="loading-animation">
+    <div class="loader"></div>
+    <div class="loading-text">Обработка...</div>
+  </div>
+</div>
+
+<script>
+// Убедимся, что скрипт выполняется один раз
+if (!window.dashboardScriptLoaded) {
+  window.dashboardScriptLoaded = true;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- Утилиты ---
+    function showNotification(message, type = 'info') {
+      if ($('#notification-container').length === 0) {
+        $('body').append('<div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+      }
+      let alertClass = 'alert-info', icon = 'info-circle';
+      if (type === 'success') { alertClass = 'alert-success'; icon = 'check-circle'; }
+      if (type === 'error') { alertClass = 'alert-danger'; icon = 'exclamation-circle'; }
+      if (type === 'warning') { alertClass = 'alert-warning'; icon = 'exclamation-triangle'; }
+      
+      const notificationId = 'notification-' + Date.now();
+      const notification = `<div id="${notificationId}" class="alert ${alertClass} fade-in" style="min-width: 300px; margin-bottom: 10px;"><i class="fas fa-${icon} mr-2"></i> ${message}</div>`;
+      $('#notification-container').append(notification);
+      setTimeout(() => { $(`#${notificationId}`).fadeOut(500, function() { $(this).remove(); }); }, 5000);
+    }
+    
+    function disableButtons() {
+        document.querySelectorAll('.call-button, .btn-refresh, .btn-delete').forEach(button => button.disabled = true);
+        document.getElementById('loading-animation').style.display = 'flex';
+    }
+
+    function enableButtons() {
+        document.querySelectorAll('.call-button, .btn-refresh, .btn-delete').forEach(button => button.disabled = false);
+        document.getElementById('loading-animation').style.display = 'none';
+    }
+
+    // --- Симуляция событий ---
+    
+    // Глобальная функция симуляции нового талона
+    window.simulateNewTicket = function() {
+        const sound = new Audio("https://cdn.jsdelivr.net/gh/ColorlibHQ/AdminLTE@main/dist/js/toastr/sounds/success.mp3"); // Пример звука
+        sound.play().catch(e => console.error("Audio play failed:", e));
+
+        const ticketNumber = 'Т-' + Math.floor(100 + Math.random() * 900);
+        showNotification(`Новый клиент! Талон №${ticketNumber} (Прием терапевта)`, 'success');
+        
+        // Подсветка секции
+        const serviceColumn = document.querySelector('.ticket-column[data-service-id="1"]');
+        if (serviceColumn) {
+            const currentTicket = serviceColumn.querySelector('.current-ticket');
+            currentTicket.style.animation = 'pulseAnimation 2s 3';
+            
+            const badge = document.createElement('div');
+            badge.className = 'new-ticket-badge';
+            badge.textContent = 'Новый';
+            currentTicket.appendChild(badge);
+            
+            setTimeout(() => {
+                currentTicket.style.animation = '';
+                if(badge.parentNode) badge.parentNode.removeChild(badge);
+            }, 8000);
+        }
+    }
+
+    // --- Функции кнопок (симуляция) ---
+
+    window.callCurrentTicket = function(ticketId, ticketNumber, userCabinet, serviceId) {
+      if (ticketId === 0) {
+        showNotification('Нет тикетов для вызова', 'warning');
+        return;
+      }
+      disableButtons();
+      showNotification(`Симуляция: Вызов тикета ${ticketNumber} в каб. ${userCabinet}...`, 'info');
+      
+      // Симуляция ответа сервера
+      setTimeout(() => {
+        enableButtons();
+        showNotification(`Тикет ${ticketNumber} успешно вызван`, 'success');
+        
+        const ticketNumberElement = $(`.ticket-column[data-service-id="${serviceId}"] .ticket-number`);
+        ticketNumberElement.addClass('highlight');
+        setTimeout(() => ticketNumberElement.removeClass('highlight'), 2000);
+
+      }, 1500);
+    };
+
+    window.callNextTicket = function(ticketId, serviceId) {
+        const column = $(`.ticket-column[data-service-id="${serviceId}"]`);
+        const hasActiveTicket = column.find('.status.at-work').length > 0;
+
+        if (!hasActiveTicket) {
+          showNotification("Сначала вызовите текущий тикет!", 'warning');
+          return;
+        }
+        
+        disableButtons();
+        showNotification('Симуляция: Вызов следующего тикета...', 'info');
+
+        setTimeout(() => {
+            enableButtons();
+            const nextTicketRow = column.find('tbody tr:nth-child(2)');
+            if (nextTicketRow.length > 0) {
+                const nextTicketNumber = nextTicketRow.find('td:first-child').text();
+                showNotification(`Следующий тикет ${nextTicketNumber} вызван`, 'success');
+                // Визуальное обновление интерфейса
+                column.find('tbody tr:first-child').remove();
+                column.find('.ticket-number').text(nextTicketNumber);
+                column.find('tbody tr:first-child .status').removeClass('issued').addClass('at-work').text('В работе');
+            } else {
+                showNotification('Больше нет тикетов в очереди', 'info');
+            }
+        }, 1500);
+    };
+
+    window.deleteTicket = function(buttonElement, ticketId) {
+      if (confirm(`Вы уверены, что хотите удалить тикет #${ticketId}?`)) {
+        showNotification(`Симуляция: Удаление тикета #${ticketId}`, 'warning');
+        // Анимация и удаление строки из таблицы
+        $(buttonElement).closest('tr').fadeOut(500, function() {
+          $(this).remove();
+          showNotification(`Тикет #${ticketId} удален`, 'success');
+        });
+      }
+    };
+    
+    // --- Добавление динамических стилей для анимаций ---
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes pulseAnimation {
+        0% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); transform: scale(1); }
+        50% { box-shadow: 0 5px 30px rgba(52, 152, 219, 0.5); transform: scale(1.02); }
+        100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); transform: scale(1); }
+      }
+      .ticket-number.highlight { animation: text-pop 0.5s ease; }
+      @keyframes text-pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); color: #2ecc71; } 100% { transform: scale(1); } }
+      .new-ticket-badge {
+        position: absolute; top: -10px; right: -10px; background-color: #e74c3c; color: white;
+        border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center;
+        justify-content: center; font-size: 0.7rem; font-weight: bold;
+        animation: badgePulse 1.5s infinite; box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+      }
+      @keyframes badgePulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    `;
+    document.head.appendChild(style);
+
+    showNotification('Демо-панель оператора загружена', 'success');
+  });
+}
+</script>

@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика электронной очереди</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@2.0.2/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.0"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #1abc9c;
+            --accent: #e74c3c;
+            --info: #3498db;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+            --white: #ffffff;
+            --black: #000000;
+            
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, #1a2530 100%);
+            --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, #16a085 100%);
+            --gradient-accent: linear-gradient(135deg, var(--accent) 0%, #c0392b 100%);
+            
+            --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.2);
+            
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--gradient-primary);
+            color: var(--light);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Декоративные элементы */
+        .decorative-circle {
+            position: fixed;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary), transparent);
+            opacity: 0.05;
+            z-index: 0;
+        }
+
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+            animation: floatAnimation 8s ease-in-out infinite;
+        }
+
+        .circle-2 {
+            width: 400px;
+            height: 400px;
+            bottom: -150px;
+            right: -100px;
+            animation: floatAnimation 10s ease-in-out infinite reverse;
+        }
+
+        .circle-3 {
+            width: 200px;
+            height: 200px;
+            top: 30%;
+            right: 10%;
+            animation: floatAnimation 7s ease-in-out infinite 1s;
+        }
+
+        @keyframes floatAnimation {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            50% {
+                transform: translate(20px, 20px) rotate(5deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 2rem 1rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: var(--light);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: 3px;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 10;
+        }
+
+        .filter-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-md);
+        }
+
+        .filter-panel .row {
+            align-items: center;
+        }
+
+        .filter-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--light);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.25);
+            color: var(--white);
+        }
+
+        .form-control option {
+            background-color: var(--dark);
+            color: var(--light);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-secondary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: var(--secondary);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            color: var(--light);
+            text-align: center;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .chart-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 2px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            margin-bottom: 1rem;
+        }
+
+        canvas {
+            min-width: 100%;
+            min-height: 380px;
+        }
+
+        .total-tickets {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            color: var(--secondary);
+            margin-top: 1rem;
+        }
+
+        .chart-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 5;
+        }
+
+        .data-summary {
+            display: flex;
+            justify-content: space-around;
+            margin: 1rem 0;
+        }
+
+        .summary-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            flex: 1;
+            margin: 0 0.5rem;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            opacity: 0.7;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .empty-state-text {
+            font-size: 1.2rem;
+        }
+
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: var(--radius-lg);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .logo {
+            height: auto;
+            transition: var(--transition);
+            border-radius: var(--radius-md);
+            padding: 0.25rem;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .logo-left {
+            max-width: 150px;
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+        }
+
+        .logo-right {
+            max-width: 200px;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+
+        /* Адаптивная верстка */
+        @media (max-width: 992px) {
+            .chart-wrapper {
+                height: 350px;
+            }
+            
+            .logo-left, .logo-right {
+                max-width: 120px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chart-wrapper {
+                height: 300px;
+            }
+            
+            .filter-panel .row > div {
+                margin-bottom: 1rem;
+            }
+            
+            .data-summary {
+                flex-direction: column;
+            }
+            
+            .summary-item {
+                margin: 0.5rem 0;
+            }
+            
+            .logo-left, .logo-right {
+                max-width: 100px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-title {
+                font-size: 1.8rem;
+            }
+            
+            .chart-wrapper {
+                height: 250px;
+            }
+            
+            .chart-title {
+                font-size: 1.2rem;
+            }
+            
+            .summary-value {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .logo-left, .logo-right {
+                position: relative;
+                display: inline-block;
+                top: auto;
+                left: auto;
+                right: auto;
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Анимации */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-delay-1 {
+            animation-delay: 0.2s;
+        }
+
+        .fade-in-delay-2 {
+            animation-delay: 0.4s;
+        }
+
+        .fade-in-delay-3 {
+            animation-delay: 0.6s;
+        }
+    </style>
+</head>
+<body>
+    <!-- Декоративные элементы -->
+    <div class="decorative-circle circle-1"></div>
+    <div class="decorative-circle circle-2"></div>
+    <div class="decorative-circle circle-3"></div>
+
+    <!-- Логотипы -->
+    <img src="{{ url_for('static', filename='img/logo_organization.png') }}" class="logo logo-left" alt="Логотип организации">
+    <img src="{{ url_for('static', filename='img/logo_qq.gif') }}" class="logo logo-right" alt="Логотип QQ">
+
+    <a href="{{ url_for('secondary_admin.dashboard') }}" class="btn btn-secondary back-button">
+        <i class="fas fa-arrow-left"></i> Назад к панели управления
+    </a>
+
+    <div class="container">
+        <div class="page-header fade-in">
+            <h1 class="page-title"><i class="fas fa-chart-bar mr-2"></i>Статистика электронной очереди</h1>
+        </div>
+
+        <div class="filter-panel fade-in fade-in-delay-1">
+            <h3 class="filter-title"><i class="fas fa-filter mr-2"></i>Фильтры и параметры</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="service-select"><i class="fas fa-concierge-bell mr-1"></i> Выберите услугу:</label>
+                        <select id="service-select" class="form-control">
+                            {% for service in services %}
+                                <option value="{{ service.id }}">{{ service.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="date-input"><i class="fas fa-calendar-day mr-1"></i> Выберите дату:</label>
+                        <div class="input-group">
+                            <input type="date" id="date-input" class="form-control">
+                            <div class="input-group-append">
+                                <button id="load-daily-stats" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Загрузить
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="month-input"><i class="fas fa-calendar-alt mr-1"></i> Выберите месяц:</label>
+                        <div class="input-group">
+                            <input type="month" id="month-input" class="form-control">
+                            <div class="input-group-append">
+                                <button id="load-monthly-stats" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Загрузить
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container fade-in fade-in-delay-2">
+            <h3 class="chart-title"><i class="fas fa-calendar-day mr-2"></i>Ежедневная статистика</h3>
+            
+            <div class="chart-actions">
+                <button id="reset-daily-zoom" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-search-minus"></i> Сбросить масштаб
+                </button>
+            </div>
+            
+            <div id="daily-summary" class="data-summary">
+                <div class="summary-item">
+                    <div class="summary-label">Всего билетов</div>
+                    <div class="summary-value" id="daily-total">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Обслужено</div>
+                    <div class="summary-value" id="daily-served">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Среднее время ожидания</div>
+                    <div class="summary-value" id="daily-avg-wait">0 мин</div>
+                </div>
+            </div>
+            
+            <div class="chart-wrapper">
+                <canvas id="dailyChart"></canvas>
+                <div id="daily-empty-state" class="empty-state">
+                    <i class="fas fa-chart-line"></i>
+                    <p class="empty-state-text">Выберите дату и нажмите "Загрузить" для просмотра статистики</p>
+                </div>
+                <div id="daily-loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            
+            <div id="daily-total-tickets" class="total-tickets">
+                Всего тикетов: <span id="daily-tickets-count">0</span>
+            </div>
+        </div>
+
+        <div class="chart-container fade-in fade-in-delay-3">
+            <h3 class="chart-title"><i class="fas fa-calendar-alt mr-2"></i>Ежемесячная статистика</h3>
+            
+            <div class="chart-actions">
+                <button id="reset-monthly-zoom" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-search-minus"></i> Сбросить масштаб
+                </button>
+            </div>
+            
+            <div id="monthly-summary" class="data-summary">
+                <div class="summary-item">
+                    <div class="summary-label">Всего билетов</div>
+                    <div class="summary-value" id="monthly-total">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Обслужено</div>
+                    <div class="summary-value" id="monthly-served">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Среднее время ожидания</div>
+                    <div class="summary-value" id="monthly-avg-wait">0 мин</div>
+                </div>
+            </div>
+            
+            <div class="chart-wrapper">
+                <canvas id="monthlyChart"></canvas>
+                <div id="monthly-empty-state" class="empty-state">
+                    <i class="fas fa-chart-bar"></i>
+                    <p class="empty-state-text">Выберите месяц и нажмите "Загрузить" для просмотра статистики</p>
+                </div>
+                <div id="monthly-loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            
+            <div id="monthly-total-tickets" class="total-tickets">
+                Всего тикетов: <span id="monthly-tickets-count">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Установка текущей даты
+        const currentDate = new Date();
+        document.getElementById('date-input').value = currentDate.toISOString().split('T')[0];
+        
+        // Установка текущего месяца
+        const currentMonthYear = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+        document.getElementById('month-input').value = currentMonthYear;
+
+        let minTime, maxTime;
+        let defaultMinTime, defaultMaxTime;
+
+        // Создание и настройка графиков
+        const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+
+        // Создаем базовые настройки для графиков
+        function createScatterChart(ctx, label, isMonthly = false) {
+            return new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Выдано',
+                            data: [],
+                            backgroundColor: 'rgba(26, 188, 156, 0.4)',
+                            borderColor: 'rgba(26, 188, 156, 1)',
+                            borderWidth: 1,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointStyle: 'circle'
+                        },
+                        {
+                            label: 'Вызвано',
+                            data: [],
+                            backgroundColor: 'rgba(231, 76, 60, 0.4)',
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 1,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointStyle: 'triangle'
+                        },
+                        {
+                            label: 'Связь',
+                            data: [],
+                            showLine: true,
+                            fill: false,
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            pointRadius: 0,
+                            borderWidth: 1,
+                            pointHoverRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                tooltipFormat: isMonthly ? 'DD' : 'HH:mm',
+                                unit: isMonthly ? 'day' : 'minute',
+                                displayFormats: {
+                                    day: 'D MMM',
+                                    minute: 'HH:mm'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                source: 'auto',
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            title: {
+                                display: true,
+                                text: isMonthly ? 'Дни' : 'Время',
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        y: {
+                            display: false,
+                            min: -0.5,
+                            max: 1.5
+                        }
+                    },
+                    plugins: {
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x'
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                drag: {
+                                    enabled: true,
+                                    backgroundColor: 'rgba(26, 188, 156, 0.1)',
+                                    borderColor: 'rgba(26, 188, 156, 0.5)',
+                                    borderWidth: 1
+                                },
+                                mode: 'x'
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 12
+                                },
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'rgba(255, 255, 255, 0.9)',
+                            bodyColor: 'rgba(255, 255, 255, 0.9)',
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 12
+                            },
+                            displayColors: false,
+                            padding: 10,
+                            cornerRadius: 4,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const dataset = context.dataset;
+                                    
+                                    if (dataset.label === 'Выдано') {
+                                        return `Билет выдан: ${luxon.DateTime.fromJSDate(value.x).toFormat('HH:mm')}`;
+                                    } else if (dataset.label === 'Вызвано') {
+                                        return `Билет вызван: ${luxon.DateTime.fromJSDate(value.x).toFormat('HH:mm')}`;
+                                    }
+                                    
+                                    return '';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Создаем графики
+        const dailyChart = createScatterChart(dailyCtx, 'Ежедневная статистика');
+        const monthlyChart = createScatterChart(monthlyCtx, 'Ежемесячная статистика', true);
+
+        // Устанавливаем обработчики кнопок сброса масштаба
+        document.getElementById('reset-daily-zoom').addEventListener('click', function() {
+            dailyChart.resetZoom();
+        });
+        
+        document.getElementById('reset-monthly-zoom').addEventListener('click', function() {
+            monthlyChart.resetZoom();
+        });
+
+        // Функция для расчета статистики
+        function calculateStats(data) {
+            let totalTickets = 0;
+            let servedTickets = 0;
+            let totalWaitTime = 0;
+            
+            data.forEach(stat => {
+                if (stat.issue_time) {
+                    totalTickets++;
+                    
+                    if (stat.call_time) {
+                        servedTickets++;
+                        
+                        // Рассчитываем время ожидания в минутах
+                        const issueTime = luxon.DateTime.fromISO(`${stat.date}T${stat.issue_time}`);
+                        const callTime = luxon.DateTime.fromISO(`${stat.date}T${stat.call_time}`);
+                        const waitTime = callTime.diff(issueTime, 'minutes').minutes;
+                        
+                        totalWaitTime += waitTime;
+                    }
+                }
+            });
+            
+            const avgWaitTime = servedTickets > 0 ? Math.round(totalWaitTime / servedTickets) : 0;
+            
+            return {
+                total: totalTickets,
+                served: servedTickets,
+                avgWait: avgWaitTime
+            };
+        }
+
+        // Функция для обновления графика
+        function updateScatterChart(chart, label, issuedData, calledData, linesData, stats, type) {
+            // Обновляем данные графика
+            chart.data.datasets[0].data = issuedData;
+            chart.data.datasets[1].data = calledData;
+            chart.data.datasets[2].data = linesData.flat();
+            
+            // Устанавливаем временные границы
+            chart.options.scales.x.min = defaultMinTime;
+            chart.options.scales.x.max = defaultMaxTime;
+            
+            // Обновляем график
+            chart.update();
+            
+            // Обновляем статистику
+            document.getElementById(`${type}-total`).textContent = stats.total;
+            document.getElementById(`${type}-served`).textContent = stats.served;
+            document.getElementById(`${type}-avg-wait`).textContent = `${stats.avgWait} мин`;
+            document.getElementById(`${type}-tickets-count`).textContent = stats.total;
+            
+            // Скрываем пустое состояние и показываем график
+            document.getElementById(`${type}-empty-state`).style.display = 'none';
+        }
+
+        // Функция для установки временных границ
+        function setDefaultTimeBounds() {
+            if (minTime && maxTime) {
+                const timeRange = maxTime.getTime() - minTime.getTime();
+                const padding = timeRange * 0.05; // 5% отступ
+                defaultMinTime = new Date(minTime.getTime() - padding);
+                defaultMaxTime = new Date(maxTime.getTime() + padding);
+            } else {
+                // Значения по умолчанию если данных нет
+                const now = new Date();
+                defaultMinTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0);
+                defaultMaxTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 0, 0);
+            }
+        }
+
+        // Загрузка ежедневной статистики
+        document.getElementById('load-daily-stats').addEventListener('click', function() {
+            const serviceId = document.getElementById('service-select').value;
+            const selectedDate = document.getElementById('date-input').value;
+            
+            if (!selectedDate) {
+                showNotification('Пожалуйста, выберите дату', 'warning');
+                return;
+            }
+            
+            // Показываем индикатор загрузки
+            document.getElementById('daily-loading').style.display = 'flex';
+            
+            fetch(`/secondary_admin/api/statistics/${serviceId}/daily?date=${selectedDate}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка загрузки данных');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const issuedData = [];
+                    const calledData = [];
+                    const linesData = [];
+                    minTime = null;
+                    maxTime = null;
+
+                    data.forEach(stat => {
+                        let issueTime, callTime;
+                        if (stat.issue_time) {
+                            issueTime = luxon.DateTime.fromISO(`${stat.date}T${stat.issue_time}`).toJSDate();
+                            issuedData.push({
+                                x: issueTime,
+                                y: 0
+                            });
+                            minTime = !minTime || issueTime < minTime ? issueTime : minTime;
+                            maxTime = !maxTime || issueTime > maxTime ? issueTime : maxTime;
+                        }
+                        if (stat.call_time) {
+                            callTime = luxon.DateTime.fromISO(`${stat.date}T${stat.call_time}`).toJSDate();
+                            calledData.push({
+                                x: callTime,
+                                y: 1
+                            });
+                            minTime = !minTime || callTime < minTime ? callTime : minTime;
+                            maxTime = !maxTime || callTime > maxTime ? callTime : maxTime;
+                        }
+                        if (stat.issue_time && stat.call_time) {
+                            linesData.push([{ x: issueTime, y: 0 }, { x: callTime, y: 1 }]);
+                        }
+                    });
+
+                    setDefaultTimeBounds();
+                    
+                    // Рассчитываем статистику
+                    const stats = calculateStats(data);
+                    
+                    // Обновляем график
+                    updateScatterChart(dailyChart, `Статистика за ${selectedDate}`, issuedData, calledData, linesData, stats, 'daily');
+                    
+                    // Скрываем индикатор загрузки
+                    document.getElementById('daily-loading').style.display = 'none';
+                    
+                    if (data.length === 0) {
+                        showNotification('Нет данных для выбранной даты', 'info');
+                        document.getElementById('daily-empty-state').style.display = 'flex';
+                        document.getElementById('daily-empty-state').querySelector('.empty-state-text').textContent = 
+                            'Нет данных для выбранной даты';
+                    } else {
+                        showNotification(`Загружено ${data.length} записей`, 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('daily-loading').style.display = 'none';
+                    showNotification('Ошибка при загрузке данных: ' + error.message, 'danger');
+                });
+        });
+
+        // Загрузка ежемесячной статистики
+        document.getElementById('load-monthly-stats').addEventListener('click', function() {
+            const serviceId = document.getElementById('service-select').value;
+            const selectedMonth = document.getElementById('month-input').value;
+            
+            if (!selectedMonth) {
+                showNotification('Пожалуйста, выберите месяц', 'warning');
+                return;
+            }
+            
+            // Показываем индикатор загрузки
+            document.getElementById('monthly-loading').style.display = 'flex';
+            
+            fetch(`/secondary_admin/api/statistics/${serviceId}/monthly?month=${selectedMonth}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка загрузки данных');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const issuedData = [];
+                    const calledData = [];
+                    const linesData = [];
+                    minTime = null;
+                    maxTime = null;
+
+                    data.forEach(stat => {
+                        let issueTime, callTime;
+                        if (stat.issue_time) {
+                            issueTime = luxon.DateTime.fromISO(`${stat.date}T${stat.issue_time}`).toJSDate();
+                            issuedData.push({
+                                x: issueTime,
+                                y: 0
+                            });
+                            minTime = !minTime || issueTime < minTime ? issueTime : minTime;
+                            maxTime = !maxTime || issueTime > maxTime ? issueTime : maxTime;
+                        }
+                        if (stat.call_time) {
+                            callTime = luxon.DateTime.fromISO(`${stat.date}T${stat.call_time}`).toJSDate();
+                            calledData.push({
+                                x: callTime,
+                                y: 1
+                            });
+                            minTime = !minTime || callTime < minTime ? callTime : minTime;
+                            maxTime = !maxTime || callTime > maxTime ? callTime : maxTime;
+                        }
+                        if (stat.issue_time && stat.call_time) {
+                            linesData.push([{ x: issueTime, y: 0 }, { x: callTime, y: 1 }]);
+                        }
+                    });
+
+                    setDefaultTimeBounds();
+                    
+                    // Рассчитываем статистику
+                    const stats = calculateStats(data);
+                    
+                    // Обновляем график
+                    updateScatterChart(monthlyChart, `Статистика за ${selectedMonth}`, issuedData, calledData, linesData, stats, 'monthly');
+                    
+                    // Скрываем индикатор загрузки
+                    document.getElementById('monthly-loading').style.display = 'none';
+                    
+                    if (data.length === 0) {
+                        showNotification('Нет данных для выбранного месяца', 'info');
+                        document.getElementById('monthly-empty-state').style.display = 'flex';
+                        document.getElementById('monthly-empty-state').querySelector('.empty-state-text').textContent = 
+                            'Нет данных для выбранного месяца';
+                    } else {
+                        showNotification(`Загружено ${data.length} записей`, 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('monthly-loading').style.display = 'none';
+                    showNotification('Ошибка при загрузке данных: ' + error.message, 'danger');
+                });
+        });
+
+        // Функция отображения уведомлений
+        function showNotification(message, type) {
+            // Удаляем предыдущие уведомления с тем же классом
+            $('.custom-notification').remove();
+            
+            // Определяем цвет и иконку в зависимости от типа
+            let bgColor, icon, title;
+            
+            switch(type) {
+                case 'success':
+                    bgColor = 'linear-gradient(135deg, #1abc9c 0%, #16a085 100%)';
+                    icon = 'check-circle';
+                    title = 'Успешно';
+                    break;
+                case 'danger':
+                    bgColor = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                    icon = 'exclamation-circle';
+                    title = 'Ошибка';
+                    break;
+                case 'warning':
+                    bgColor = 'linear-gradient(135deg, #f39c12 0%, #d35400 100%)';
+                    icon = 'exclamation-triangle';
+                    title = 'Внимание';
+                    break;
+                case 'info':
+                default:
+                    bgColor = 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)';
+                    icon = 'info-circle';
+                    title = 'Информация';
+                    break;
+            }
+            
+            // Создаем элемент для уведомления с анимацией
+            var notification = $(`
+                <div class="custom-notification" style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 1050;
+                    min-width: 300px;
+                    max-width: 400px;
+                    border-radius: 8px;
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                    overflow: hidden;
+                    background: white;
+                    transform: translateX(400px);
+                    opacity: 0;
+                    transition: all 0.3s ease-out;
+                ">
+                    <div style="
+                        background: ${bgColor};
+                        color: white;
+                        padding: 12px 15px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                    ">
+                        <div style="display: flex; align-items: center;">
+                            <i class="fas fa-${icon}" style="font-size: 18px; margin-right: 10px;"></i>
+                            <strong>${title}</strong>
+                        </div>
+                        <button type="button" class="close-notification" style="
+                            background: none;
+                            border: none;
+                            color: white;
+                            opacity: 0.8;
+                            font-size: 20px;
+                            cursor: pointer;
+                            padding: 0;
+                            line-height: 1;
+                        ">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div style="
+                        padding: 15px;
+                        color: #333;
+                        font-size: 14px;
+                        line-height: 1.5;
+                    ">
+                        ${message}
+                    </div>
+                    <div class="notification-progress" style="
+                        height: 3px;
+                        width: 100%;
+                        background: rgba(255, 255, 255, 0.3);
+                    ">
+                        <div style="
+                            height: 100%;
+                            width: 100%;
+                            background: ${bgColor};
+                            transition: width 5s linear;
+                        "></div>
+                    </div>
+                </div>
+            `);
+            
+            // Добавляем элемент в body
+            $('body').append(notification);
+            
+            // Анимируем появление
+            setTimeout(function() {
+                notification.css({
+                    'transform': 'translateX(0)',
+                    'opacity': '1'
+                });
+                
+                // Запускаем анимацию прогресс-бара
+                notification.find('.notification-progress > div').css('width', '0');
+            }, 10);
+            
+            // Обработчик закрытия
+            notification.find('.close-notification').on('click', function() {
+                hideNotification(notification);
+            });
+            
+            // Скрываем через 5 секунд
+            var timer = setTimeout(function() {
+                hideNotification(notification);
+            }, 5000);
+            
+            // Пауза таймера при наведении
+            notification.hover(
+                function() {
+                    clearTimeout(timer);
+                    // Останавливаем анимацию прогресс-бара
+                    notification.find('.notification-progress > div').css('transition', 'none');
+                },
+                function() {
+                    // Возобновляем таймер и анимацию
+                    timer = setTimeout(function() {
+                        hideNotification(notification);
+                    }, 5000);
+                    
+                    // Продолжаем анимацию прогресс-бара с оставшегося места
+                    var progress = notification.find('.notification-progress > div');
+                    var currentWidth = progress.width() / progress.parent().width() * 100;
+                    var timeLeft = 5000 * (currentWidth / 100);
+                    
+                    progress.css({
+                        'transition': `width ${timeLeft}ms linear`,
+                        'width': '0'
+                    });
+                }
+            );
+            
+            // Функция скрытия уведомления
+            function hideNotification(element) {
+                element.css({
+                    'transform': 'translateX(400px)',
+                    'opacity': '0'
+                });
+                
+                setTimeout(function() {
+                    element.remove();
+                }, 300);
+            }
+        }
+
+        // Загружаем данные за текущую дату при загрузке страницы
+        document.getElementById('load-daily-stats').click();
+    </script>
+</body>
+</html>

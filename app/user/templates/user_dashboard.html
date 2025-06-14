@@ -1,0 +1,718 @@
+<!-- user_dashboard.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Панель управления оператора</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <!-- Используем динамический путь к CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename=css_path) }}">
+</head>
+<body>
+  <div class="container">
+    <!-- Верхний заголовок с информацией о пользователе -->
+    <div class="row sticky-header mb-4 fade-in">
+      <div class="col-md-6">
+        <h1 class="app-title">
+          <div class="app-logo"></div> Панель оператора
+        </h1>
+      </div>
+      <div class="col-md-6">
+        <div class="user-info">
+          <div class="avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div>
+            <div class="user-name">{{ current_user.username }}</div>
+            <div class="cabinet">Здравствуй {{ current_user.username }} !</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-flex fade-in">
+      {% for assignment in assignments %}
+        <div class="ticket-column">
+          <div class="current-ticket">
+            <div class="service-icon">
+              <i class="fas fa-headset"></i>
+            </div>
+            <h3>
+              <span class="service-name">{{ services[assignment.service_id].name }}</span>
+              {% if tickets_by_service[assignment.service_id] %}
+                <span class="ticket-number">{{ tickets_by_service[assignment.service_id][0].number }}</span>
+              {% else %}
+                <span class="ticket-number">—</span>
+              {% endif %}
+            </h3>
+            
+            <div class="buttons-container">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button onclick="callCurrentTicket({{ tickets_by_service[assignment.service_id][0].id if tickets_by_service[assignment.service_id] else 0 }}, '{{ tickets_by_service[assignment.service_id][0].number if tickets_by_service[assignment.service_id] else 0 }}', '{{ current_user.cabinet }}', {{ assignment.service_id }})" class="btn btn-primary call-button">
+                <i class="fas fa-phone-alt"></i> Вызвать
+              </button>
+              
+              <button onclick="callNextTicket({{ tickets_by_service[assignment.service_id][0].id if tickets_by_service[assignment.service_id] else 0 }}, {{ assignment.service_id }})" class="btn btn-next call-button">
+                <i class="fas fa-forward"></i> Вызвать следующего
+              </button>
+              
+              <button class="btn btn-refresh" onclick="location.reload();">
+                <i class="fas fa-sync-alt"></i> Обновить
+              </button>
+            </div>
+            
+            {% if not tickets_by_service[assignment.service_id] %}
+              <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle"></i> Нет активных тикетов
+              </div>
+            {% endif %}
+          </div>
+          
+          <div class="ticket-container">
+            <div class="section-header">
+              <i class="fas fa-list"></i> Очередь
+              {% if tickets_by_service[assignment.service_id] %}
+                <span class="badge badge-info">{{ tickets_by_service[assignment.service_id]|length }}</span>
+              {% endif %}
+            </div>
+            
+            {% if tickets_by_service[assignment.service_id] %}
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Номер</th>
+                      <th>Статус</th>
+                      <th>Время</th>
+                      <th>Действие</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for ticket in tickets_by_service[assignment.service_id] %}
+                      <tr>
+                        <td>{{ ticket.number }}</td>
+                        <td>
+                          {% if ticket.status == 'issued' %}
+                            <span class="status issued">Выдан</span>
+                          {% elif ticket.status == 'at work' %}
+                            <span class="status at-work">В работе</span>
+                          {% else %}
+                            <span class="status">{{ ticket.status }}</span>
+                          {% endif %}
+                        </td>
+                        <td title="{{ ticket.issue_time.strftime('%Y-%m-%d %H:%M:%S') }}">
+                          {{ ticket.issue_time.strftime('%H:%M') }}
+                          <div class="time-info">{{ ticket.issue_time.strftime('%d.%m.%Y') }}</div>
+                        </td>
+                        <td>
+                          <button onclick="deleteTicket({{ ticket.id }})" class="btn btn-delete btn-sm">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="empty-state">
+                <i class="fas fa-ticket-alt"></i>
+                <p>Нет активных тикетов в очереди</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+<footer>
+	<a href="https://somnium.kz" target="_blank" class="footer-text">
+		&copy; 2025 ИП Somnium, ИИН: 000104551353
+	</a>
+</footer>
+
+  <div id="loading-animation">
+    <div class="loader"></div>
+    <div class="loading-text">Обработка...</div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.min.js"></script>
+
+<script>
+    // Настройка AJAX для CSRF
+    $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+        if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type)) {
+          xhr.setRequestHeader("X-CSRFToken", $('input[name="csrf_token"]').val());
+        }
+      }
+    });
+
+    function csrfSafeMethod(method) {
+      return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    function logout() {
+      // Показываем анимацию при выходе
+      $('#loading-animation').show();
+      $('.loading-text').text('Выход из системы...');
+      
+      $.post("{{ url_for('main.logout') }}", function() {
+        window.location.href = "{{ url_for('main.login') }}";
+      }).fail(function() {
+        window.location.href = "{{ url_for('main.login') }}";
+      });
+    }
+
+    $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
+      if (jqXHR.status === 403) {
+        showNotification('Ошибка авторизации. Перенаправление...', 'error');
+        setTimeout(logout, 2000);
+      }
+    });
+
+    // Функция для отображения уведомлений
+    function showNotification(message, type = 'info') {
+      // Создаем элемент уведомления, если его еще нет
+      if ($('#notification-container').length === 0) {
+        $('body').append('<div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+      }
+      
+      // Определяем класс в зависимости от типа
+      let alertClass = 'alert-info';
+      let icon = 'info-circle';
+      
+      if (type === 'success') {
+        alertClass = 'alert-success';
+        icon = 'check-circle';
+      } else if (type === 'error') {
+        alertClass = 'alert-danger';
+        icon = 'exclamation-circle';
+      } else if (type === 'warning') {
+        alertClass = 'alert-warning';
+        icon = 'exclamation-triangle';
+      }
+      
+      // Создаем и добавляем уведомление
+      const notificationId = 'notification-' + Date.now();
+      const notification = `
+        <div id="${notificationId}" class="alert ${alertClass} fade-in" style="min-width: 300px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+          <i class="fas fa-${icon} mr-2"></i> ${message}
+        </div>
+      `;
+      
+      $('#notification-container').append(notification);
+      
+      // Удаляем уведомление через 5 секунд
+      setTimeout(() => {
+        $(`#${notificationId}`).fadeOut(500, function() {
+          $(this).remove();
+        });
+      }, 5000);
+    }
+
+    // Функция для обновления информации о времени последнего обновления
+    function updateRefreshCounter() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString();
+      
+      // Проверяем, существует ли элемент с классом last-update
+      if ($('.last-update').length === 0) {
+        // Если нет, создаем его
+        if ($('.user-info').length) {
+          $('.user-info').append('<div class="last-update" style="font-size: 0.8rem; color: #7f8c8d; margin-top: 5px;"></div>');
+        }
+      }
+      
+      // Обновляем текст
+      $('.last-update').text(`Последнее обновление: ${timeString}`);
+    }
+
+    $(document).ready(function() {
+      // Подключаемся к Socket.IO
+      var socket = io.connect(window.location.origin + '/voicing');
+      var username = "{{ session['username'] }}";
+
+      function disableButton(button) {
+        button.disabled = true;
+        button.classList.add('btn-disabled');
+        setTimeout(() => {
+          button.disabled = false;
+          button.classList.remove('btn-disabled');
+        }, 10000);
+      }
+
+      function disableButtons() {
+        document.querySelectorAll('.call-button').forEach(button => button.disabled = true);
+        document.querySelectorAll('.btn-refresh, .btn-delete').forEach(button => button.disabled = true);
+        document.getElementById('loading-animation').style.display = 'flex';
+      }
+
+      function enableButtons() {
+        document.querySelectorAll('.call-button, .btn-refresh, .btn-delete').forEach(button => button.disabled = false);
+        document.getElementById('loading-animation').style.display = 'none';
+      }
+
+      socket.on('connect', function() {
+        console.log('Socket connected on /voicing namespace');
+        
+        // Получаем ID текущего пользователя
+        const userId = {{ current_user.id }};
+        
+        // Получаем ID всех назначенных пользователю услуг
+        const assignedServiceIds = [];
+        {% for assignment in assignments %}
+          assignedServiceIds.push({{ assignment.service_id }});
+        {% endfor %}
+        
+        // Присоединяемся к персональной комнате оператора
+        socket.emit('join_operator_room', {
+          service_ids: assignedServiceIds
+        }, function(response) {
+          if (response && response.status === 'success') {
+            console.log('Joined personal room:', response.room);
+            showNotification('Соединение установлено', 'success');
+          } else {
+            console.error('Failed to join personal room');
+            showNotification('Ошибка подключения к серверу уведомлений', 'error');
+          }
+        });
+      });
+
+      socket.on('disconnect', function(reason) {
+        console.warn('Socket disconnected:', reason);
+        showNotification('Соединение потеряно. Перезагрузка...', 'error');
+        setTimeout(logout, 3000);
+      });
+
+      socket.on('connect_error', function(error) {
+        console.error('Socket connection error:', error);
+        showNotification('Ошибка соединения', 'error');
+        setTimeout(logout, 3000);
+      });
+      
+      // Глобальные переменые для управления обновлением страницы
+      let refreshTimer;
+      const REFRESH_INTERVAL = 30000; // 30 секунд до обновления страницы
+
+      // Запускаем таймер обновления страницы
+      function startRefreshTimer() {
+        // Очищаем предыдущий таймер, если он существует
+        if (refreshTimer) clearTimeout(refreshTimer);
+        
+        // Устанавливаем новый таймер
+        refreshTimer = setTimeout(function() {
+          location.reload();
+        }, REFRESH_INTERVAL);
+        
+        // Показываем счетчик до обновления
+        updateRefreshCounter();
+        
+        // Запускаем обратный отсчет, если функция существует
+        if (typeof startCountdown === 'function') {
+          startCountdown();
+        }
+      }
+
+      // Создаем объект аудио для уведомления
+      const notificationSound = new Audio("{{ url_for('static', filename='audio/notification.mp3') }}");
+
+      // Функция для воспроизведения звука уведомления
+      function playNotificationSound() {
+        notificationSound.currentTime = 0; // Сбрасываем звук в начало
+        notificationSound.play().catch(error => {
+          console.error('Ошибка воспроизведения звука:', error);
+        });
+      }
+
+      // Обработка события нового тикета
+      socket.on('new_ticket', function(data) {
+        console.log('Получено событие new_ticket:', data);
+        
+        // Получаем список ID услуг, назначенных текущему оператору
+        const assignedServiceIds = [];
+        {% for assignment in assignments %}
+          assignedServiceIds.push({{ assignment.service_id }});
+        {% endfor %}
+        
+        // Проверяем, относится ли это событие к услуге, назначенной данному оператору
+        if (assignedServiceIds.includes(data.serviceId)) {
+          console.log('Уведомление принято - услуга назначена этому оператору');
+          
+          // Воспроизводим звук уведомления
+          playNotificationSound();
+          
+          // Показываем уведомление
+          showNotification(`Новый клиент! Талон №${data.ticketNumber} (${data.serviceName || ''})`, 'success');
+          
+          // Перезапускаем таймер обновления страницы
+          startRefreshTimer();
+          
+          // Обновляем интерфейс без полной перезагрузки страницы
+          highlightServiceSection(data.serviceId);
+        } else {
+          console.log('Игнорируем уведомление - услуга не назначена этому оператору:', data.serviceId);
+        }
+      });
+
+      // Подсвечиваем секцию с новым тикетом
+      function highlightServiceSection(serviceId) {
+        // Находим колонку с указанным service_id
+        const serviceColumns = document.querySelectorAll('.ticket-column');
+        
+        serviceColumns.forEach(column => {
+          const buttons = column.querySelectorAll('.call-button');
+          
+          // Проверяем, относится ли этот столбец к указанному serviceId
+          if (buttons.length && buttons[0].onclick && buttons[0].onclick.toString().includes(serviceId)) {
+            column.classList.add('fade-in');
+            
+            // Добавляем анимацию пульсации для текущего тикета
+            const currentTicket = column.querySelector('.current-ticket');
+            if (currentTicket) {
+              currentTicket.style.animation = 'pulseAnimation 2s 3';
+              
+              // Добавляем бейдж "Новый"
+              const badge = document.createElement('div');
+              badge.className = 'new-ticket-badge';
+              badge.textContent = 'Новый';
+              currentTicket.appendChild(badge);
+              
+              // Удаляем бейдж через 8 секунд
+              setTimeout(() => {
+                if (badge && badge.parentNode) {
+                  badge.parentNode.removeChild(badge);
+                }
+              }, 8000);
+            }
+            
+            // Через 6 секунд убираем эффекты
+            setTimeout(() => {
+              column.classList.remove('fade-in');
+              if (currentTicket) {
+                currentTicket.style.animation = '';
+              }
+            }, 6000);
+          }
+        });
+      }
+
+      // Обработка события вызова тикета
+      socket.on('call_ticket', function(data) {
+        console.log('Получено событие call_ticket:', data);
+        
+        // Получаем список ID услуг, назначенных текущему оператору
+        const assignedServiceIds = [];
+        {% for assignment in assignments %}
+          assignedServiceIds.push({{ assignment.service_id }});
+        {% endfor %}
+        
+        // Проверяем, относится ли это событие к услуге, назначенной данному оператору
+        if (assignedServiceIds.includes(data.serviceId)) {
+          showNotification(`Вызов тикета ${data.ticketNumber} в кабинет ${data.cabinetNumber}`, 'info');
+          // Сбрасываем таймер при получении события, относящегося к этому оператору
+          startRefreshTimer();
+        }
+      });
+
+      // Обработка события удаления тикета
+      socket.on('delete_ticket', function(data) {
+        console.log('Получено событие delete_ticket:', data);
+        
+        // Получаем список ID услуг, назначенных текущему оператору
+        const assignedServiceIds = [];
+        {% for assignment in assignments %}
+          assignedServiceIds.push({{ assignment.service_id }});
+        {% endfor %}
+        
+        // Проверяем, относится ли это событие к услуге, назначенной данному оператору
+        if (assignedServiceIds.includes(data.serviceId)) {
+          showNotification(`Талон №${data.ticketNumber} удален`, 'warning');
+          // Сбрасываем таймер
+          startRefreshTimer();
+        }
+      });
+
+      window.callCurrentTicket = function(ticketId, ticketNumber, userCabinet, serviceId) {
+        console.log(`Вызов тикета ID: ${ticketId}, Номер: ${ticketNumber}, Кабинет: ${userCabinet}`);
+        
+        if (ticketId === 0) {
+          showNotification('Нет тикетов для вызова', 'warning');
+          return;
+        }
+        
+        disableButtons();
+        showNotification(`Вызов тикета ${ticketNumber}...`, 'info');
+        
+        $.ajax({
+          url: "{{ url_for('user.call_ticket', ticket_id=0) }}".replace('0', ticketId),
+          method: 'POST',
+          success: function(response) {
+            console.log('Тикет вызван успешно:', response);
+            
+            socket.emit('call_ticket', {
+              ticketNumber: ticketNumber,
+              cabinetNumber: userCabinet,
+              serviceId: serviceId
+            });
+            
+            // Изменяем анимацию для текущего тикета
+            const ticketNumberElement = $(`button[onclick*="${ticketId}"]`).closest('.current-ticket').find('.ticket-number');
+            ticketNumberElement.addClass('highlight');
+            
+            // Перезапускаем таймер обновления
+            startRefreshTimer();
+            
+            setTimeout(function() {
+              location.reload();
+            }, 10000);
+          },
+          error: function(xhr, status, error) {
+            console.error('Ошибка вызова тикета:', xhr.responseText);
+            enableButtons();
+            showNotification('Ошибка вызова тикета', 'error');
+          }
+        });
+      };
+
+      window.callNextTicket = function(ticketId, serviceId) {
+        const statuses = Array.from(document.querySelectorAll('.status')).map(td => td.textContent.trim().toLowerCase());
+        const hasActiveTicket = statuses.some(status => status === 'в работе' || status === 'at work');
+        
+        if (!hasActiveTicket) {
+          showNotification("Нельзя вызвать следующий тикет! Сначала вызовите текущий тикет (талон) ! Это условие не позволит Вам пропустить клиента!", 'warning');
+          return;
+        }
+        
+        if (ticketId === 0) {
+          showNotification('Нет тикетов для вызова', 'warning');
+          return;
+        }
+        
+        disableButtons();
+        showNotification('Вызов следующего тикета...', 'info');
+        
+        $.ajax({
+          url: "{{ url_for('user.remove_and_call_next_ticket', ticket_id=0) }}".replace('0', ticketId),
+          method: 'POST',
+          success: function(response) {
+            console.log('Следующий тикет вызван:', response);
+            
+            if (response.status === 'success' && response.announce) {
+              var currentTicketDisplay = document.getElementById(`currentTicketDisplay${serviceId}`);
+              if (currentTicketDisplay) {
+                currentTicketDisplay.innerHTML = `Текущий тикет: ${response.ticket.number}`;
+              }
+              
+              socket.emit('call_ticket', {
+                ticketNumber: response.ticket.number,
+                cabinetNumber: response.ticket.cabinet,
+                serviceId: serviceId
+              });
+              
+              showNotification(`Вызван следующий тикет: ${response.ticket.number}`, 'success');
+              
+              // Перезапускаем таймер обновления
+              startRefreshTimer();
+              
+              setTimeout(function() {
+                location.reload();
+              }, 4000);
+            } else if (response.status === 'error') {
+              showNotification(response.message, 'error');
+              enableButtons();
+            }
+          },
+          error: function(xhr) {
+            console.error('Ошибка вызова следующего тикета:', xhr.responseText);
+            enableButtons();
+            showNotification('Ошибка вызова следующего тикета', 'error');
+          }
+        });
+      };
+
+      window.deleteTicket = function(ticketId) {
+        if (confirm('Вы уверены, что хотите удалить этот тикет?')) {
+          $.ajax({
+            url: "{{ url_for('user.delete_ticket', ticket_id=0) }}".replace('0', ticketId),
+            type: 'POST',
+            success: function(response) {
+              console.log('Тикет удалён:', response);
+              showNotification('Тикет успешно удален', 'success');
+              
+              // Перезапускаем таймер обновления
+              startRefreshTimer();
+              
+              location.reload();
+            },
+            error: function(xhr) {
+              console.error('Ошибка удаления тикета:', xhr.responseText);
+              showNotification('Ошибка удаления тикета', 'error');
+            }
+          });
+        }
+      };
+
+      // Улучшенная функция для проверки статуса авторизации
+      function checkAuthStatus() {
+        $.ajax({
+          url: "{{ url_for('main.check_auth_status') }}",
+          method: 'GET',
+          success: function(data) {
+            if (!data.authenticated) {
+              showNotification('Сессия истекла. Выполняется перенаправление...', 'warning');
+              setTimeout(function() {
+                window.location.href = "{{ url_for('main.login') }}";
+              }, 2000);
+            }
+          },
+          error: function() {
+            showNotification('Ошибка проверки статуса авторизации', 'error');
+          }
+        });
+      }
+
+      // Применяем эффекты при наведении к кнопкам
+      $('.btn').hover(
+        function() {
+          $(this).css('transform', 'translateY(-2px)').css('box-shadow', '0 4px 12px rgba(0, 0, 0, 0.15)');
+        },
+        function() {
+          $(this).css('transform', 'translateY(0)').css('box-shadow', '0 2px 5px rgba(0, 0, 0, 0.1)');
+        }
+      );
+
+      // Проверяем статус при загрузке и каждые 5 минут
+      checkAuthStatus();
+      setInterval(checkAuthStatus, 300000); // 5 минут
+
+      // Обработка клика на тикет в таблице
+      $(document).on('click', 'tbody tr', function() {
+        $(this).toggleClass('highlight');
+        setTimeout(() => {
+          $(this).removeClass('highlight');
+        }, 2000);
+      });
+      
+      // Создаем элемент для отображения таймера обновления
+      const refreshTimerElement = document.createElement('div');
+      refreshTimerElement.className = 'refresh-timer fade-in';
+      refreshTimerElement.innerHTML = '<i class="fas fa-sync-alt"></i> <span id="refresh-countdown">30</span> сек. до обновления';
+      document.body.appendChild(refreshTimerElement);
+
+      // Функция обратного отсчета
+      function startCountdown() {
+        const countdownElement = document.getElementById('refresh-countdown');
+        let seconds = 30; // Начальное значение
+        
+        // Очищаем предыдущий интервал, если он существует
+        if (window.countdownInterval) {
+          clearInterval(window.countdownInterval);
+        }
+        
+        // Обновляем текст каждую секунду
+        window.countdownInterval = setInterval(() => {
+          seconds--;
+          countdownElement.textContent = seconds;
+          
+          // Визуальное оповещение, когда остается мало времени
+          if (seconds <= 5) {
+            refreshTimerElement.classList.add('countdown-active');
+          } else {
+            refreshTimerElement.classList.remove('countdown-active');
+          }
+          
+          if (seconds <= 0) {
+            clearInterval(window.countdownInterval);
+          }
+        }, 1000);
+      }
+
+      // Добавление CSS для анимаций
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes pulseAnimation {
+          0% {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transform: scale(1);
+          }
+          50% {
+            box-shadow: 0 5px 30px rgba(52, 152, 219, 0.5);
+            transform: scale(1.03);
+          }
+          100% {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transform: scale(1);
+          }
+        }
+        
+        .refresh-timer {
+          position: fixed;
+          bottom: 50px;
+          right: 20px;
+          background-color: rgba(44, 62, 80, 0.8);
+          color: white;
+          padding: 8px 15px;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          z-index: 99;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .countdown-active {
+          border-left: 4px solid #2ecc71;
+        }
+        
+        .new-ticket-badge {
+          position: absolute;
+          top: -10px;
+          right: -10px;
+          background-color: #e74c3c;
+          color: white;
+          border-radius: 50%;
+          width: 25px;
+          height: 25px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.7rem;
+          font-weight: bold;
+          animation: badgePulse 1.5s infinite;
+          box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+        }
+        
+        @keyframes badgePulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.2); }
+          100% { transform: scale(1); }
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Добавление кнопки для ручного сброса таймера
+      const resetButton = document.createElement('button');
+      resetButton.className = 'btn btn-sm btn-info';
+      resetButton.style.position = 'fixed';
+      resetButton.style.bottom = '90px';
+      resetButton.style.right = '20px';
+      resetButton.style.zIndex = '99';
+      resetButton.innerHTML = '<i class="fas fa-redo"></i> Сбросить таймер';
+      resetButton.addEventListener('click', function() {
+        startRefreshTimer();
+        showNotification('Таймер обновления сброшен', 'info');
+      });
+      document.body.appendChild(resetButton);
+
+      // Инициализация таймера при загрузке страницы
+      startRefreshTimer();
+      
+      // Завершение инициализации
+      showNotification('Система загружена успешно', 'success');
+    });
+</script>
