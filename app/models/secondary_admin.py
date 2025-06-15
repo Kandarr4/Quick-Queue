@@ -18,6 +18,7 @@ class User(Base):
     cabinet = Column(String(50), nullable=True)
     video = Column(String(100), nullable=True, default='0')
     style_type = Column(String(50), nullable=True, default='default')  # 'default' или 'custom'   
+    marquee_text = Column(Text, nullable=True)  # Новое поле для бегущей строки   
     created_at = Column(DateTime, default=datetime.utcnow)
 
     def set_password(self, password):

@@ -3,7 +3,7 @@
   <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Электронная очередь</title>
+  <title>Табло электронной очереди</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
@@ -24,7 +24,6 @@
     </div>
 
     <div class="content-container">
-      <!-- Таблица с билетами (адаптивный размер) -->
       <div class="tablo-container" id="tabloContainer">
         <div class="tablo-header">
           <div class="header-columns">
@@ -38,7 +37,6 @@
         </div>
         
         <div id="ticketItems" class="tablo-items two-columns">
-          <!-- Тикеты будут отображаться здесь -->
         </div>
         
         <div class="loading-indicator" id="loading-indicator">
@@ -55,15 +53,13 @@
         </div>
       </div>
       
-      <!-- Видеоплеер (справа) -->
       <div class="video-container" id="videoContainer">
         <div class="video-header">
           <i class="fas fa-film mr-2"></i>Видео
           <span id="videoFolderName"></span>
         </div>
         <div class="video-player-wrapper">
-          <video id="videoPlayer" class="video-player" controls autoplay loop>
-            <!-- Источник видео будет добавлен через JavaScript -->
+          <video id="videoPlayer" class="video-player" controls autoplay>
           </video>
           <div class="video-loading" id="videoLoading">Загрузка видео...</div>
           <button class="volume-control" id="volumeControl" title="Включить/выключить звук">
@@ -73,32 +69,24 @@
       </div>
     </div>
 
-    <!-- Скрытые поля для передачи информации в JavaScript -->
     <input type="hidden" id="video_setting" value="{{ 'true' if show_video else 'false' }}">
     <input type="hidden" id="video_folder" value="{{ video_folder|default('') }}">
   </div>
 
-  <!-- Бегущая строка в нижней части страницы -->
+  {% if marquee_text %}
   <div class="marquee-container">
     <div class="marquee-content">
-      <span><i class="fas fa-first-aid"></i> Добро пожаловать в КГП "Поликлиника №2" города Темиртау! <strong>Режим работы:</strong> Пн-Пт 8:00-19:00, Сб 8:00-13:00</span>
-      <span><i class="fas fa-phone"></i> <strong>Единый Call-центр:</strong> 8 (7213) 44-78-88, +7 705 759 1963</span>
-      <span><i class="fas fa-calendar-check"></i> <strong>Запись на прием доступна</strong> через портал электронного правительства <strong>eGov.kz</strong> и приложение <strong>DamuMed</strong></span>
-      <span><i class="fas fa-syringe"></i> <strong>УЗКО (Ультразвуковое Комплексное Обследование)</strong> - доступно в нашей поликлинике. <span class="accent">Запись через регистратуру или Call-центр</span></span>
-      <span><i class="fas fa-stethoscope"></i> В поликлинике ведут прием <strong>врачи всех специальностей</strong> для взрослых и детей</span>
-      <span><i class="fas fa-clock"></i> Пациенты обслуживаются в порядке электронной очереди. <strong>Спасибо за понимание!</strong></span>
+      {{ marquee_text|safe }}
     </div>
   </div>
+  {% endif %}
 
-  <!-- Скрипты -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Устанавливаем флаг пользовательского взаимодействия при загрузке
       document.documentElement.setAttribute('data-user-interacted', 'true');
       
-      // Инициализируем базовые переменные
       const videoPlayer = document.getElementById('videoPlayer');
       const volumeControl = document.getElementById('volumeControl');
       const volumeIcon = document.getElementById('volumeIcon');
@@ -107,16 +95,13 @@
       const videoLoading = document.getElementById('videoLoading');
       const videoFolderName = document.getElementById('videoFolderName');
       
-      // Получаем настройки видео из hidden-полей
       const showVideo = document.getElementById('video_setting').value === 'true';
       const videoFolder = document.getElementById('video_folder').value;
       
-      // Устанавливаем имя папки с видео (если доступно)
       if (videoFolder && videoFolder !== '0') {
         videoFolderName.textContent = `(${videoFolder})`;
       }
       
-      // Настраиваем отображение контейнеров в зависимости от настройки видео
       if (!showVideo) {
         videoContainer.style.display = 'none';
         tabloContainer.style.flex = '1';
@@ -125,7 +110,6 @@
         videoContainer.style.flex = '2';
       }
       
-      // Анимированные часы с форматированием
       function updateClock() {
         const now = new Date();
         const hours = String(now.getHours()).padStart(2, '0');
@@ -136,17 +120,14 @@
         document.querySelector('.minutes').textContent = minutes;
         document.querySelector('.seconds').textContent = seconds;
         
-        // Обновляем дату
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const dateString = now.toLocaleDateString('ru-RU', options);
         document.getElementById('date-display').textContent = dateString;
       }
       
-      // Инициализируем часы и запускаем обновление
       updateClock();
       setInterval(updateClock, 1000);
       
-      // Функция выхода
       function logout() {
         $.post('/logout', function() {
           window.location.href = '/login';
@@ -155,33 +136,26 @@
         });
       }
       
-      // Показываем индикатор загрузки
       $('#loading-indicator').show();
       
-      // Глобальные переменные для управления состоянием
       let displayedTickets = {};
       let assignedServices = [];
       let playQueue = [];
       let isPlaying = false;
-      let videoVolume = 0.5; // Значение громкости по умолчанию
+      let videoVolume = 0.5;
       
-      // Флаг состояния воспроизведения аудио
       window.audioPlaying = false;
       
-      // Массив для хранения путей к видеофайлам
       let videoFiles = [];
       let currentVideoIndex = 0;
       
-      // Контролирует состояние мьюта видео
       let videoIsMuted = false;
       
-      // Функция переключения звука видео
       function toggleVideoSound() {
         if (videoPlayer) {
           videoPlayer.muted = !videoPlayer.muted;
           videoIsMuted = videoPlayer.muted;
           
-          // Обновляем иконку
           if (videoPlayer.muted) {
             volumeIcon.className = 'fas fa-volume-mute';
           } else {
@@ -189,12 +163,10 @@
             videoPlayer.volume = videoVolume;
           }
           
-          // Сохраняем предпочтения в localStorage
           localStorage.setItem('videoMuted', videoPlayer.muted);
         }
       }
       
-      // Обработчик для кнопки управления звуком
       if (volumeControl) {
         volumeControl.addEventListener('click', function(e) {
           e.preventDefault();
@@ -202,67 +174,49 @@
         });
       }
       
-      // Функция для выключения звука во время аудиоуведомлений
       function muteVideo() {
-        // Проверяем, существует ли видеоплеер и показывается ли видео
         if (!showVideo || !videoPlayer) {
           return;
         }
         
-        // Если звук не был выключен пользователем, отключаем его временно
         if (!videoIsMuted) {
-          console.log("Временно отключаем звук видео для аудио уведомления");
           videoPlayer.muted = true;
           window.audioPlaying = true;
         }
       }
       
-      // Функция для включения звука после аудиоуведомлений
       function unmuteVideo() {
-        // Проверяем, существует ли видеоплеер и показывается ли видео
         if (!showVideo || !videoPlayer) {
           return;
         }
         
-        // Включаем звук только если звук не был выключен пользователем
-        // и если нет активного аудио
         if (!videoIsMuted && !isPlaying && playQueue.length === 0) {
-          console.log("Включаем звук видео");
           videoPlayer.muted = false;
           videoPlayer.volume = videoVolume;
           window.audioPlaying = false;
-        } else {
-          console.log("Не включаем звук видео: " + 
-                     (videoIsMuted ? "пользователь отключил звук" : "ещё воспроизводится аудио"));
         }
       }
       
-      // Восстанавливаем предпочтения звука из localStorage
       if (showVideo && videoPlayer) {
-        // Проверяем сохраненное состояние звука
         const savedMuted = localStorage.getItem('videoMuted') === 'true';
         videoIsMuted = savedMuted;
         videoPlayer.muted = savedMuted;
         
-        // Устанавливаем правильную иконку звука
         if (volumeIcon) {
           volumeIcon.className = savedMuted ? 
             'fas fa-volume-mute' : 'fas fa-volume-up';
         }
         
-        // Устанавливаем громкость видео
         videoPlayer.volume = videoVolume;
       }
       
-      // Подключаемся к Socket.IO
       let socket = io.connect(window.location.origin + '/voicing', {
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
         timeout: 20000
       });
       
-      // Получение назначенных услуг для табло
-    $.get('{{ url_for("tablo.get_assigned_services") }}', function(data) {
+      $.get('{{ url_for("tablo.get_assigned_services") }}', function(data) {
         assignedServices = data.assigned_services;
         socket.emit('register_tab', { 
           tabId: 'tablo1', 
@@ -273,22 +227,17 @@
         if (jqXHR.status === 403) {
           logout();
         } else {
-          console.error('Ошибка при получении назначенных услуг:', jqXHR.statusText);
           $('#loading-indicator').html('<p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Ошибка загрузки данных</p>');
         }
       });
       
-      // Обработка событий сокета
       socket.on('connect', function() {
-        console.log('Socket connected on /voicing namespace');
         showNotification('Соединение установлено', 'info');
       });
       
       socket.on('disconnect', function(reason) {
-        console.warn('Socket disconnected:', reason);
         showNotification('Соединение потеряно. Перезагрузка...', 'warning');
         
-        // Пытаемся переподключиться, затем перезагружаем страницу
         setTimeout(function() {
           if (socket.disconnected) {
             window.location.reload();
@@ -297,18 +246,14 @@
       });
       
       socket.on('connect_error', function(error) {
-        console.error('Socket connection error:', error);
         showNotification('Ошибка соединения!', 'danger');
         
-        // Пытаемся перезагрузить страницу при серьезных ошибках
         setTimeout(function() {
           window.location.reload();
         }, 5000);
       });
       
-      // Функция для показа уведомлений
       function showNotification(message, type) {
-        // Удаляем существующие уведомления, чтобы не скапливались
         $('.notification').remove();
         
         const notificationDiv = $('<div class="notification ' + (type || 'info') + '">' + message + '</div>');
@@ -326,26 +271,19 @@
         }, 100);
       }
       
-      // Обработка аудио
       socket.on('play_audio', function(data) {
         if (assignedServices.includes(data.serviceId)) {
-          console.log("Получен play_audio сигнал");
-          
-          // Приглушаем звук видео
           muteVideo();
           
-          // Обработка последовательности аудио
           if (!isPlaying) {
             isPlaying = true;
             playAudioSequence(data.sequence);
           } else {
-            // Если уже что-то играет, добавляем в очередь
             playQueue.push(data.sequence);
           }
         }
       });
       
-      // Обработка очереди аудио
       function processQueue() {
         if (playQueue.length > 0) {
           isPlaying = true;
@@ -353,30 +291,23 @@
           playAudioSequence(nextSequence);
         } else {
           isPlaying = false;
-          console.log("Аудио очередь пуста, включаем звук видео через 1 секунду");
           
-          // После завершения всех аудио, включаем звук с задержкой
           setTimeout(function() {
             unmuteVideo();
           }, 1000);
         }
       }
       
-      // Улучшенная функция воспроизведения аудио
       function playAudioSequence(sequence) {
-        console.log("Запуск последовательности аудио: ", sequence);
-        
         if (!sequence || sequence.length === 0) {
           isPlaying = false;
           processQueue();
           return;
         }
         
-        // Предзагрузка всех аудио файлов в последовательности
         const audioElements = [];
         const loadPromises = [];
         
-        // Создаем аудио элементы и устанавливаем источники
         sequence.forEach((name, index) => {
           const encodedName = encodeURIComponent(name);
           const url = window.location.origin + '/static/audio/' + encodedName;
@@ -386,78 +317,58 @@
           audio.preload = 'auto';
           audioElements.push(audio);
           
-          // Создаем промис для отслеживания загрузки
           loadPromises.push(new Promise((resolve, reject) => {
             audio.addEventListener('canplaythrough', () => resolve(index), { once: true });
             audio.addEventListener('error', () => {
-              console.error(`Ошибка загрузки аудио: ${name}`);
               reject(`Не удалось загрузить: ${name}`);
             }, { once: true });
             
-            // Начинаем загрузку
             audio.load();
           }));
         });
         
-        // Ждем пока все файлы будут загружены
         Promise.allSettled(loadPromises)
           .then(() => {
-            console.log(`Предзагружено ${audioElements.length} аудиофайлов`);
-            
             let currentIndex = 0;
             
-            // Функция для последовательного воспроизведения
             function playNext() {
               if (currentIndex >= audioElements.length) {
-                console.log("Последовательность аудио завершена");
                 processQueue();
                 return;
               }
               
               const currentAudio = audioElements[currentIndex];
               
-              // Настраиваем обработчики для текущего аудиофайла
               currentAudio.onended = () => {
                 currentIndex++;
-                playNext(); // Воспроизводим следующий файл
+                playNext();
               };
               
               currentAudio.onerror = () => {
-                console.error(`Ошибка воспроизведения файла ${currentIndex}`);
                 currentIndex++;
-                playNext(); // Пропускаем файл с ошибкой
+                playNext();
               };
               
-              // Воспроизводим текущий файл
               currentAudio.play()
-                .then(() => {
-                  console.log(`Воспроизводится файл: ${currentIndex+1}/${audioElements.length}`);
-                })
                 .catch(error => {
-                  console.error("Ошибка запуска воспроизведения:", error);
                   currentIndex++;
-                  playNext(); // Пропускаем файл с ошибкой
+                  playNext();
                 });
             }
             
-            // Начинаем последовательное воспроизведение
             playNext();
           })
           .catch(error => {
-            console.error("Ошибка предзагрузки аудио:", error);
-            processQueue(); // Переходим к следующей очереди при ошибке
+            processQueue();
           });
       }
       
-      // Обработка вызова билета
       socket.on('call_ticket', function(data) {
         if (assignedServices.includes(data.serviceId)) {
-          console.log("Получен call_ticket сигнал");
           updateTicketsDisplay();
         }
       });
       
-      // Проверка статуса авторизации
       function checkLoginStatus() {
         $.ajax({
           url: '/check_auth_status',
@@ -479,30 +390,23 @@
         });
       }
       
-      // Проверяем статус при загрузке и каждые 5 минут
       checkLoginStatus();
-      setInterval(checkLoginStatus, 300000); // 5 минут
+      setInterval(checkLoginStatus, 300000);
       
-      // Функция для установки отображения в один или два столбца
       function setColumnLayout(activeTickets) {
         const ticketItemsContainer = document.getElementById('ticketItems');
         
-        // Проверяем ширину экрана для адаптивного переключения количества столбцов
         if (window.innerWidth <= 992) {
-          // На мобильных и планшетах - один столбец
           ticketItemsContainer.classList.remove('two-columns');
           ticketItemsContainer.classList.add('single-column');
         } else {
-          // На десктопах - два столбца
           ticketItemsContainer.classList.remove('single-column');
           ticketItemsContainer.classList.add('two-columns');
         }
       }
       
-      // Отслеживаем изменение размера окна для адаптивного переключения столбцов
       let resizeTimer;
       window.addEventListener('resize', function() {
-        // Используем debounce для улучшения производительности
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function() {
           const activeTickets = document.querySelectorAll('.tablo-item').length;
@@ -510,7 +414,6 @@
         }, 200);
       });
       
-      // Обновление отображения билетов
       function updateTicketsDisplay() {
         fetch('{{ url_for("tablo.tablo_data") }}')
           .then(response => {
@@ -524,16 +427,12 @@
             const ticketItems = document.getElementById('ticketItems');
             const newDisplayedTickets = {};
             
-            // Фильтруем и сортируем билеты
             const activeTickets = tickets.filter(ticket => ticket.status === 'at work');
             
-            // Устанавливаем отображение в соответствии с размером экрана
             setColumnLayout(activeTickets.length);
             
-            // Обновляем счетчик активных билетов
             document.getElementById('active-count').textContent = activeTickets.length;
             
-            // Если нет активных билетов, показываем сообщение
             if (activeTickets.length === 0) {
               if (!document.getElementById('no-tickets-message')) {
                 const noTicketsMessage = document.createElement('div');
@@ -547,16 +446,13 @@
                 ticketItems.appendChild(noTicketsMessage);
               }
             } else {
-              // Удаляем сообщение о отсутствии билетов, если оно есть
               const noTicketsMessage = document.getElementById('no-tickets-message');
               if (noTicketsMessage) {
                 noTicketsMessage.remove();
               }
               
-              // Обрабатываем каждый активный билет
               activeTickets.forEach(ticket => {
                 if (displayedTickets[ticket.id]) {
-                  // Билет уже отображается - обновляем данные при необходимости
                   newDisplayedTickets[ticket.id] = displayedTickets[ticket.id];
                   
                   const ticketDiv = displayedTickets[ticket.id];
@@ -571,33 +467,18 @@
                     cabinetElement.textContent = ticket.cabinet;
                   }
                 } else {
-                  // Создаем новый элемент для билета с анимацией
                   const ticketDiv = document.createElement('div');
                   ticketDiv.className = 'tablo-item new-item animate__animated animate__bounceInDown';
                   
-                  // При появлении новых билетов отключаем звук видео
                   muteVideo();
                   
-                  // Воспроизводим звуковое уведомление о новом билете
-                  if (document.documentElement.hasAttribute('data-user-interacted')) {
-                    const audioNotice = new Audio();
-                    audioNotice.src = window.location.origin + '/static/audio/notice.mp3';
-                    
-                    // Используем Promise с обработкой ошибок
-                    audioNotice.play()
-                      .catch(error => console.log('Автозапуск аудио заблокирован:', error));
-                  }
-                  
-                  // Создаем содержимое тикета
                   ticketDiv.innerHTML = 
                     `<div class="ticket-number">${ticket.number}</div>` +
                     `<div class="ticket-cabinet">${ticket.cabinet}</div>`;
                   
-                  // Добавляем в DOM
                   ticketItems.appendChild(ticketDiv);
                   newDisplayedTickets[ticket.id] = ticketDiv;
                   
-                  // Убираем подсветку через 30 секунд
                   setTimeout(() => {
                     ticketDiv.classList.add('stop-animation');
                     ticketDiv.classList.remove('animate__bounceInDown');
@@ -606,10 +487,8 @@
                 }
               });
               
-              // Удаляем билеты, которых больше нет в активных
               for (let ticketId in displayedTickets) {
                 if (!newDisplayedTickets[ticketId]) {
-                  // Плавное удаление
                   const ticketToRemove = displayedTickets[ticketId];
                   ticketToRemove.style.transition = 'all 0.5s ease';
                   ticketToRemove.style.opacity = '0';
@@ -624,204 +503,158 @@
               }
             }
             
-            // Обновляем список отображаемых билетов
             displayedTickets = newDisplayedTickets;
           })
-          .catch(error => {
-            console.error('Ошибка получения данных таблицы:', error);
-          });
+          .catch(error => {});
       }
       
-      // Обработка ошибок AJAX
       $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
         if (jqXHR.status === 403) {
           logout();
         }
       });
       
-      // Запускаем начальное обновление и настраиваем интервал
       updateTicketsDisplay();
       setInterval(updateTicketsDisplay, 2000);
       
-      // Регистрируем событие взаимодействия с пользователем для разрешения автозапуска аудио
       function enableUserInteraction() {
         document.documentElement.setAttribute('data-user-interacted', 'true');
         
-        // Если видео включено, убедимся, что звук работает (если пользователь его не отключил)
         if (showVideo && videoPlayer && !videoIsMuted) {
           videoPlayer.muted = false;
           videoPlayer.volume = videoVolume;
-          console.log("Взаимодействие пользователя: включаем звук видео");
         }
       }
       
-      // Обработчики событий для регистрации взаимодействия
       document.addEventListener('click', enableUserInteraction, { once: true });
       document.addEventListener('keydown', enableUserInteraction, { once: true });
       document.addEventListener('touchstart', enableUserInteraction, { once: true });
       
-      // Инициализация видеоплеера
       if (showVideo && videoPlayer) {
-        // Получаем список доступных видео из директории
         function fetchVideoList() {
-          // Показываем индикатор загрузки видео
           if (videoLoading) {
             videoLoading.style.display = 'block';
           }
           
           $.ajax({
-            url: '/get_video_list',
+            url: '/tablo/get_video_list',
             method: 'GET',
             success: function(data) {
               if (data.videos && data.videos.length > 0) {
-                // Выводим в консоль все полученные URL для диагностики
-                console.log("Получены URL видео:", JSON.stringify(data.videos));
+                videoFiles = [...data.videos];
                 
-                if (data.videos.length === 1) {
-                  // Если видео только одно, предупреждаем об этом
-                  console.warn("Внимание: получен только один видеофайл, смена видео невозможна");
-                  videoFiles = data.videos;
-                  currentVideoIndex = 0;
-                  playVideo(currentVideoIndex);
-                } else {
-                  // Сохраняем список видео и перемешиваем его
-                  videoFiles = [...data.videos]; // Создаем копию массива
-                  console.log("Получено видеофайлов:", videoFiles.length);
-                  
-                  // Перемешиваем массив видео для случайного воспроизведения
+                if (videoFiles.length > 1) {
                   shuffleVideoArray();
-                  
-                  // Запускаем воспроизведение первого видео
-                  currentVideoIndex = 0;
-                  playVideo(currentVideoIndex);
                 }
+                
+                currentVideoIndex = 0;
+                playVideo(currentVideoIndex);
               } else {
-                // Скрываем контейнер если видео нет
                 if (videoContainer) {
                   videoContainer.style.display = 'none';
                 }
-                console.log('Видеофайлы не найдены');
+                
+                if (tabloContainer) {
+                  tabloContainer.style.flex = '1';
+                }
+                
                 showNotification('Видеофайлы не найдены', 'warning');
               }
               
-              // Скрываем индикатор загрузки
               if (videoLoading) {
                 videoLoading.style.display = 'none';
               }
             },
-            error: function(error) {
-              console.error('Ошибка при получении списка видео:', error);
-              
+            error: function(jqXHR, textStatus, errorThrown) {
               if (videoContainer) {
                 videoContainer.style.display = 'none';
               }
               
-              // Скрываем индикатор загрузки
+              if (tabloContainer) {
+                tabloContainer.style.flex = '1';
+              }
+              
               if (videoLoading) {
                 videoLoading.style.display = 'none';
               }
               
-              showNotification('Ошибка загрузки видео', 'danger');
+              try {
+                const responseData = JSON.parse(jqXHR.responseText);
+                showNotification(`Ошибка загрузки видео: ${responseData.error || errorThrown}`, 'danger');
+              } catch (e) {
+                showNotification(`Ошибка загрузки видео: ${errorThrown}`, 'danger');
+              }
             }
           });
         }
         
-        // Улучшенная функция для перемешивания видео
         function shuffleVideoArray() {
           if (!videoFiles || videoFiles.length <= 1) {
-            console.warn("Недостаточно видеофайлов для перемешивания");
             return;
           }
           
-          console.log("Перемешивание массива видео. До:", JSON.stringify(videoFiles));
-          
-          // Запоминаем текущее видео, чтобы не начать сразу с него же
           const currentVideo = videoFiles[currentVideoIndex];
           
-          // Используем алгоритм Фишера-Йейтса для перемешивания
           for (let i = videoFiles.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            // Обмен элементами
             [videoFiles[i], videoFiles[j]] = [videoFiles[j], videoFiles[i]];
           }
           
-          // Проверяем, чтобы после перемешивания первый элемент не совпадал с текущим
-          // Если совпадает, и есть больше одного видео, меняем его с произвольным другим
           if (videoFiles.length > 1 && videoFiles[0] === currentVideo) {
             const swapIndex = 1 + Math.floor(Math.random() * (videoFiles.length - 1));
             [videoFiles[0], videoFiles[swapIndex]] = [videoFiles[swapIndex], videoFiles[0]];
           }
-          
-          console.log("После перемешивания:", JSON.stringify(videoFiles));
         }
         
-        // Улучшенная функция для воспроизведения видео
         function playVideo(index) {
           if (!videoFiles || videoFiles.length === 0) {
-            console.error("Нет доступных видеофайлов");
             return;
           }
           
-          // Проверяем границы индекса
           if (index >= videoFiles.length) {
-            console.log("Достигнут конец списка, перемешиваем и начинаем сначала");
             currentVideoIndex = 0;
-            // Перемешиваем перед началом нового цикла
             shuffleVideoArray();
           } else {
             currentVideoIndex = index;
           }
           
-          // Показываем индикатор загрузки
           if (videoLoading) {
             videoLoading.style.display = 'block';
           }
           
           const videoSrc = videoFiles[currentVideoIndex];
-          console.log(`Воспроизведение видео ${currentVideoIndex + 1}/${videoFiles.length}: ${videoSrc}`);
           
-          // Устанавливаем атрибут src напрямую
           videoPlayer.src = videoSrc;
           
-          // Устанавливаем обработчики перед загрузкой
           videoPlayer.oncanplay = function() {
-            console.log("Видео готово к воспроизведению");
             if (videoLoading) {
               videoLoading.style.display = 'none';
             }
           };
           
           videoPlayer.onerror = function(e) {
-            console.error('Ошибка воспроизведения видео:', videoPlayer.error);
             if (videoLoading) {
               videoLoading.style.display = 'none';
             }
-            // Пробуем следующее видео при ошибке
             setTimeout(() => playVideo(currentVideoIndex + 1), 500);
           };
           
-          // Устанавливаем правильное состояние звука перед воспроизведением
           videoPlayer.muted = window.audioPlaying ? true : videoIsMuted;
           videoPlayer.volume = videoVolume;
+          videoPlayer.loop = false;
           
-          // Загружаем и воспроизводим
           videoPlayer.load();
           
           const playPromise = videoPlayer.play();
           if (playPromise !== undefined) {
             playPromise.catch(error => {
-              console.warn('Автоматическое воспроизведение заблокировано:', error);
-              
-              // Пользователь должен взаимодействовать со страницей
               if (!document.documentElement.hasAttribute('data-video-interacted')) {
                 showNotification('Нажмите на страницу для включения видео', 'info');
                 
-                // Обработчик для разрешения видео
                 const activateVideo = function() {
                   videoPlayer.play()
-                    .catch(e => console.log('Не удалось воспроизвести видео:', e));
+                    .catch(e => {});
                   
-                  // Включаем звук если он не был отключен пользователем
                   if (!videoIsMuted && !window.audioPlaying) {
                     videoPlayer.muted = false;
                   }
@@ -829,107 +662,66 @@
                   document.documentElement.setAttribute('data-video-interacted', 'true');
                 };
                 
-                // Установка обработчика клика для активации
                 document.body.addEventListener('click', activateVideo, { once: true });
               }
             });
           }
         }
         
-        // Более надежный обработчик окончания видео
         videoPlayer.addEventListener('ended', function onVideoEnded() {
-          console.log("Событие 'ended': Видео закончилось, переходим к следующему");
           const nextIndex = currentVideoIndex + 1;
-          
-          // Небольшая задержка перед следующим видео
           setTimeout(() => {
             playVideo(nextIndex);
           }, 200);
         });
         
-        // Обработчик ошибки загрузки видео
         videoPlayer.addEventListener('error', function(e) {
-          console.error('Событие ошибки видео:', videoPlayer.error);
-          
-          // Скрываем индикатор загрузки
           if (videoLoading) {
             videoLoading.style.display = 'none';
           }
-          
-          // Пробуем следующее видео при ошибке
           setTimeout(() => playVideo(currentVideoIndex + 1), 500);
         });
         
-        // Дополнительный обработчик для отслеживания окончания видео (страховка)
-        videoPlayer.addEventListener('timeupdate', function() {
-          // Если видео почти закончилось (осталось менее 0.5 секунды)
-          if (videoPlayer.duration > 0 && 
-              !videoPlayer.paused && 
-              !videoPlayer.ended && 
-              videoPlayer.currentTime + 0.5 >= videoPlayer.duration) {
-            console.log("Почти конец видео, готовимся к следующему");
-          }
-        });
-        
-        // Обработчик waiting для показа индикатора загрузки
         videoPlayer.addEventListener('waiting', function() {
           if (videoLoading) {
             videoLoading.style.display = 'block';
           }
         });
         
-        // Периодическая проверка состояния видео и автоматический переход к следующему
-        // если текущее видео застряло или зависло
         let lastTimePosition = 0;
         let stuckCounter = 0;
         
         setInterval(function() {
           if (videoPlayer && !videoPlayer.paused && !videoPlayer.ended) {
-            // Если позиция видео не изменилась за 3 секунды и не загружается
             if (videoPlayer.currentTime === lastTimePosition && !videoPlayer.seeking) {
               stuckCounter++;
-              console.log(`Видео не прогрессирует: ${stuckCounter}/2`);
               
               if (stuckCounter >= 2) {
-                console.warn("Видео зависло, принудительно переходим к следующему");
                 stuckCounter = 0;
                 playVideo(currentVideoIndex + 1);
               }
             } else {
-              // Сбрасываем счетчик, если видео проигрывается нормально
               stuckCounter = 0;
               lastTimePosition = videoPlayer.currentTime;
             }
           } else if (videoPlayer && videoPlayer.paused && !videoPlayer.ended && 
                      document.documentElement.hasAttribute('data-user-interacted')) {
-            console.log("Обнаружена пауза видео - возобновляем воспроизведение");
-            
             videoPlayer.play()
-              .catch(error => {
-                console.log('Ошибка возобновления воспроизведения:', error);
-              });
+              .catch(error => {});
           }
         }, 3000);
         
-        // Запускаем инициализацию видеоплеера
         fetchVideoList();
       }
       
-      // Дополнительная проверка состояния звука каждые 10 секунд
       setInterval(function() {
-        // Проверяем только если видео показывается
         if (showVideo && videoPlayer) {
-          // Проверяем логическое условие: если аудио не воспроизводится, но видео без звука
           if (!isPlaying && playQueue.length === 0) {
-            // Если флаг audioPlaying активен, но не играется аудио - сбрасываем флаг
             if (window.audioPlaying) {
-              console.log("Несоответствие состояния: аудио не играет, но флаг активен - сбрасываем");
               window.audioPlaying = false;
             }
             
-            // Если видео заглушено, но аудио не активно и пользователь не отключил звук
             if (videoPlayer.muted && !videoIsMuted) {
-              console.log("Периодическая проверка: видео без звука, хотя нет активного аудио - включаем звук");
               videoPlayer.muted = false;
               videoPlayer.volume = videoVolume;
             }

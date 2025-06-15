@@ -1,5 +1,3 @@
-<!-- Демонстрационный блок Панели Администратора -->
-
 <div class="container fade-in" data-database-name="demo_base">
     <div class="page-header">
         <h1 class="page-title"><i class="fas fa-cogs mr-2"></i>Панель администратора</h1>
@@ -26,7 +24,6 @@
     </ul>
 
     <div class="tab-content" id="adminTabContent">
-        <!-- ВКЛАДКА ПОЛЬЗОВАТЕЛИ -->
         <div class="tab-pane fade show active" id="users" role="tabpanel">
             <div class="d-flex justify-content-between mb-4">
                 <div>
@@ -42,7 +39,6 @@
                             <tr><th width="40"></th><th width="60">ID</th><th>Имя</th><th>Роль</th><th>Кабинет</th><th>Действия</th></tr>
                         </thead>
                         <tbody>
-                            <!-- Демо-группа -->
                             <tr class="group-row">
                                 <td colspan="6" class="p-0">
                                     <div class="group-header">
@@ -88,7 +84,6 @@
                                     </div>
                                 </td>
                             </tr>
-                            <!-- Демо-пользователи без группы -->
                             <tr class="user-row">
                                 <td><div class="form-check"><input type="checkbox" class="form-check-input user-checkbox" data-user-id="15" id="user-15"><label class="form-check-label" for="user-15"></label></div></td>
                                 <td>15</td>
@@ -123,7 +118,6 @@
             </div>
         </div>
 
-        <!-- ВКЛАДКА УСЛУГИ -->
         <div class="tab-pane fade" id="services" role="tabpanel">
             <div class="d-flex justify-content-between mb-4">
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addServiceModal"><i class="fas fa-plus-circle"></i> Добавить услугу</button>
@@ -164,7 +158,6 @@
             </div>
         </div>
 
-        <!-- ВКЛАДКА ВИДЕО -->
         <div class="tab-pane fade" id="videos" role="tabpanel">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <div>
@@ -197,14 +190,13 @@
     </div>
 </div>
 
-	<!-- Модальное окно создания папки -->
 	<div class="modal fade" id="createFolderModal" tabindex="-1" role="dialog" aria-labelledby="createFolderModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="createFolderModalLabel"><i class="fas fa-folder-plus mr-2"></i>Создать новую папку</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+						<span aria-hidden="true">×</span>
 					</button>
 				</div>
 				<div class="modal-body">
@@ -228,9 +220,8 @@
 		</div>
 	</div>
 
-	<!-- Модальное окно загрузки видео -->
 	<div class="modal fade" id="uploadVideoModal" tabindex="-1" role="dialog" aria-labelledby="uploadVideoModalLabel" aria-hidden="true">
-		<div class="modal-dialog modal-lg" role="document"> <!-- Добавлен modal-lg для большего пространства -->
+		<div class="modal-dialog modal-lg" role="document"> 
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="uploadVideoModalLabel"><i class="fas fa-upload mr-2"></i>Загрузить видео</h5>
@@ -243,7 +234,6 @@
 						<div class="form-group">
 							<label for="videoFile">Выберите видеофайлы</label>
 							<div class="custom-file">
-								<!-- Добавлен атрибут 'multiple' -->
 								<input type="file" class="custom-file-input" id="videoFile" name="video" accept="video/*" required multiple>
 								<label class="custom-file-label" for="videoFile">Выберите файлы...</label>
 							</div>
@@ -251,11 +241,9 @@
 							<small class="form-text text-muted">Видео будет загружено в директорию: <span id="current-dir-for-upload">/</span></small>
 						</div>
 						
-						<!-- Новый контейнер для отображения прогресса -->
 						<div id="uploadProgressContainer" class="mt-3" style="display: none;">
 							<h6 class="mb-2">Прогресс загрузки:</h6>
 							<div id="upload-progress-list">
-								<!-- Сюда будут добавляться индикаторы прогресса для каждого файла -->
 							</div>
 						</div>
 						
@@ -273,14 +261,13 @@
 		</div>
 	</div>
 
-	<!-- Модальное окно для переименования -->
 	<div class="modal fade" id="renameModal" tabindex="-1" role="dialog" aria-labelledby="renameModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="renameModalLabel"><i class="fas fa-edit mr-2"></i>Переименовать</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+						<span aria-hidden="true">×</span>
 					</button>
 				</div>
 				<div class="modal-body">
@@ -305,14 +292,13 @@
 		</div>
 	</div>
 
-	<!-- Модальное окно для перемещения файла/папки -->
 	<div class="modal fade" id="moveModal" tabindex="-1" role="dialog" aria-labelledby="moveModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="moveModalLabel"><i class="fas fa-exchange-alt mr-2"></i>Переместить</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+						<span aria-hidden="true">×</span>
 					</button>
 				</div>
 				<div class="modal-body">
@@ -323,7 +309,6 @@
 							<label for="targetFolder">Выберите целевую папку</label>
 							<select class="form-control" id="targetFolder" required>
 								<option value="/">/</option>
-								<!-- Другие папки будут добавлены через JavaScript -->
 							</select>
 						</div>
 						<div class="modal-footer">
@@ -340,14 +325,13 @@
 		</div>
 	</div>
 
-	<!-- Модальное окно для предпросмотра видео -->
 	<div class="modal fade" id="previewVideoModal" tabindex="-1" role="dialog" aria-labelledby="previewVideoModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="previewVideoModalLabel"><i class="fas fa-film mr-2"></i>Просмотр видео</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+						<span aria-hidden="true">×</span>
 					</button>
 				</div>
 				<div class="modal-body text-center">
@@ -367,14 +351,13 @@
 		</div>
 	</div>
 
-	<!-- Модальное окно для подтверждения удаления -->
 	<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header bg-danger text-white">
 					<h5 class="modal-title" id="confirmDeleteModalLabel"><i class="fas fa-exclamation-triangle mr-2"></i>Подтверждение удаления</h5>
 					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+						<span aria-hidden="true">×</span>
 					</button>
 				</div>
 				<div class="modal-body">
@@ -397,7 +380,6 @@
 		</div>
 	</div>
 
-	<!-- Шаблоны для карточек файлов и папок -->
 	<template id="folder-card-template">
 		<div class="col-md-4 col-lg-3 mb-4 folder-card">
 			<div class="card bg-dark text-light folder-item">
@@ -471,14 +453,13 @@
 		</div>
 	</template>
 
-    <!-- Модальное окно для создания группы -->
     <div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="groupModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="groupModalLabel"><i class="fas fa-object-group mr-2"></i>Создать группу</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -508,7 +489,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="addUserModalLabel"><i class="fas fa-user-plus mr-2"></i>Добавить пользователя</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -571,10 +552,9 @@
 							<input type="text" class="form-control" id="editUsername" name="username" required>
 						</div>
                         <div class="form-group">
-                            <label for="editRole"> <!-- Используем ID 'editRole' -->
+                            <label for="editRole"> 
                                 <i class="fas fa-user-tag mr-1"></i> Роль
                             </label>
-                            <!-- Устанавливаем ID 'editRole' для единообразия с JS -->
                             {{ user_form.role(class_='form-control', id='editRole') }}
                         </div>
 
@@ -589,7 +569,6 @@
 							<hr>
 							<h6><i class="fas fa-video mr-1"></i> Настройки видео</h6>
 							<div class="form-check mb-2">
-								<!-- Убедились, что чекбокс только один -->
 								<input type="checkbox" class="form-check-input" id="editShowVideo" name="show_video">
 								<label class="form-check-label" for="editShowVideo">Показывать видео</o>
 							</div>
@@ -598,7 +577,6 @@
 									<i class="fas fa-folder-open mr-1"></i> Папка с видео
 								</label>
 								<select class="form-control" id="editVideoFolder" name="video_folder">
-                                    <!-- Опции будут загружаться динамически -->
 								</select>
 								<small class="form-text text-muted">
 									Выберите папку в директории <strong>static/video/{{current_user.database_name}}/</strong>
@@ -631,20 +609,18 @@
 		</div>
 	</div>
 
-    <!-- Объединенное модальное окно управления услугами пользователя -->
     <div class="modal fade" id="userServicesModal" tabindex="-1" role="dialog" aria-labelledby="userServicesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="userServicesModalLabel"><i class="fas fa-tasks mr-2"></i>Управление услугами пользователя</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="userIdField" value="">
                     
-                    <!-- Вкладки для переключения -->
                     <ul class="nav nav-pills mb-3" id="servicesTab" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active" id="assigned-services-tab" data-toggle="pill" href="#assigned-services" role="tab">
@@ -658,9 +634,7 @@
                         </li>
                     </ul>
                     
-                    <!-- Содержимое вкладок -->
                     <div class="tab-content" id="servicesTabContent">
-                        <!-- Вкладка назначенных услуг -->
                         <div class="tab-pane fade show active" id="assigned-services" role="tabpanel">
                             <div class="form-group">
                                 <div class="input-group mb-3">
@@ -673,7 +647,6 @@
                             
                             <div class="services-list">
                                 <div id="userServicesList">
-                                    <!-- Здесь будет список назначенных услуг -->
                                     <div class="text-center p-4" id="loadingServices">
                                         <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
                                         <p>Загрузка услуг...</p>
@@ -686,7 +659,6 @@
                             </div>
                         </div>
                         
-                        <!-- Вкладка доступных услуг -->
                         <div class="tab-pane fade" id="available-services" role="tabpanel">
                             <div class="form-group">
                                 <div class="input-group mb-3">
@@ -699,7 +671,6 @@
                             
                             <div class="available-services-grid mb-3">
                                 <div id="availableServicesList">
-                                    <!-- Здесь будет список доступных услуг -->
                                     <div class="text-center p-4" id="loadingAvailableServices">
                                         <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
                                         <p>Загрузка доступных услуг...</p>
@@ -737,7 +708,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="addServiceModalLabel"><i class="fas fa-plus-circle mr-2"></i>Добавить новую услугу</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -776,14 +747,13 @@
         </div>
     </div>
 
-    <!-- Модальное окно для редактирования услуги -->
     <div class="modal fade" id="editServiceModal" tabindex="-1" role="dialog" aria-labelledby="editServiceModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editServiceModalLabel"><i class="fas fa-edit mr-2"></i>Редактировать услугу</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -827,14 +797,13 @@
         </div>
     </div>
 
-    <!-- Модальное окно лицензия -->
     <div class="modal fade" id="licenseModal" tabindex="-1" role="dialog" aria-labelledby="licenseModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="licenseModalLabel"><i class="fas fa-file-contract mr-2"></i>Лицензионное соглашение</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -898,19 +867,17 @@
         </div>
     </div>
     
-	<!-- Компактное модальное окно для редактирования расписания -->
 	<div class="modal fade" id="scheduleServiceModal" tabindex="-1" role="dialog" aria-labelledby="scheduleServiceModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="scheduleServiceModalLabel"><i class="fas fa-calendar-alt mr-2"></i>Редактирование расписания</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+						<span aria-hidden="true">×</span>
 					</button>
 				</div>
 				<div class="modal-body">
 					<form id="scheduleForm">
-						<!-- Скрытое поле для хранения ID сервиса -->
 						<input type="hidden" id="currentServiceIdField" value="">
 						
 						<div class="form-group">
@@ -1102,211 +1069,669 @@
 	</div>
 
 
-<!-- Уведомления будут добавляться сюда -->
 <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
-<!-- Шаблоны для карточек (остаются без изменений) -->
 <template id="folder-card-template">
-    <!-- ... ваш шаблон папки ... -->
 </template>
 <template id="video-card-template">
-    <!-- ... ваш шаблон видео ... -->
 </template>
 
 <script>
-if (!window.adminScriptLoaded) {
-    window.adminScriptLoaded = true;
-    
-    document.addEventListener('DOMContentLoaded', function() {
+
+document.addEventListener('DOMContentLoaded', function() {
+    function showNotification(message, type = 'success') {
+        const container = $('#notification-container');
+        const icon = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' }[type];
+        const alertClass = { success: 'alert-success', error: 'alert-danger', warning: 'alert-warning', info: 'alert-info' }[type];
+        const notification = $(`<div class="alert ${alertClass} alert-dismissible fade show" role="alert" style="min-width: 300px;"><i class="fas ${icon} mr-2"></i>${message}<button type="button" class="close" data-dismiss="alert">×</button></div>`);
+        container.append(notification);
+        setTimeout(() => notification.fadeOut(500, () => notification.remove()), 5000);
+    }
+
+    $(document).on('click', '[data-toggle="modal"]', function(e) {
+        const target = $(this).data('target');
         
-        // --- УТИЛИТА ДЛЯ УВЕДОМЛЕНИЙ ---
-        function showNotification(message, type = 'success') {
-            const container = $('#notification-container');
-            const icon = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' }[type];
-            const alertClass = { success: 'alert-success', error: 'alert-danger', warning: 'alert-warning', info: 'alert-info' }[type];
-            const notification = $(`<div class="alert ${alertClass} alert-dismissible fade show" role="alert" style="min-width: 300px;"><i class="fas ${icon} mr-2"></i>${message}<button type="button" class="close" data-dismiss="alert">×</button></div>`);
-            container.append(notification);
-            setTimeout(() => notification.fadeOut(500, () => notification.remove()), 5000);
-        }
-
-        // --- ЛОГИКА ВКЛАДКИ "ПОЛЬЗОВАТЕЛИ" ---
-        // Удаление пользователя
-        $(document).on('click', '.delete-user-btn', function() {
-            if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
-                $(this).closest('.user-row').fadeOut(500, function() { $(this).remove(); });
-                showNotification('Пользователь успешно удален', 'success');
-            }
-        });
-
-        // Открытие модального окна редактирования
-        $(document).on('click', '.edit-user-btn', function() {
-            const button = $(this);
-            $('#editUserId').val(button.data('id'));
-            $('#editUsername').val(button.data('username'));
-            $('#editRole').val(button.data('role')).trigger('change');
-            $('#editCabinet').val(button.data('cabinet'));
-            
-            // Логика для настроек видео
-            if (button.data('role') === 'tablo') {
-                $('#videoSettingsContainer').show();
-                const showVideo = button.data('video') === true || button.data('video') === 'True' || button.data('video') === 'true';
-                $('#editShowVideo').prop('checked', showVideo);
-                if(showVideo) {
-                    $('#videoFolderContainer').show();
-                    // Симуляция загрузки папок
-                    $('#editVideoFolder').html('<option value="">Загрузка...</option>');
-                    setTimeout(() => {
-                        const folders = '<option value="">- Не выбрано -</option><option value="promo">promo</option><option value="education">education</option>';
-                        $('#editVideoFolder').html(folders).val(button.data('video-folder'));
-                    }, 500);
-                } else {
-                    $('#videoFolderContainer').hide();
-                }
-            } else {
-                $('#videoSettingsContainer').hide();
-            }
-        });
+        $('.modal').not(target).modal('hide');
         
-        // Показ/скрытие выбора папки с видео при изменении роли или чекбокса
-        $('#editRole, #editShowVideo').on('change', function(){
-            const isTablo = $('#editRole').val() === 'tablo';
-            const isChecked = $('#editShowVideo').is(':checked');
-            if(isTablo) {
-                $('#videoSettingsContainer').show();
-                if(isChecked) $('#videoFolderContainer').show();
-                else $('#videoFolderContainer').hide();
-            } else {
-                $('#videoSettingsContainer').hide();
-            }
-        });
-
-        // Сохранение изменений пользователя (симуляция)
-        $('#saveUserChangesBtn').on('click', function() {
-            showNotification('Изменения успешно сохранены!', 'success');
-            $('#editUserModal').modal('hide');
-        });
-
-        // Раскрытие/сворачивание групп
-        $(document).on('click', '.toggle-group', function() {
-            const groupId = $(this).data('group-id');
-            $(`.group-${groupId}`).toggle();
-            $(this).find('i').toggleClass('fa-plus fa-minus');
-        });
+        $('.modal-backdrop').remove();
         
-        // --- ЛОГИКА ВКЛАДКИ "УСЛУГИ" ---
-        $(document).on('click', '.delete-service-btn', function() {
-            if (confirm('Вы уверены, что хотите удалить эту услугу?')) {
-                $(this).closest('.service-row').fadeOut(500, function() { $(this).remove(); });
-                showNotification('Услуга успешно удалена', 'success');
-            }
-        });
-        
-        $(document).on('click', '.delete-all-tickets-btn', function() {
-            if (confirm('Вы уверены, что хотите удалить ВСЕ талоны для этой услуги?')) {
-                 showNotification('Все талоны для услуги удалены', 'warning');
-            }
-        });
-
-        // --- ЛОГИКА ВКЛАДКИ "ВИДЕО" (СИМУЛЯТОР ФАЙЛОВОГО МЕНЕДЖЕРА) ---
-        const fileSystem = {
-            '/': {
-                folders: [{ name: 'promo', files: 1, size: '150 МБ' }, { name: 'education', files: 2, size: '320 МБ' }],
-                videos: [{ name: 'intro.mp4', size: '25 МБ', duration: '00:30' }, { name: 'background.mp4', size: '80 МБ', duration: '05:12' }]
-            },
-            '/promo/': {
-                folders: [],
-                videos: [{ name: 'advert_new.mp4', size: '150 МБ', duration: '01:15' }]
-            },
-            '/education/': {
-                folders: [{ name: 'internal', files: 1, size: '120 МБ' }],
-                videos: [{ name: 'howto_wash_hands.mp4', size: '200 МБ', duration: '02:45' }]
-            },
-            '/education/internal/': {
-                folders: [],
-                videos: [{ name: 'doctor_speech.mp4', size: '120 МБ', duration: '08:20' }]
-            }
-        };
-
-        function renderFileSystem(path) {
-            const foldersContainer = $('#folders-container').empty();
-            const videosContainer = $('#videos-container').empty();
-            const breadcrumb = $('#breadcrumb-container').empty();
-            
-            const content = fileSystem[path] || fileSystem['/'];
-
-            // Рендер "хлебных крошек"
-            let currentPath = '';
-            const pathParts = path.split('/').filter(p => p);
-            breadcrumb.append(`<li class="breadcrumb-item"><a href="#" class="folder-link" data-path="/">Корень</a></li>`);
-            pathParts.forEach(part => {
-                currentPath += `/${part}`;
-                breadcrumb.append(`<li class="breadcrumb-item"><a href="#" class="folder-link" data-path="${currentPath}/">${part}</a></li>`);
-            });
-
-            // Рендер папок
-            if (content.folders.length) {
-                content.folders.forEach(folder => {
-                    const card = $(`<div class="col-md-3 mb-4 folder-card">
-                        <div class="card bg-dark text-light folder-item" data-path="${path}${folder.name}/" data-name="${folder.name}">
-                            <div class="card-body p-3">
-                                <i class="fas fa-folder fa-2x text-warning"></i>
-                                <h6 class="card-title text-truncate mt-2">${folder.name}</h6>
-                                <p class="card-text small text-muted">${folder.files} видео, ${folder.size}</p>
-                            </div>
-                            <div class="card-footer p-2 text-center"><button class="btn btn-primary btn-sm open-folder">Открыть</button></div>
-                        </div></div>`);
-                    foldersContainer.append(card);
-                });
-            } else {
-                foldersContainer.html('<div class="col-12 text-center text-muted"><p>Нет папок</p></div>');
-            }
-
-            // Рендер видео
-            if (content.videos.length) {
-                content.videos.forEach(video => {
-                    const card = $(`<div class="col-md-3 mb-4 video-card">
-                        <div class="card bg-dark text-light video-item" data-path="${path}${video.name}" data-name="${video.name}">
-                           <div class="video-thumbnail position-relative d-flex align-items-center justify-content-center" style="height: 140px; background-color: #111;">
-                                <i class="fas fa-play-circle fa-3x text-light opacity-75"></i>
-                                <span class="position-absolute badge badge-dark" style="bottom: 5px; right: 5px;">${video.duration}</span>
-                           </div>
-                           <div class="card-body p-3">
-                                <h6 class="card-title text-truncate">${video.name}</h6>
-                                <p class="card-text small text-muted">${video.size}</p>
-                           </div>
-                           <div class="card-footer p-2 text-center">
-                                <button class="btn btn-info btn-sm preview-video-btn"><i class="fas fa-play"></i> Просмотр</button>
-                                <button class="btn btn-danger btn-sm delete-video-btn ml-2"><i class="fas fa-trash"></i></button>
-                           </div>
-                        </div></div>`);
-                    videosContainer.append(card);
-                });
-            } else {
-                videosContainer.html('<div class="col-12 text-center text-muted"><p>Нет видео</p></div>');
-            }
-        }
-
-        // Навигация по папкам
-        $(document).on('click', '.folder-link, .open-folder', function(e) {
-            e.preventDefault();
-            const path = $(this).data('path') || $(this).closest('.folder-item').data('path');
-            renderFileSystem(path);
-        });
-
-        // Удаление видео/папки (симуляция)
-        $(document).on('click', '.delete-video-btn, .delete-folder-btn', function(e) {
-            e.preventDefault();
-             if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
-                $(this).closest('.video-card, .folder-card').fadeOut(500, function() { $(this).remove(); });
-                showNotification('Элемент удален', 'success');
-            }
-        });
-
-        // Инициализация при первом показе вкладки
-        $('a[data-toggle="pill"][href="#videos"]').on('shown.bs.tab', function() {
-            renderFileSystem('/');
-        });
-
+        $('body').removeClass('modal-open');
     });
-}
+
+    $('.modal .btn-secondary[data-dismiss="modal"], .modal .close').on('click', function() {
+        const modal = $(this).closest('.modal');
+        modal.modal('hide');
+    });
+    
+    $('.modal form').on('submit', function(e) {
+        e.preventDefault();
+        const modal = $(this).closest('.modal');
+        showNotification('Операция выполнена успешно', 'success');
+        modal.modal('hide');
+    });
+
+    $(document).on('click', '.delete-user-btn', function() {
+        if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+            $(this).closest('.user-row').fadeOut(500, function() { $(this).remove(); });
+            showNotification('Пользователь успешно удален', 'success');
+        }
+    });
+
+    $(document).on('click', '.edit-user-btn', function() {
+        const button = $(this);
+        $('#editUserId').val(button.data('id'));
+        $('#editUsername').val(button.data('username'));
+        $('#editRole').val(button.data('role')).trigger('change');
+        $('#editCabinet').val(button.data('cabinet'));
+        
+        const showVideo = button.data('video') === true || button.data('video') === 'true';
+        if (button.data('role') === 'tablo') {
+            $('#videoSettingsContainer').show();
+            $('#editShowVideo').prop('checked', showVideo);
+            if(showVideo) {
+                $('#videoFolderContainer').show();
+                $('#editVideoFolder').html('<option value="">Загрузка...</option>');
+                setTimeout(() => {
+                    const folders = '<option value="">- Не выбрано -</option><option value="promo">promo</option><option value="education">education</option>';
+                    $('#editVideoFolder').html(folders).val(button.data('video-folder'));
+                }, 500);
+            } else {
+                $('#videoFolderContainer').hide();
+            }
+        } else {
+            $('#videoSettingsContainer').hide();
+        }
+    });
+    
+    $('#editRole').on('change', function(){
+        const isTablo = $(this).val() === 'tablo';
+        if(isTablo) {
+            $('#videoSettingsContainer').show();
+            if($('#editShowVideo').is(':checked')) {
+                $('#videoFolderContainer').show();
+            } else {
+                $('#videoFolderContainer').hide();
+            }
+        } else {
+            $('#videoSettingsContainer').hide();
+        }
+    });
+    
+    $('#editShowVideo').on('change', function(){
+        if($(this).is(':checked')) {
+            $('#videoFolderContainer').show();
+        } else {
+            $('#videoFolderContainer').hide();
+        }
+    });
+
+    $('#editUserForm').on('submit', function(e) {
+        e.preventDefault();
+        showNotification('Изменения пользователя сохранены!', 'success');
+        $('#editUserModal').modal('hide');
+    });
+
+    $('#groupUsersBtn').on('click', function() {
+        if($('.user-checkbox:checked').length === 0) {
+            showNotification('Выберите пользователей для объединения в группу', 'warning');
+            return;
+        }
+        $('#groupModal').modal('show');
+    });
+    
+    $('#groupForm').on('submit', function(e) {
+        e.preventDefault();
+        showNotification('Группа успешно создана!', 'success');
+        $('#groupModal').modal('hide');
+    });
+
+    $(document).on('click', '.toggle-group', function() {
+        const groupId = $(this).data('group-id');
+        $(`.group-${groupId}`).toggle();
+        $(this).find('i').toggleClass('fa-plus fa-minus');
+    });
+    
+    $(document).on('click', '.show-dependencies-btn', function() {
+        const userId = $(this).data('user-id');
+        $('#userIdField').val(userId);
+        
+        $('#loadingServices').show();
+        $('#noAssignedServices').hide();
+        
+        setTimeout(() => {
+            $('#loadingServices').hide();
+            
+            if (userId === 10 || userId === 12) {
+                $('#userServicesList').html(`
+                    <div class="list-group">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Прием терапевта</strong>
+                                <div class="text-muted small">Кабинет: 101</div>
+                            </div>
+                            <button class="btn btn-danger btn-sm remove-service-btn" data-service-id="1">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `);
+            } else if (userId === 15) {
+                $('#userServicesList').html(`
+                    <div class="list-group">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Регистратура</strong>
+                                <div class="text-muted small">Все услуги</div>
+                            </div>
+                            <button class="btn btn-danger btn-sm remove-service-btn" data-service-id="all">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `);
+            } else {
+                $('#noAssignedServices').show();
+            }
+        }, 800);
+        
+        $('#userServicesModal').modal('show');
+    });
+    
+    $(document).on('click', '.delete-service-btn', function() {
+        if (confirm('Вы уверены, что хотите удалить эту услугу?')) {
+            $(this).closest('.service-row').fadeOut(500, function() { $(this).remove(); });
+            showNotification('Услуга успешно удалена', 'success');
+        }
+    });
+    
+    $(document).on('click', '.schedule-service-btn', function() {
+        const serviceId = $(this).data('service-id');
+        const serviceName = $(this).data('service-name');
+        
+        $('#currentServiceIdField').val(serviceId);
+        $('#planName').val(serviceName);
+        
+        $('.schedule-container input[type="time"]').val('09:00');
+        $('#monday_end, #tuesday_end, #wednesday_end, #thursday_end, #friday_end').val('18:00');
+        $('#saturday_end, #sunday_end').val('14:00');
+        $('#monday, #tuesday, #wednesday, #thursday, #friday').prop('checked', true);
+        $('#saturday, #sunday').prop('checked', false);
+        
+        $('#scheduleServiceModal').modal('show');
+    });
+    
+    $('#copyToAllBtn').on('click', function() {
+        const startTime = $('#monday_start').val();
+        const endTime = $('#monday_end').val();
+        
+        $('.schedule-container input[type="time"][id$="_start"]').val(startTime);
+        $('.schedule-container input[type="time"][id$="_end"]').val(endTime);
+    });
+    
+    $('#workdaysOnlyBtn').on('click', function() {
+        $('#monday, #tuesday, #wednesday, #thursday, #friday').prop('checked', true);
+        $('#saturday, #sunday').prop('checked', false);
+    });
+    
+    $('#saveScheduleBtn').on('click', function() {
+        showNotification('Расписание успешно сохранено!', 'success');
+        $('#scheduleServiceModal').modal('hide');
+    });
+    
+    $(document).on('click', '.delete-all-tickets-btn', function() {
+        if (confirm('Вы уверены, что хотите удалить ВСЕ талоны для этой услуги?')) {
+             showNotification('Все талоны для услуги удалены', 'warning');
+        }
+    });
+
+    $('#addServiceForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const serviceName = $('#serviceName').val();
+        const startNumber = $('#startNumber').val();
+        const endNumber = $('#endNumber').val();
+        
+        const newServiceRow = $(`
+            <tr class="service-row">
+                <td><strong>${serviceName}</strong></td>
+                <td>${startNumber}</td>
+                <td>${endNumber}</td>
+                <td><span class="badge badge-pill badge-secondary"><i class="fas fa-door-open mr-1"></i> -</span></td>
+                <td>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary btn-sm edit-service-btn" data-toggle="modal" data-service-id="new" data-service-name="${serviceName}" data-start-number="${startNumber}" data-end-number="${endNumber}" data-cabinet=""><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-info btn-sm schedule-service-btn" data-service-id="new" data-service-name="${serviceName}"><i class="fas fa-calendar-alt"></i></button>
+                        <button class="btn btn-danger btn-sm delete-service-btn"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn btn-warning btn-sm delete-all-tickets-btn"><i class="fas fa-ticket-alt"></i> <i class="fas fa-ban"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `);
+        
+        $('#servicesList').append(newServiceRow);
+        showNotification('Услуга успешно добавлена!', 'success');
+        $('#addServiceModal').modal('hide');
+        this.reset();
+    });
+    
+    $(document).on('click', '.edit-service-btn', function() {
+        const button = $(this);
+        
+        $('#editServiceId').val(button.data('service-id'));
+        $('#editServiceName').val(button.data('service-name'));
+        $('#editStartNumber').val(button.data('start-number'));
+        $('#editEndNumber').val(button.data('end-number'));
+        $('#editCabinetNumber').val(button.data('cabinet'));
+        
+        $('#editServiceModal').modal('show');
+    });
+    
+    $('#editServiceForm').on('submit', function(e) {
+        e.preventDefault();
+        showNotification('Изменения услуги сохранены!', 'success');
+        $('#editServiceModal').modal('hide');
+    });
+
+    const fileSystem = {
+        '/': {
+            folders: [{ name: 'promo', files: 1, size: '150 МБ' }, { name: 'education', files: 2, size: '320 МБ' }],
+            videos: [{ name: 'intro.mp4', size: '25 МБ', duration: '00:30' }, { name: 'background.mp4', size: '80 МБ', duration: '05:12' }]
+        },
+        '/promo/': {
+            folders: [],
+            videos: [{ name: 'advert_new.mp4', size: '150 МБ', duration: '01:15' }]
+        },
+        '/education/': {
+            folders: [{ name: 'internal', files: 1, size: '120 МБ' }],
+            videos: [{ name: 'howto_wash_hands.mp4', size: '200 МБ', duration: '02:45' }]
+        },
+        '/education/internal/': {
+            folders: [],
+            videos: [{ name: 'doctor_speech.mp4', size: '120 МБ', duration: '08:20' }]
+        }
+    };
+    
+    let currentPath = '/';
+
+    function renderFileSystem(path) {
+        currentPath = path;
+        const foldersContainer = $('#folders-container').empty();
+        const videosContainer = $('#videos-container').empty();
+        const breadcrumb = $('#breadcrumb-container').empty();
+        
+        $('#current-dir-for-new-folder, #current-dir-for-upload').text(path);
+        
+        const content = fileSystem[path] || fileSystem['/'];
+
+        let crumbPath = '';
+        const pathParts = path.split('/').filter(p => p);
+        breadcrumb.append(`<li class="breadcrumb-item"><a href="#" class="folder-link" data-path="/">Корень</a></li>`);
+        pathParts.forEach(part => {
+            crumbPath += `/${part}`;
+            breadcrumb.append(`<li class="breadcrumb-item"><a href="#" class="folder-link" data-path="${crumbPath}/">${part}</a></li>`);
+        });
+
+        if (content.folders && content.folders.length) {
+            content.folders.forEach(folder => {
+                const card = $(`<div class="col-md-4 col-lg-3 mb-4 folder-card">
+                    <div class="card bg-dark text-light folder-item" data-path="${path}${folder.name}/" data-name="${folder.name}">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="folder-icon">
+                                    <i class="fas fa-folder fa-2x text-warning"></i>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-dark dropdown-toggle" type="button" data-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item rename-folder" href="#"><i class="fas fa-edit mr-2"></i>Переименовать</a>
+                                        <a class="dropdown-item move-folder" href="#"><i class="fas fa-exchange-alt mr-2"></i>Переместить</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item delete-folder text-danger" href="#"><i class="fas fa-trash-alt mr-2"></i>Удалить</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <h6 class="card-title folder-name-text text-truncate mb-0">${folder.name}</h6>
+                            <p class="card-text folder-info small text-muted mt-2">${folder.files} видео, ${folder.size}</p>
+                        </div>
+                        <div class="card-footer p-2 text-center">
+                            <button class="btn btn-primary btn-sm open-folder">
+                                <i class="fas fa-folder-open mr-1"></i> Открыть
+                            </button>
+                        </div>
+                    </div></div>`);
+                foldersContainer.append(card);
+            });
+        } else {
+            foldersContainer.html('<div class="col-12 text-center text-muted"><p>Нет папок</p></div>');
+        }
+
+        if (content.videos && content.videos.length) {
+            content.videos.forEach(video => {
+                const card = $(`<div class="col-md-4 col-lg-3 mb-4 video-card">
+                    <div class="card bg-dark text-light video-item" data-path="${path}${video.name}" data-name="${video.name}">
+                       <div class="video-thumbnail position-relative" style="height: 140px; background-color: #1a2530; overflow: hidden;">
+                            <div class="play-icon position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                <i class="fas fa-play-circle fa-3x text-light opacity-75"></i>
+                            </div>
+                            <div class="video-duration position-absolute badge badge-dark" style="bottom: 10px; right: 10px;">
+                                ${video.duration}
+                            </div>
+                       </div>
+                       <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="video-icon">
+                                    <i class="fas fa-film text-info"></i>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-dark dropdown-toggle" type="button" data-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item preview-video" href="#"><i class="fas fa-eye mr-2"></i>Просмотр</a>
+                                        <a class="dropdown-item rename-video" href="#"><i class="fas fa-edit mr-2"></i>Переименовать</a>
+                                        <a class="dropdown-item move-video" href="#"><i class="fas fa-exchange-alt mr-2"></i>Переместить</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item delete-video text-danger" href="#"><i class="fas fa-trash-alt mr-2"></i>Удалить</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <h6 class="card-title video-name-text text-truncate">${video.name}</h6>
+                            <p class="card-text video-info small text-muted">${video.size}</p>
+                       </div>
+                       <div class="card-footer p-2 text-center">
+                            <button class="btn btn-info btn-sm preview-video-btn">
+                                <i class="fas fa-play mr-1"></i> Воспроизвести
+                            </button>
+                       </div>
+                    </div></div>`);
+                videosContainer.append(card);
+            });
+        } else {
+            videosContainer.html('<div class="col-12 text-center text-muted"><p>Нет видео</p></div>');
+        }
+    }
+
+    $(document).on('click', '.folder-link, .open-folder', function(e) {
+        e.preventDefault();
+        const path = $(this).data('path') || $(this).closest('.folder-item').data('path');
+        renderFileSystem(path);
+    });
+
+    $(document).on('click', '.preview-video-btn, .preview-video', function(e) {
+        e.preventDefault();
+        const videoItem = $(this).closest('.video-item');
+        const videoName = videoItem.data('name');
+        
+        $('#previewVideoModalLabel').html(`<i class="fas fa-film mr-2"></i>Просмотр: ${videoName}`);
+        $('#previewVideoPlayer').attr('src', '');
+        
+        $('#previewVideoModal').modal('show');
+    });
+
+    $('#createFolderForm').on('submit', function(e) {
+        e.preventDefault();
+        const folderName = $('#folderName').val();
+        
+        if (!fileSystem[currentPath].folders) {
+            fileSystem[currentPath].folders = [];
+        }
+        
+        fileSystem[currentPath].folders.push({
+            name: folderName,
+            files: 0,
+            size: '0 МБ'
+        });
+        
+        fileSystem[`${currentPath}${folderName}/`] = {
+            folders: [],
+            videos: []
+        };
+        
+        renderFileSystem(currentPath);
+        showNotification(`Папка "${folderName}" успешно создана!`, 'success');
+        $('#createFolderModal').modal('hide');
+        this.reset();
+    });
+
+    $('#uploadVideoForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const fileInput = $('#videoFile')[0];
+        if (fileInput.files.length === 0) {
+            showNotification('Выберите файлы для загрузки', 'warning');
+            return;
+        }
+        
+        $('#uploadProgressContainer').show();
+        $('#upload-progress-list').empty();
+        
+        Array.from(fileInput.files).forEach((file, index) => {
+            const progressItem = $(`
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small>${file.name}</small>
+                        <small class="progress-percent">0%</small>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-success progress-bar-${index}" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+            `);
+            
+            $('#upload-progress-list').append(progressItem);
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 10) + 5;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    const allCompleted = Array.from($('.progress-percent')).every(el => $(el).text() === '100%');
+                    if (allCompleted) {
+                        setTimeout(() => {
+                            showNotification('Все файлы успешно загружены!', 'success');
+                            $('#uploadVideoModal').modal('hide');
+                            
+                            Array.from(fileInput.files).forEach(file => {
+                                if (!fileSystem[currentPath].videos) {
+                                    fileSystem[currentPath].videos = [];
+                                }
+                                
+                                fileSystem[currentPath].videos.push({
+                                    name: file.name,
+                                    size: `${Math.round(file.size / (1024 * 1024))} МБ`,
+                                    duration: '00:30'
+                                });
+                            });
+                            
+                            renderFileSystem(currentPath);
+                            $('#uploadProgressContainer').hide();
+                            $('#uploadVideoForm')[0].reset();
+                        }, 500);
+                    }
+                }
+                
+                $(`.progress-bar-${index}`).css('width', `${progress}%`);
+                $(progressItem).find('.progress-percent').text(`${progress}%`);
+            }, 300 + (index * 100));
+        });
+    });
+
+    $(document).on('click', '.delete-video, .delete-folder', function(e) {
+        e.preventDefault();
+        const item = $(this).closest('.video-item, .folder-item');
+        const itemName = item.data('name');
+        const itemPath = item.data('path');
+        const isFolder = $(this).hasClass('delete-folder');
+        
+        $('#deleteItemType').val(isFolder ? 'folder' : 'video');
+        $('#deleteItemPath').val(itemPath);
+        $('#confirmDeleteText').text(`Вы уверены, что хотите удалить ${isFolder ? 'папку' : 'видео'} "${itemName}"?`);
+        
+        $('#confirmDeleteModal').modal('show');
+    });
+    
+    $('#confirmDeleteBtn').on('click', function() {
+        const itemType = $('#deleteItemType').val();
+        const itemPath = $('#deleteItemPath').val();
+        
+        if (itemType === 'folder') {
+            $(`.folder-item[data-path="${itemPath}"]`).closest('.folder-card').fadeOut(500, function() { $(this).remove(); });
+        } else {
+            $(`.video-item[data-path="${itemPath}"]`).closest('.video-card').fadeOut(500, function() { $(this).remove(); });
+        }
+        
+        showNotification(`${itemType === 'folder' ? 'Папка' : 'Видео'} успешно удалена!`, 'success');
+        $('#confirmDeleteModal').modal('hide');
+    });
+    
+    $(document).on('click', '.rename-video, .rename-folder', function(e) {
+        e.preventDefault();
+        const item = $(this).closest('.video-item, .folder-item');
+        const itemName = item.data('name');
+        const itemPath = item.data('path');
+        const isFolder = $(this).hasClass('rename-folder');
+        
+        $('#renameItemType').val(isFolder ? 'folder' : 'video');
+        $('#renameItemPath').val(itemPath);
+        $('#newName').val(itemName);
+        
+        $('#renameModal').modal('show');
+    });
+    
+    $('#renameForm').on('submit', function(e) {
+        e.preventDefault();
+        const itemType = $('#renameItemType').val();
+        
+        showNotification(`${itemType === 'folder' ? 'Папка' : 'Видео'} успешно переименована!`, 'success');
+        $('#renameModal').modal('hide');
+    });
+    
+    $(document).on('click', '.move-video, .move-folder', function(e) {
+        e.preventDefault();
+        const item = $(this).closest('.video-item, .folder-item');
+        const itemPath = item.data('path');
+        const isFolder = $(this).hasClass('move-folder');
+        
+        $('#moveItemType').val(isFolder ? 'folder' : 'video');
+        $('#moveItemPath').val(itemPath);
+        
+        $('#targetFolder').html('<option value="/">Корень (/)</option>');
+        Object.keys(fileSystem).filter(path => path !== '/' && path.endsWith('/')).forEach(path => {
+            $('#targetFolder').append(`<option value="${path}">${path}</option>`);
+        });
+
+        $('#moveModal').modal('show');
+    });
+
+    $('#moveForm').on('submit', function(e) {
+        e.preventDefault();
+        const itemType = $('#moveItemType').val();
+        
+        showNotification(`${itemType === 'folder' ? 'Папка' : 'Видео'} успешно перемещена!`, 'success');
+        $('#moveModal').modal('hide');
+        renderFileSystem(currentPath);
+    });
+
+    $('#videoFile').on('change', function() {
+        const fileCount = this.files.length;
+        let label = fileCount > 0 
+            ? (fileCount > 1 ? `Выбрано файлов: ${fileCount}` : this.files[0].name)
+            : 'Выберите файлы...';
+        
+        $(this).next('.custom-file-label').text(label);
+    });
+
+    $('#refreshDiskSpaceBtn').on('click', function() {
+        $(this).find('i').addClass('fa-spin');
+        setTimeout(() => {
+            $(this).find('i').removeClass('fa-spin');
+            showNotification('Информация о диске обновлена', 'info');
+        }, 800);
+    });
+
+    $('a[data-toggle="pill"][href="#videos"]').on('shown.bs.tab', function() {
+        renderFileSystem('/');
+    });
+
+    $('#acceptLicense').on('click', function() {
+        $('#licenseModal').modal('hide');
+        showNotification('Лицензионное соглашение принято', 'success');
+    });
+
+    $('#declineLicense').on('click', function() {
+        $('#licenseModal').modal('hide');
+        showNotification('Вы отклонили лицензионное соглашение', 'error');
+    });
+
+    setTimeout(function() {
+        if ($('#videos').hasClass('active')) {
+            renderFileSystem('/');
+        }
+    }, 500);
+
+    $('.modal').each(function() {
+        $(this).on('hidden.bs.modal', function() {
+            $(this).find('form').trigger('reset');
+            $(this).find('#uploadProgressContainer').hide();
+            
+            if ($('.modal:visible').length) {
+                $('body').addClass('modal-open');
+            } else {
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+            }
+        });
+    });
+
+    $(document).on('hidden.bs.modal', '.modal', function() {
+        if (!$('.modal:visible').length) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            $('body').css('padding-right', '');
+            $('body').css('overflow', '');
+        }
+    });
+
+    $(document).on('show.bs.modal', '.modal', function() {
+        if ($('.modal.show').length > 0) {
+            $('.modal.show').modal('hide');
+            $('.modal-backdrop').remove();
+        }
+    });
+
+    $(document).on('click', '.dropdown-toggle', function(e) {
+        e.stopPropagation();
+    });
+
+    $(document).on('click', '.dropdown-menu a', function(e) {
+        e.stopPropagation();
+    });
+
+    $(document).on('show.bs.modal', '.modal', function() {
+        const zIndex = 1040 + (10 * $('.modal:visible').length);
+        $(this).css('z-index', zIndex);
+        setTimeout(() => {
+            $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
+        }, 0);
+    });
+
+    $('form').on('submit', function() {
+        $(this).find('button[type="submit"]').prop('disabled', true);
+        setTimeout(() => {
+            $(this).find('button[type="submit"]').prop('disabled', false);
+        }, 1000);
+    });
+
+    $('.modal .btn[data-dismiss="modal"]').on('click', function() {
+        const modalId = $(this).closest('.modal').attr('id');
+        $(`#${modalId}`).modal('hide');
+    });
+});
+
+
+
 </script>

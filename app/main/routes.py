@@ -8,8 +8,8 @@ from ..models.secondary_admin import User  # Импорт модели поль�
 from . import main
 
 
-@main.route('/index')
-def index():
+@main.route('/benefits')
+def benefits():
     """Маршрут для отображения главной страницы продукта Quick Queue"""
     # Создаем экземпляры форм
     user_form = UserForm()
@@ -17,7 +17,7 @@ def index():
     assign_service_form = AssignServiceForm()
     
     # Теперь передаем созданные экземпляры в шаблон
-    return render_template('index.html', 
+    return render_template('benefits.html', 
                            title='Quick Queue - Мультитенантная система электронной очереди', 
                            user_form=user_form, 
                            service_form=service_form, 
@@ -27,7 +27,7 @@ def index():
 def home():
     # Если пользователь не авторизован, сначала показываем лендинг
     if not current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.benefits'))
     
     print(f"Home route: current_user={current_user}, role={getattr(current_user, 'role', 'N/A')}")
     print(f"is_org_user={getattr(current_user, 'is_org_user', False)}")

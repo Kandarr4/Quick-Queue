@@ -60,6 +60,7 @@ class UserForm(FlaskForm):
     user_id = HiddenField('user_id')
     username = StringField('Имя пользователя', validators=[DataRequired(), Length(min=2, max=20)])
     password = PasswordField('Пароль', validators=[Optional()])
+    marquee_text = TextAreaField('Текст бегущей строки', validators=[Optional()])
     cabinet = StringField('Cabinet', validators=[Optional()])
 
     role = SelectField('Роль', choices=[

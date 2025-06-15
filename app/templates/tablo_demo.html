@@ -1,407 +1,491 @@
-    <div id="tablo-demo-wrapper">
-        <!-- Статус подключения -->
-        <div class="connection-status disconnected" id="connectionStatus">
-            <i class="fas fa-wifi"></i> Подключение...
-        </div>
+<div id="tablo-demo-wrapper">
+  <div class="demo-control-panel mb-3">
+    <div class="control-header">
+      <i class="fas fa-cogs mr-2"></i>Демо панель
+    </div>
+    <div class="control-content d-flex flex-wrap align-items-center">
+      <button id="generateTicketBtn" class="btn btn-primary mr-2 mb-2">
+        <i class="fas fa-ticket-alt mr-2"></i>Сгенерировать тикет
+      </button>
+      <button id="clearTicketsBtn" class="btn btn-danger mr-3 mb-2">
+        <i class="fas fa-trash mr-2"></i>Очистить все
+      </button>
+      <div class="form-check mr-3 mb-2">
+        <input class="form-check-input" type="checkbox" value="" id="playAudioCheck" checked>
+        <label class="form-check-label" for="playAudioCheck">
+          Озвучивать тикеты
+        </label>
+      </div>
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" value="" id="showVideoCheck" checked>
+        <label class="form-check-label" for="showVideoCheck">
+          Показывать видео
+        </label>
+      </div>
+    </div>
+  </div>
 
-        <!-- Статус воспроизведения звука -->
-        <div class="audio-status" id="audioStatus">
-            <i class="fas fa-volume-up"></i> Воспроизводится озвучка...
+  <div class="main-container"> 
+    <div class="header">
+      <img src="{{ url_for('static', filename='img/logo_organization.png') }}" class="logo logo-left" alt="Логотип организации">
+      <div class="clock-container">
+        <div class="clock" id="demo-clock">
+          <span class="hours">00</span>:<span class="minutes">00</span>:<span class="seconds">00</span>
         </div>
-
-        <!-- Панель для симуляции событий -->
-        <div class="alert alert-info text-center" id="demo-controls-tablo">
-            <strong>Демо-панель:</strong>
-            <button class="btn btn-sm btn-primary ml-2" id="simulate-call-btn">Симулировать вызов клиента</button>
-            <small class="form-text text-muted">Нажмите, чтобы увидеть анимацию, звук и обновление списка на табло.</small>
-        </div>
-
-        <div class="main-container">
-            <div class="content-container">
-                <div class="tablo-container" id="tabloContainer">
-                    <div class="tablo-header">
-                        <div class="header-columns">
-                            <div class="column-title"><i class="fas fa-user mr-2"></i>Клиент</div>
-                            <div class="column-title"><i class="fas fa-door-open mr-2"></i>Кабинет</div>
-                        </div>
-                        <div class="header-columns">
-                            <div class="column-title"><i class="fas fa-user mr-2"></i>Клиент</div>
-                            <div class="column-title"><i class="fas fa-door-open mr-2"></i>Кабинет</div>
-                        </div>
-                    </div>
-                    <div id="ticketItems" class="tablo-items two-columns">
-                        <!-- Начальные демонстрационные тикеты -->
-                        <div class="tablo-item" data-ticket-id="998">
-                            <div class="ticket-number">А-15</div>
-                            <div class="ticket-cabinet">101</div>
-                        </div>
-                        <div class="tablo-item" data-ticket-id="999">
-                            <div class="ticket-number">Б-22</div>
-                            <div class="ticket-cabinet">205</div>
-                        </div>
-                    </div>
-                    <div class="ticket-count" id="ticket-count">Активных вызовов: <span id="active-count">2</span></div>
-                </div>
-                
-                <div class="video-container" id="videoContainer">
-                    <div class="video-header"><i class="fas fa-film mr-2"></i>Видео</div>
-                    <div class="video-player-wrapper">
-                        <video id="videoPlayer" class="video-player" controls autoplay loop muted></video>
-                        <div class="video-loading" id="videoLoading">Загрузка видео...</div>
-                        <button class="volume-control" id="volumeControl" title="Включить/выключить звук">
-                            <i class="fas fa-volume-mute" id="volumeIcon"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="marquee-container">
-            <div class="marquee-content">
-                <span><i class="fas fa-first-aid"></i> Добро пожаловать в нашу поликлинику! <strong>Режим работы:</strong> Пн-Пт 8:00-19:00</span>
-                <span><i class="fas fa-phone"></i> <strong>Единый Call-центр:</strong> +7 (XXX) XXX-XX-XX</span>
-                <span><i class="fas fa-calendar-check"></i> Запись на прием доступна через eGov.kz и DamuMed</span>
-                <span><i class="fas fa-info-circle"></i> Пациенты обслуживаются в порядке электронной очереди. <strong>Спасибо за понимание!</strong></span>
-            </div>
-        </div>
+        <div class="date-display" id="demo-date-display"></div>
+      </div>
+      <img src="{{ url_for('static', filename='img/logo_qq.gif') }}" class="logo logo-right" alt="Логотип QQ">
     </div>
 
-    <!-- Socket.IO -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
-    
-    <script>
-        // Защита от повторного выполнения скрипта
-        if (!window.tabloScriptLoaded) {
-            window.tabloScriptLoaded = true;
+    <div class="content-container">
+      <div class="tablo-container" id="demoTabloContainer">
+        <div class="tablo-header">
+          <div class="header-columns">
+            <div class="column-title"><i class="fas fa-user mr-2"></i>Клиент</div>
+            <div class="column-title"><i class="fas fa-door-open mr-2"></i>Кабинет</div>
+          </div>
+          <div class="header-columns">
+            <div class="column-title"><i class="fas fa-user mr-2"></i>Клиент</div>
+            <div class="column-title"><i class="fas fa-door-open mr-2"></i>Кабинет</div>
+          </div>
+        </div>
+        
+        <div id="demoTicketItems" class="tablo-items two-columns">
+        </div>
+        
+        <div class="ticket-count" id="demo-ticket-count">
+          Активных вызовов: <span id="demo-active-count">0</span>
+        </div>
+      </div>
+      
+      <div class="video-container" id="demoVideoContainer">
+        <div class="video-header">
+          <i class="fas fa-film mr-2"></i>Видео
+        </div>
+        <div class="video-player-wrapper">
+          <video id="demoVideoPlayer" class="video-player" controls loop>
+            <source src="{{ url_for('static', filename='video/demo_video.mp4') }}" type="video/mp4">
+            Ваш браузер не поддерживает тег video.
+          </video>
+          <div class="video-loading" id="demoVideoLoading">Загрузка видео...</div>
+          <button class="volume-control" id="demoVolumeControl" title="Включить/выключить звук">
+            <i class="fas fa-volume-up" id="demoVolumeIcon"></i>
+          </button>
+        </div>
+      </div>
+    </div>
 
-            document.addEventListener('DOMContentLoaded', function() {
-                
-                // --- ИНИЦИАЛИЗАЦИЯ ЭЛЕМЕНТОВ ---
-                const videoPlayer = document.getElementById('videoPlayer');
-                const volumeControl = document.getElementById('volumeControl');
-                const volumeIcon = document.getElementById('volumeIcon');
-                const videoLoading = document.getElementById('videoLoading');
-                const ticketItemsContainer = document.getElementById('ticketItems');
-                const activeCountSpan = document.getElementById('active-count');
-                const simulationButton = document.getElementById('simulate-call-btn');
-                const connectionStatus = document.getElementById('connectionStatus');
-                const audioStatus = document.getElementById('audioStatus');
-                
-                // --- КОНФИГУРАЦИЯ ---
-                const SOCKET_URL = window.location.origin; // Используем текущий хост
-                const DEMO_SERVICE_ID = 1; // ID сервиса для демо
-                const ASSIGNED_SERVICES = [1, 2, 3]; // Назначенные сервисы для табло
-                
-                // --- ДЕМО-ДАННЫЕ ---
-                let displayedTickets = {}; // Объект для хранения DOM-элементов талонов
-                let isPlayingAudio = false;
-                let socket = null;
-                let audioQueue = []; // Очередь аудиофайлов для воспроизведения
-                let currentAudio = null;
-                
-                // Список демонстрационных видео
-                const videoFiles = [
-                    'https://videos.pexels.com/video-files/4784089/4784089-hd_1280_720_25fps.mp4',
-                    'https://videos.pexels.com/video-files/855353/855353-hd_1280_720_30fps.mp4',
-                    'https://videos.pexels.com/video-files/2099392/2099392-hd_1280_720_24fps.mp4'
-                ];
-                let currentVideoIndex = 0;
-                
-                // Префиксы для номеров тикетов
-                const ticketPrefixes = ['А', 'Б', 'В', 'Г', 'Д'];
-                
-                // --- WEBSOCKET ПОДКЛЮЧЕНИЕ ---
-                function initializeSocket() {
-                    try {
-                        socket = io(SOCKET_URL + '/voicing', {
-                            transports: ['websocket', 'polling'],
-                            upgrade: true,
-                            rememberUpgrade: true
-                        });
+  </div>
 
-                        socket.on('connect', function() {
-                            console.log('Connected to voicing namespace');
-                            updateConnectionStatus(true);
-                            
-                            // Регистрируем табло с назначенными сервисами
-                            socket.emit('register_tab', {
-                                tabId: 'demo-tab-' + Date.now(),
-                                assignedServices: ASSIGNED_SERVICES
-                            });
-                        });
+  <div class="marquee-container">
+    <div class="marquee-content">
+      <span><i class="fas fa-first-aid"></i> Добро пожаловать в КГП "Поликлиника №2" города Темиртау! <strong>Режим работы:</strong> Пн-Пт 8:00-19:00, Сб 8:00-13:00</span>
+      <span><i class="fas fa-phone"></i> <strong>Единый Call-центр:</strong> 8 (7213) 44-78-88, +7 705 759 1963</span>
+      <span><i class="fas fa-calendar-check"></i> <strong>Запись на прием доступна</strong> через портал электронного правительства <strong>eGov.kz</strong> и приложение <strong>DamuMed</strong></span>
+    </div>
+  </div>
 
-                        socket.on('disconnect', function() {
-                            console.log('Disconnected from voicing namespace');
-                            updateConnectionStatus(false);
-                        });
-
-                        socket.on('connect_error', function(error) {
-                            console.error('Connection error:', error);
-                            updateConnectionStatus(false);
-                        });
-
-                        // Обработчик события воспроизведения аудио
-                        socket.on('play_audio', function(data) {
-                            console.log('Received play_audio event:', data);
-                            playAudioSequence(data.sequence);
-                        });
-
-                    } catch (error) {
-                        console.error('Socket initialization error:', error);
-                        updateConnectionStatus(false);
-                    }
-                }
-
-                function updateConnectionStatus(connected) {
-                    if (connected) {
-                        connectionStatus.className = 'connection-status connected';
-                        connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Подключено';
-                    } else {
-                        connectionStatus.className = 'connection-status disconnected';
-                        connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Отключено';
-                    }
-                }
-
-                // --- АУДИО СИСТЕМА ---
-                let pendingAudioSequences = []; // Очередь последовательностей
-                let currentSequenceType = null; // 'kz' или 'ru'
-                
-                function playAudioSequence(audioFiles) {
-                    if (!audioFiles || audioFiles.length === 0) return;
-                    
-                    // Определяем тип языка по первому файлу
-                    const isKazakh = audioFiles.some(file => file.includes('woomen_kz/'));
-                    const sequenceType = isKazakh ? 'kz' : 'ru';
-                    
-                    console.log('Received audio sequence:', sequenceType, audioFiles);
-                    
-                    // Добавляем в очередь с типом
-                    pendingAudioSequences.push({
-                        type: sequenceType,
-                        files: [...audioFiles]
-                    });
-                    
-                    // Если сейчас ничего не играет, начинаем воспроизведение
-                    if (!isPlayingAudio) {
-                        processNextSequence();
-                    }
-                }
-                
-                function processNextSequence() {
-                    if (pendingAudioSequences.length === 0) {
-                        showAudioStatus(false);
-                        isPlayingAudio = false;
-                        currentSequenceType = null;
-                        return;
-                    }
-                    
-                    // Сортируем: сначала казахский, потом русский
-                    pendingAudioSequences.sort((a, b) => {
-                        if (a.type === 'kz' && b.type === 'ru') return -1;
-                        if (a.type === 'ru' && b.type === 'kz') return 1;
-                        return 0;
-                    });
-                    
-                    const nextSequence = pendingAudioSequences.shift();
-                    currentSequenceType = nextSequence.type;
-                    audioQueue = [...nextSequence.files];
-                    
-                    console.log(`Starting ${nextSequence.type} sequence:`, nextSequence.files);
-                    
-                    playNextAudio();
-                    showAudioStatus(true);
-                }
-
-                function playNextAudio() {
-                    if (audioQueue.length === 0) {
-                        // Текущая последовательность завершена, переходим к следующей
-                        console.log(`Finished ${currentSequenceType} sequence`);
-                        if (currentAudio) {
-                            currentAudio.pause();
-                            currentAudio.removeEventListener('ended', currentAudio.onended);
-                            currentAudio.removeEventListener('error', currentAudio.onerror);
-                            currentAudio.src = '';
-                            currentAudio = null;
-                        }
-                        setTimeout(processNextSequence, 1000); // Пауза между языками
-                        return;
-                    }
-
-                    isPlayingAudio = true;
-
-                    const audioFile = audioQueue.shift();
-                    console.log('Playing audio:', audioFile);
-
-                    // Полностью останавливаем и очищаем предыдущий audio
-                    if (currentAudio) {
-                        currentAudio.pause();
-                        currentAudio.removeEventListener('ended', currentAudio.onended);
-                        currentAudio.removeEventListener('error', currentAudio.onerror);
-                        currentAudio.removeEventListener('loadstart', currentAudio.onloadstart);
-                        currentAudio.removeEventListener('canplay', currentAudio.oncanplay);
-                        currentAudio.src = '';
-                        currentAudio.load();
-                        currentAudio = null;
-                    }
-
-                    // Создаем полный URL для аудиофайла
-                    const audioUrl = audioFile.startsWith('http') ? audioFile : `${SOCKET_URL}/static/audio/${audioFile}`;
-                    
-                    currentAudio = new Audio();
-                    currentAudio.volume = 1.0;
-                    currentAudio.preload = 'auto';
-                    
-                    // Устанавливаем обработчики ПЕРЕД установкой src
-                    currentAudio.onended = function() {
-                        console.log('Audio file finished:', audioFile);
-                        setTimeout(playNextAudio, 300); // Уменьшил паузу
-                    };
-                    
-                    currentAudio.onerror = function(e) {
-                        console.error('Audio playback error for file:', audioFile, e);
-                        // Пропускаем проблемный файл и переходим к следующему
-                        setTimeout(playNextAudio, 100);
-                    };
-                    
-                    currentAudio.onloadstart = function() {
-                        console.log('Started loading:', audioFile);
-                    };
-                    
-                    currentAudio.oncanplay = function() {
-                        console.log('Can play:', audioFile);
-                    };
-                    
-                    // Устанавливаем источник и начинаем воспроизведение
-                    currentAudio.src = audioUrl;
-                    
-                    // Небольшая задержка перед воспроизведением
-                    setTimeout(() => {
-                        if (currentAudio && currentAudio.src === audioUrl) {
-                            currentAudio.play().catch(e => {
-                                console.error('Audio play failed for file:', audioFile, e);
-                                setTimeout(playNextAudio, 100);
-                            });
-                        }
-                    }, 100);
-                }
-
-                function showAudioStatus(show) {
-                    audioStatus.style.display = show ? 'block' : 'none';
-                }
-
-                // --- УПРАВЛЕНИЕ ВИДЕО (ОТКЛЮЧЕНО) ---
-                // Видеоплеер отключен по запросу
-                function initializeVideo() {
-                    // Скрываем видео контейнер
-                    const videoContainer = document.getElementById('videoContainer');
-                    if (videoContainer) {
-                        videoContainer.style.display = 'none';
-                    }
-                    
-                    console.log('Video player disabled');
-                }
-                
-                // --- УПРАВЛЕНИЕ ТАЛОНАМИ ---
-                function addTicketToDisplay(ticket) {
-                    // Удаляем старые талоны, если их больше 10
-                    while (ticketItemsContainer.children.length >= 10) {
-                        const oldTicketId = ticketItemsContainer.firstChild.getAttribute('data-ticket-id');
-                        delete displayedTickets[oldTicketId];
-                        ticketItemsContainer.firstChild.remove();
-                    }
-
-                    const ticketDiv = document.createElement('div');
-                    ticketDiv.className = 'tablo-item new-item animate__animated animate__bounceInDown';
-                    ticketDiv.setAttribute('data-ticket-id', ticket.id);
-                    ticketDiv.innerHTML = `
-                        <div class="ticket-number">${ticket.number}</div>
-                        <div class="ticket-cabinet">${ticket.cabinet}</div>
-                    `;
-                    
-                    ticketItemsContainer.appendChild(ticketDiv);
-                    displayedTickets[ticket.id] = ticketDiv;
-                    
-                    // Обновление счетчика
-                    activeCountSpan.textContent = Object.keys(displayedTickets).length;
-
-                    // Убираем подсветку через 30 секунд
-                    setTimeout(() => {
-                        ticketDiv.classList.remove('new-item', 'animate__animated', 'animate__bounceInDown');
-                    }, 30000);
-                }
-                
-                // --- СИМУЛЯЦИЯ СОБЫТИЯ ---
-                function simulateCall() {
-                    if (isPlayingAudio) {
-                        console.log('Audio is already playing, skipping simulation');
-                        return;
-                    }
-
-                    // Генерируем случайные данные для тикета
-                    const ticketNumber = Math.floor(1 + Math.random() * 999); // Только номер без букв
-                    const cabinetLetter = ticketPrefixes[Math.floor(Math.random() * ticketPrefixes.length)]; // Буква для кабинета
-                    const cabinetNumber = cabinetLetter; // Кабинет = только буква
-                    
-                    const newTicket = {
-                        id: Date.now(),
-                        number: ticketNumber,
-                        cabinet: cabinetNumber
-                    };
-
-                    // Добавляем тикет на табло
-                    addTicketToDisplay(newTicket);
-
-                    // Отправляем событие через WebSocket (если подключен)
-                    if (socket && socket.connected) {
-                        socket.emit('call_ticket', {
-                            ticketNumber: ticketNumber,
-                            cabinetNumber: cabinetNumber,
-                            serviceId: DEMO_SERVICE_ID
-                        });
-                        console.log('Sent call_ticket event:', {
-                            ticketNumber: ticketNumber,
-                            cabinetNumber: cabinetNumber,
-                            serviceId: DEMO_SERVICE_ID
-                        });
-                    } else {
-                        console.log('Socket not connected, simulating audio locally');
-                        // Если WebSocket не подключен, симулируем локально с правильной последовательностью
-                        const demoAudioKZ = [
-                            'woomen_kz/at_work.mp3',
-                            'woomen_kz/клиент_номер.mp3',
-                            `woomen_kz/${ticketNumber}.mp3`,
-                            'woomen_kz/Подойдите_в_кабинет.mp3',
-                            `woomen_kz/${cabinetNumber}.mp3`
-                        ];
-                        const demoAudioRU = [
-                            'male_rus/клиент_номер.mp3',
-                            `male_rus/${ticketNumber}.mp3`,
-                            'male_rus/Подойдите_в_кабинет.mp3',
-                            `male_rus/${cabinetNumber}.mp3`
-                        ];
-                        
-                        // Сначала казахский, потом русский
-                        playAudioSequence([...demoAudioKZ, ...demoAudioRU]);
-                    }
-                }
-
-                // --- ИНИЦИАЛИЗАЦИЯ ---
-                // Собираем уже существующие тикеты в объект
-                document.querySelectorAll('.tablo-item').forEach(item => {
-                    const id = item.getAttribute('data-ticket-id');
-                    displayedTickets[id] = item;
-                });
-
-                // Инициализация видео (отключена)
-                initializeVideo();
-
-                // Инициализация WebSocket
-                initializeSocket();
-
-                // Инициализация кнопок симуляции
-                simulationButton.addEventListener('click', simulateCall);
-
-                console.log('Tablo demo initialized (video disabled)');
-            });
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      function updateDemoClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        const clockElement = document.querySelector('#demo-clock');
+        if (clockElement) {
+          clockElement.querySelector('.hours').textContent = hours;
+          clockElement.querySelector('.minutes').textContent = minutes;
+          clockElement.querySelector('.seconds').textContent = seconds;
         }
-    </script>
+        
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateString = now.toLocaleDateString('ru-RU', options);
+        const dateElement = document.getElementById('demo-date-display');
+        if (dateElement) {
+          dateElement.textContent = dateString;
+        }
+      }
+      
+      updateDemoClock();
+      setInterval(updateDemoClock, 1000);
+      
+      let demoTickets = {};
+      let demoTicketCounter = 0;
+      let audioPlaying = false;
+      
+      const videoPlayer = document.getElementById('demoVideoPlayer');
+      const volumeControl = document.getElementById('demoVolumeControl');
+      const volumeIcon = document.getElementById('demoVolumeIcon');
+      const videoContainer = document.getElementById('demoVideoContainer');
+      const tabloContainer = document.getElementById('demoTabloContainer');
+      const videoLoading = document.getElementById('demoVideoLoading');
+      const showVideoCheck = document.getElementById('showVideoCheck');
+      
+      const videoVolume = 0.5;
+      let videoIsMuted = false;
+      
+      function enableAutoplay() {
+        if (videoPlayer && videoPlayer.paused) {
+          videoPlayer.play().catch(() => {});
+        }
+      }
+      
+      document.addEventListener('click', enableAutoplay, { once: true });
+      document.addEventListener('touchstart', enableAutoplay, { once: true });
+      
+      function toggleVideoSound() {
+        if (videoPlayer) {
+          videoPlayer.muted = !videoPlayer.muted;
+          videoIsMuted = videoPlayer.muted;
+          
+          if (videoPlayer.muted) {
+            volumeIcon.className = 'fas fa-volume-mute';
+          } else {
+            volumeIcon.className = 'fas fa-volume-up';
+            videoPlayer.volume = videoVolume;
+          }
+        }
+      }
+      
+      if (volumeControl) {
+        volumeControl.addEventListener('click', function(e) {
+          e.preventDefault();
+          toggleVideoSound();
+        });
+      }
+      
+      function toggleVideoDisplay() {
+        const showVideo = showVideoCheck.checked;
+        
+        if (showVideo) {
+          videoContainer.style.display = 'block';
+          tabloContainer.style.flex = '3';
+          videoContainer.style.flex = '2';
+          if (videoPlayer.paused && !audioPlaying) {
+            videoPlayer.play().catch(() => {});
+          }
+        } else {
+          videoContainer.style.display = 'none';
+          tabloContainer.style.flex = '1';
+          if (!videoPlayer.paused) {
+            videoPlayer.pause();
+          }
+        }
+      }
+      
+      showVideoCheck.addEventListener('change', toggleVideoDisplay);
+      
+      if (videoPlayer) {
+        videoPlayer.volume = videoVolume;
+        videoPlayer.muted = false;
+        
+        videoPlayer.addEventListener('click', function() {
+          if (videoPlayer.paused) {
+            videoPlayer.play();
+          }
+        });
+        
+        videoPlayer.addEventListener('canplay', function() {
+          if (videoLoading) {
+            videoLoading.style.display = 'none';
+          }
+          
+          if (showVideoCheck.checked && !audioPlaying) {
+            videoPlayer.play().catch(() => {});
+          }
+        });
+        
+        videoPlayer.addEventListener('error', function() {
+          if (videoLoading) {
+            videoLoading.style.display = 'block';
+            videoLoading.textContent = 'Ошибка загрузки видео';
+          }
+        });
+      }
+      
+      toggleVideoDisplay();
+      
+      function muteVideo() {
+        if (!showVideoCheck.checked || !videoPlayer) {
+          return;
+        }
+        
+        const wasMuted = videoPlayer.muted;
+        videoPlayer.muted = true;
+        
+        return function() {
+          videoPlayer.muted = wasMuted;
+        };
+      }
+      
+      function generateRandomTicket() {
+        const ticketNumber = Math.floor(Math.random() * 1999) + 1;
+        const cabinetNumber = Math.floor(Math.random() * 500) + 1;
+        const addLetter = Math.random() < 0.2;
+        const letter = Math.random() < 0.5 ? 'А' : 'Б';
+        
+        const finalTicketNumber = addLetter ? `${ticketNumber}${letter}` : `${ticketNumber}`;
+        const finalCabinetNumber = addLetter ? `${cabinetNumber}${letter}` : `${cabinetNumber}`;
+        
+        return {
+          id: `demo-${++demoTicketCounter}`,
+          number: finalTicketNumber,
+          cabinet: finalCabinetNumber
+        };
+      }
+      
+      function getAudioSequenceKz(value) {
+        const sequence = [];
+        const match = /^(\d+)([А-Яа-я])?$/.exec(value);
+        if (!match) return sequence;
+        
+        let num = parseInt(match[1], 10);
+        const letter = match[2];
+        
+        if (num >= 1000) {
+          const thousands = Math.floor(num / 1000) * 1000;
+          sequence.push(`woomen_kz/${thousands}.mp3`);
+          num = num % 1000;
+        }
+        
+        if (num >= 100) {
+          const hundreds = Math.floor(num / 100) * 100;
+          sequence.push(`woomen_kz/${hundreds}.mp3`);
+          num = num % 100;
+        }
+        
+        if (num >= 11 && num <= 19) {
+          sequence.push(`woomen_kz/${num}.mp3`);
+          num = 0;
+        } else if (num >= 10) {
+          const tens = Math.floor(num / 10) * 10;
+          sequence.push(`woomen_kz/${tens}.mp3`);
+          num = num % 10;
+        }
+        
+        if (num > 0) {
+          sequence.push(`woomen_kz/${num}.mp3`);
+        }
+        
+        if (letter) {
+          sequence.push(`woomen_kz/${letter}.mp3`);
+        }
+        
+        return sequence;
+      }
+      
+      function getAudioSequenceRu(value) {
+        const sequence = [];
+        const match = /^(\d+)([А-Яа-я])?$/.exec(value);
+        if (!match) return sequence;
+        
+        let num = parseInt(match[1], 10);
+        const letter = match[2];
+        
+        if (num >= 1000) {
+          const thousands = Math.floor(num / 1000) * 1000;
+          sequence.push(`male_rus/${thousands}.mp3`);
+          num = num % 1000;
+        }
+        
+        if (num >= 100) {
+          const hundreds = Math.floor(num / 100) * 100;
+          sequence.push(`male_rus/${hundreds}.mp3`);
+          num = num % 100;
+        }
+        
+        if (num >= 11 && num <= 19) {
+          sequence.push(`male_rus/${num}.mp3`);
+          num = 0;
+        } else if (num >= 10) {
+          const tens = Math.floor(num / 10) * 10;
+          sequence.push(`male_rus/${tens}.mp3`);
+          num = num % 10;
+        }
+        
+        if (num > 0) {
+          sequence.push(`male_rus/${num}.mp3`);
+        }
+        
+        if (letter) {
+          sequence.push(`male_rus/${letter}.mp3`);
+        }
+        
+        return sequence;
+      }
+      
+      let audioQueue = [];
+      let isAudioPlaying = false;
+      
+      function processAudioQueue() {
+        if (audioQueue.length === 0) {
+          isAudioPlaying = false;
+          audioPlaying = false;
+          if (showVideoCheck.checked && videoPlayer && !videoIsMuted) {
+            videoPlayer.muted = false;
+          }
+          return;
+        }
+        
+        isAudioPlaying = true;
+        audioPlaying = true;
+        
+        const audioElement = new Audio();
+        audioElement.src = `/static/audio/${audioQueue.shift()}`;
+        
+        audioElement.onended = function() {
+          setTimeout(processAudioQueue, 5);
+        };
+        
+        audioElement.onerror = function() {
+          setTimeout(processAudioQueue, 5);
+        };
+        
+        audioElement.play().catch(() => {
+          setTimeout(processAudioQueue, 5);
+        });
+      }
+      
+      function playAudioSequence(ticketNumber, cabinetNumber) {
+        if (!document.getElementById('playAudioCheck').checked) {
+          return;
+        }
+        
+        if (showVideoCheck.checked && videoPlayer) {
+          videoPlayer.muted = true;
+        }
+        
+        const ticketSeqKz = getAudioSequenceKz(ticketNumber);
+        const cabinetSeqKz = getAudioSequenceKz(cabinetNumber);
+        const ticketSeqRu = getAudioSequenceRu(ticketNumber);
+        const cabinetSeqRu = getAudioSequenceRu(cabinetNumber);
+        
+        const audioSequenceKz = [
+          'woomen_kz/at_work.mp3',
+          'woomen_kz/клиент_номер.mp3',
+          ...ticketSeqKz,
+          'woomen_kz/Подойдите_в_кабинет.mp3',
+          ...cabinetSeqKz
+        ];
+        
+        const audioSequenceRu = [
+          'male_rus/клиент_номер.mp3',
+          ...ticketSeqRu,
+          'male_rus/Подойдите_в_кабинет.mp3',
+          ...cabinetSeqRu
+        ];
+        
+        audioQueue = [...audioSequenceKz, ...audioSequenceRu];
+        
+        if (!isAudioPlaying) {
+          processAudioQueue();
+        }
+      }
+      
+      function addTicketToTablo(ticket) {
+        const ticketItemsContainer = document.getElementById('demoTicketItems');
+        
+        const noTicketsMessage = document.getElementById('demo-no-tickets-message');
+        if (noTicketsMessage) {
+          noTicketsMessage.remove();
+        }
+        
+        const ticketElement = document.createElement('div');
+        ticketElement.className = 'tablo-item new-item animate__animated animate__bounceInDown';
+        ticketElement.dataset.id = ticket.id;
+        
+        ticketElement.innerHTML = `
+          <div class="ticket-number">${ticket.number}</div>
+          <div class="ticket-cabinet">${ticket.cabinet}</div>
+        `;
+        
+        ticketItemsContainer.appendChild(ticketElement);
+        demoTickets[ticket.id] = ticket;
+        document.getElementById('demo-active-count').textContent = Object.keys(demoTickets).length;
+        
+        setTimeout(() => {
+          ticketElement.classList.add('stop-animation');
+          ticketElement.classList.remove('animate__bounceInDown');
+          ticketElement.classList.remove('new-item');
+        }, 30000);
+        
+        playAudioSequence(ticket.number, ticket.cabinet);
+        setDemoColumnLayout();
+      }
+      
+      function removeTicket(ticketId) {
+        const ticketElement = document.querySelector(`.tablo-item[data-id="${ticketId}"]`);
+        if (ticketElement) {
+          ticketElement.style.transition = 'all 0.5s ease';
+          ticketElement.style.opacity = '0';
+          ticketElement.style.transform = 'translateX(50px)';
+          
+          setTimeout(() => {
+            ticketElement.remove();
+            delete demoTickets[ticketId];
+            
+            document.getElementById('demo-active-count').textContent = Object.keys(demoTickets).length;
+            
+            if (Object.keys(demoTickets).length === 0) {
+              showNoTicketsMessage();
+            }
+            
+            setDemoColumnLayout();
+          }, 500);
+        }
+      }
+      
+      function showNoTicketsMessage() {
+        const ticketItemsContainer = document.getElementById('demoTicketItems');
+        
+        if (!document.getElementById('demo-no-tickets-message')) {
+          const noTicketsMessage = document.createElement('div');
+          noTicketsMessage.id = 'demo-no-tickets-message';
+          noTicketsMessage.className = 'text-center p-4';
+          noTicketsMessage.innerHTML = 
+            '<i class="fas fa-ticket-alt fa-3x mb-3" style="opacity: 0.5;"></i>' +
+            '<p>Нет активных вызовов</p>';
+          
+          ticketItemsContainer.innerHTML = '';
+          ticketItemsContainer.appendChild(noTicketsMessage);
+        }
+      }
+      
+      function setDemoColumnLayout() {
+        const ticketItemsContainer = document.getElementById('demoTicketItems');
+        
+        if (window.innerWidth <= 992) {
+          ticketItemsContainer.classList.remove('two-columns');
+          ticketItemsContainer.classList.add('single-column');
+        } else {
+          ticketItemsContainer.classList.remove('single-column');
+          ticketItemsContainer.classList.add('two-columns');
+        }
+      }
+      
+      document.getElementById('generateTicketBtn').addEventListener('click', function() {
+        const newTicket = generateRandomTicket();
+        addTicketToTablo(newTicket);
+      });
+      
+      document.getElementById('clearTicketsBtn').addEventListener('click', function() {
+        const ticketIds = Object.keys(demoTickets);
+        
+        ticketIds.forEach((ticketId, index) => {
+          setTimeout(() => {
+            removeTicket(ticketId);
+          }, index * 100);
+        });
+      });
+      
+      window.addEventListener('resize', function() {
+        setDemoColumnLayout();
+      });
+      
+      showNoTicketsMessage();
+      setDemoColumnLayout();
+    });
+  </script>
+</div>

@@ -40,14 +40,14 @@
 }
 
 #tablo-demo-wrapper .clock {
-  font-size: clamp(2.2rem, 3vw, 4.5rem); /* Адаптивный размер шрифта */
+  font-size: clamp(2.2rem, 3vw, 4.5rem); 
   font-weight: 700;
   color: var(--light);
   padding: 0.5rem 1rem;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 1rem;
   display: inline-block;
-  min-width: clamp(180px, 20vw, 280px); /* Адаптивная ширина */
+  min-width: clamp(180px, 20vw, 280px); 
 }
 
 #tablo-demo-wrapper .logo {
@@ -56,7 +56,7 @@
 }
 
 #tablo-demo-wrapper .logo-left {
-  max-width: clamp(80px, 10vw, 140px); /* Адаптивная ширина */
+  max-width: clamp(80px, 10vw, 140px); 
   padding: 5px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 0.5rem;
@@ -64,7 +64,7 @@
 }
 
 #tablo-demo-wrapper .logo-right {
-  max-width: clamp(80px, 12vw, 180px); /* Адаптивная ширина */
+  max-width: clamp(80px, 12vw, 180px); 
   padding: 5px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 0.5rem;

@@ -9,6 +9,7 @@ from app.models.secondary_admin import User
 from app.forms import UserForm
 from . import secondary_admin
 
+
 @secondary_admin.route('/add-user', methods=['GET', 'POST'])
 @login_required
 def add_user():
@@ -24,6 +25,7 @@ def add_user():
         password = request.form.get('password', '')
         role = request.form.get('role', '')
         cabinet = request.form.get('cabinet', '')
+        marquee_text = request.form.get('marquee_text', '')  # Получаем текст бегущей строки
 
         if not username or not password or not role:
             error_message = 'Все поля обязательны для заполнения'
@@ -48,6 +50,11 @@ def add_user():
                 role=role,
                 cabinet=cabinet if cabinet else None
             )
+            
+            # Добавляем текст бегущей строки для пользователей с ролью "tablo"
+            if role == 'tablo' and marquee_text:
+                new_user.marquee_text = marquee_text
+                
             new_user.set_password(password)
             org_db.add(new_user)
             org_db.commit()
@@ -119,6 +126,13 @@ def edit_user(user_id):
         if 'video' in data:
             user.video = data['video']
             
+        # Обрабатываем текст бегущей строки для пользователей с ролью "tablo"
+        if user.role == 'tablo' and 'marquee_text' in data:
+            user.marquee_text = data['marquee_text']
+        elif user.role != 'tablo':
+            # Если роль не "tablo", убираем текст бегущей строки
+            user.marquee_text = None
+            
         org_db.commit()
         return jsonify({'status': 'success', 'message': 'Пользователь успешно обновлен'})
     except exc.IntegrityError:
@@ -127,7 +141,7 @@ def edit_user(user_id):
     except Exception as e:
         org_db.rollback()
         return jsonify({'status': 'error', 'message': f'Произошла ошибка: {str(e)}'}), 500
-
+        
 @secondary_admin.route('/change-password', methods=['POST'])
 @login_required
 def change_password():

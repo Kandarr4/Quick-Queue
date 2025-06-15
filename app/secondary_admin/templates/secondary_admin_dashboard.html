@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -10,6 +13,33 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+
+<!-- Навигационная панель -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-admin">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <span>Quick Queue</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminNavbar" aria-controls="adminNavbar" aria-expanded="false" aria-label="Переключить навигацию">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="adminNavbar">
+            <ul class="navbar-nav ml-auto">
+                <!-- Динамический блок для статуса входа -->
+                <li class="nav-item dropdown" id="auth-dropdown">
+                    <!-- Контент будет загружен через JavaScript -->
+                </li>             
+            </ul>
+        </div>
+    </div>  
+    <!-- ИСПРАВЛЕННЫЙ БЛОК С ЛОГОТИПАМИ -->
+    <div class="logo_div">
+        <img src="{{ url_for('static', filename='img/logo_organization.png') }}" class="logo logo-left" alt="Логотип организации">
+        <img src="{{ url_for('static', filename='img/logo_qq.gif') }}" class="logo logo-right" alt="Логотип QQ">
+    </div>        
+</nav>
 
     <div class="container fade-in" data-database-name="{{ current_user.database_name }}">
         <div class="page-header">
@@ -665,56 +695,68 @@
         </div>
     </div>
 
-
-    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addUserModalLabel"><i class="fas fa-user-plus mr-2"></i>Добавить пользователя</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ url_for('secondary_admin.add_user') }}" method="post">
-                        <input type="hidden" name="csrf_token" value="{{ user_form.csrf_token._value() }}">
-                        <div class="form-group">
-                            <label for="{{ user_form.username.id }}">
-                                <i class="fas fa-user mr-1"></i> {{ user_form.username.label.text }}
-                            </label>
-                            {{ user_form.username(class_='form-control', placeholder='Введите имя пользователя') }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ user_form.password.id }}">
-                                <i class="fas fa-lock mr-1"></i> {{ user_form.password.label.text }}
-                            </label>
-                            {{ user_form.password(class_='form-control', placeholder='Введите пароль') }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ user_form.role.id }}">
-                                <i class="fas fa-user-tag mr-1"></i> {{ user_form.role.label.text }}
-                            </label>
-                            {{ user_form.role(class_='form-control') }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ user_form.cabinet.id }}">
-                                <i class="fas fa-door-open mr-1"></i> {{ user_form.cabinet.label.text }}
-                            </label>
-                            {{ user_form.cabinet(class_='form-control', placeholder='Введите номер кабинета') }}
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                <i class="fas fa-times mr-1"></i> Закрыть
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save mr-1"></i> Добавить пользователя
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="addUserModalLabel"><i class="fas fa-user-plus mr-2"></i>Добавить пользователя</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form action="{{ url_for('secondary_admin.add_user') }}" method="post">
+						<input type="hidden" name="csrf_token" value="{{ user_form.csrf_token._value() }}">
+						<div class="form-group">
+							<label for="{{ user_form.username.id }}">
+								<i class="fas fa-user mr-1"></i> {{ user_form.username.label.text }}
+							</label>
+							{{ user_form.username(class_='form-control', placeholder='Введите имя пользователя') }}
+						</div>
+						<div class="form-group">
+							<label for="{{ user_form.password.id }}">
+								<i class="fas fa-lock mr-1"></i> {{ user_form.password.label.text }}
+							</label>
+							{{ user_form.password(class_='form-control', placeholder='Введите пароль') }}
+						</div>
+						<div class="form-group">
+							<label for="{{ user_form.role.id }}">
+								<i class="fas fa-user-tag mr-1"></i> {{ user_form.role.label.text }}
+							</label>
+							{{ user_form.role(class_='form-control', id='addUserRole') }}
+						</div>
+						<div class="form-group">
+							<label for="{{ user_form.cabinet.id }}">
+								<i class="fas fa-door-open mr-1"></i> {{ user_form.cabinet.label.text }}
+							</label>
+							{{ user_form.cabinet(class_='form-control', placeholder='Введите номер кабинета') }}
+						</div>
+						
+						<!-- Новое поле для бегущей строки -->
+						<div id="addMarqueeTextContainer" class="form-group" style="display: none;">
+							<hr>
+							<h6><i class="fas fa-scroll mr-1"></i> Настройки бегущей строки</h6>
+							<label for="{{ user_form.marquee_text.id }}">
+								<i class="fas fa-text-width mr-1"></i> {{ user_form.marquee_text.label.text }}
+							</label>
+							{{ user_form.marquee_text(class_='form-control', rows='4', 
+									  placeholder='Введите текст для бегущей строки (оставьте пустым для использования текста по умолчанию)') }}
+							<small class="text-muted">Вы можете использовать HTML-теги для форматирования</small>
+						</div>
+						
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">
+								<i class="fas fa-times mr-1"></i> Закрыть
+							</button>
+							<button type="submit" class="btn btn-primary">
+								<i class="fas fa-save mr-1"></i> Добавить пользователя
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
@@ -734,13 +776,12 @@
 							</label>
 							<input type="text" class="form-control" id="editUsername" name="username" required>
 						</div>
-                        <div class="form-group">
-                            <label for="editRole"> <!-- Используем ID 'editRole' -->
-                                <i class="fas fa-user-tag mr-1"></i> Роль
-                            </label>
-                            <!-- Устанавливаем ID 'editRole' для единообразия с JS -->
-                            {{ user_form.role(class_='form-control', id='editRole') }}
-                        </div>
+						<div class="form-group">
+							<label for="editRole">
+								<i class="fas fa-user-tag mr-1"></i> Роль
+							</label>
+							{{ user_form.role(class_='form-control', id='editRole') }}
+						</div>
 
 						<div class="form-group">
 							<label for="editCabinet">
@@ -749,20 +790,31 @@
 							<input type="text" class="form-control" id="editCabinet" name="cabinet">
 						</div>
 						
+						<!-- Новое поле для бегущей строки -->
+						<div id="marqueeTextContainer" class="form-group" style="display: none;">
+							<hr>
+							<h6><i class="fas fa-scroll mr-1"></i> Настройки бегущей строки</h6>
+							<label for="editMarqueeText">
+								<i class="fas fa-text-width mr-1"></i> Текст бегущей строки
+							</label>
+							<textarea class="form-control" id="editMarqueeText" name="marquee_text" rows="4" 
+									  placeholder="Введите текст для бегущей строки (оставьте пустым для использования текста по умолчанию)"></textarea>
+							<small class="text-muted">Вы можете использовать HTML-теги для форматирования</small>
+						</div>
+						
 						<div id="videoSettingsContainer" class="form-group" style="display: none;">
 							<hr>
 							<h6><i class="fas fa-video mr-1"></i> Настройки видео</h6>
 							<div class="form-check mb-2">
-								<!-- Убедились, что чекбокс только один -->
 								<input type="checkbox" class="form-check-input" id="editShowVideo" name="show_video">
-								<label class="form-check-label" for="editShowVideo">Показывать видео</o>
+								<label class="form-check-label" for="editShowVideo">Показывать видео</label>
 							</div>
 							<div id="videoFolderContainer" class="form-group" style="display: none;">
 								<label for="editVideoFolder">
 									<i class="fas fa-folder-open mr-1"></i> Папка с видео
 								</label>
 								<select class="form-control" id="editVideoFolder" name="video_folder">
-                                    <!-- Опции будут загружаться динамически -->
+									<!-- Опции будут загружаться динамически -->
 								</select>
 								<small class="form-text text-muted">
 									Выберите папку в директории <strong>static/video/{{current_user.database_name}}/</strong>
@@ -1272,6 +1324,79 @@
 
     <script src="{{ url_for('static', filename='js/secondary_admin.js') }}"></script>
     <script src="{{ url_for('static', filename='js/secondary_admin_video.js') }}"></script>
+
+<script>
+$(document).ready(function() {
+    // Функция для обновления статуса авторизации
+    function updateAuthStatus() {
+        $.ajax({
+            url: "{{ url_for('main.check_auth_status') }}",
+            method: 'GET',
+            success: function(data) {
+                const authDropdown = $('#auth-dropdown');
+                
+                if (data.authenticated) {
+                    // Пользователь авторизован
+                    const userType = data.user_type === 'org_user' ? 'Пользователь' : 'Администратор';
+                    const roleText = data.role ? ` (${data.role})` : '';
+                    
+                    authDropdown.html(`
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user-check text-success mr-2"></i>
+                            <span class="d-none d-md-inline">${data.username}</span>
+                            <span class="d-md-none">Вход выполнен</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                            <div class="dropdown-header">
+                                <small class="text-muted">${userType}${roleText}</small>
+                                <br>
+                                <strong>${data.username}</strong>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url_for('main.home') }}">
+                                <i class="fas fa-home mr-2"></i>Главная страница
+                            </a>
+                            <a class="dropdown-item" href="{{ url_for('main.logout') }}">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Выйти
+                            </a>
+                        </div>
+                    `);
+                } else {
+                    // Пользователь не авторизован
+                    authDropdown.html(`
+                        <a class="nav-link" href="{{ url_for('main.login') }}">
+                            <i class="fas fa-right-to-bracket mr-1"></i>
+                            <span>Вход</span>
+                        </a>
+                    `);
+                }
+            },
+            error: function() {
+                // В случае ошибки показываем кнопку входа
+                const authDropdown = $('#auth-dropdown');
+                authDropdown.html(`
+                    <a class="nav-link" href="{{ url_for('main.login') }}">
+                        <i class="fas fa-right-to-bracket mr-1"></i>
+                        <span>Вход</span>
+                    </a>
+                `);
+            }
+        });
+    }
+    
+    // Обновляем статус при загрузке страницы
+    updateAuthStatus();
+    
+    // Обновляем статус каждые 30 секунд (для случаев истечения сессии)
+    setInterval(updateAuthStatus, 30000);
+    
+    // Обновляем статус при переходах между страницами (если используется AJAX)
+    $(window).on('focus', function() {
+        updateAuthStatus();
+    });
+});
+</script>
+
 
 </body>
 </html>

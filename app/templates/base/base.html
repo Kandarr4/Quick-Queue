@@ -16,7 +16,6 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-dark text-light">
-<!-- Навигационная панель -->
 <nav class="navbar navbar-expand-lg navbar-dark navbar-admin">
     <div class="container-fluid">
         <a class="navbar-brand d-flex align-items-center" href="#">
@@ -29,28 +28,22 @@
         
         <div class="collapse navbar-collapse" id="adminNavbar">
             <ul class="navbar-nav ml-auto">
-                <!-- Динамический блок для статуса входа -->
                 <li class="nav-item dropdown" id="auth-dropdown">
-                    <!-- Контент будет загружен через JavaScript -->
                 </li>             
             </ul>
         </div>
     </div>  
-    <!-- ИСПРАВЛЕННЫЙ БЛОК С ЛОГОТИПАМИ -->
     <div class="logo_div">
         <img src="{{ url_for('static', filename='img/logo_organization.png') }}" class="logo logo-left" alt="Логотип организации">
         <img src="{{ url_for('static', filename='img/logo_qq.gif') }}" class="logo logo-right" alt="Логотип QQ">
     </div>        
 </nav>
 
-<!-- Основной контент -->
 <div class="container-fluid fade-in content-wrapper">
     {% block content %}
-    <!-- Контент дочерних шаблонов будет здесь -->
     {% endblock %}
 </div>
     {% block modals %}{% endblock %}
-<!-- Footer -->
 <footer class="mainfooter py-5">
     <div class="container">
         <div class="row">
@@ -69,8 +62,8 @@
                 <h5>Компания</h5>
                 <ul class="list-unstyled">
                     <li><a href="https://somnium.kz/about" class="footer-link">О нас</a></li>
-                    <li><a href="#" class="footer-link">https://somnium.kz/</a></li>
-                    <li><a href="#" class="footer-link">https://somnium.kz/about</a></li>
+                    <li><a href="https://somnium.kz/" class="footer-link">Продукты</a></li>
+                    <li><a href="https://somnium.kz/about" class="footer-link">Контакты</a></li>
                 </ul>
             </div>
             
@@ -114,10 +107,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.min.js"></script>
 
 
-<!-- Скрипт для динамического обновления статуса авторизации -->
 <script>
 $(document).ready(function() {
-    // Функция для обновления статуса авторизации
     function updateAuthStatus() {
         $.ajax({
             url: "{{ url_for('main.check_auth_status') }}",
@@ -126,7 +117,6 @@ $(document).ready(function() {
                 const authDropdown = $('#auth-dropdown');
                 
                 if (data.authenticated) {
-                    // Пользователь авторизован
                     const userType = data.user_type === 'org_user' ? 'Пользователь' : 'Администратор';
                     const roleText = data.role ? ` (${data.role})` : '';
                     
@@ -152,7 +142,6 @@ $(document).ready(function() {
                         </div>
                     `);
                 } else {
-                    // Пользователь не авторизован
                     authDropdown.html(`
                         <a class="nav-link" href="{{ url_for('main.login') }}">
                             <i class="fas fa-right-to-bracket mr-1"></i>
@@ -162,7 +151,6 @@ $(document).ready(function() {
                 }
             },
             error: function() {
-                // В случае ошибки показываем кнопку входа
                 const authDropdown = $('#auth-dropdown');
                 authDropdown.html(`
                     <a class="nav-link" href="{{ url_for('main.login') }}">
@@ -174,13 +162,10 @@ $(document).ready(function() {
         });
     }
     
-    // Обновляем статус при загрузке страницы
     updateAuthStatus();
     
-    // Обновляем статус каждые 30 секунд (для случаев истечения сессии)
     setInterval(updateAuthStatus, 30000);
     
-    // Обновляем статус при переходах между страницами (если используется AJAX)
     $(window).on('focus', function() {
         updateAuthStatus();
     });

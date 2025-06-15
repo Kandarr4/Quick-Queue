@@ -421,7 +421,6 @@
       }
     }
 
-    /* Стили для уведомлений */
     .notification {
       position: fixed;
       bottom: -100px;
@@ -434,7 +433,7 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       transition: bottom 0.5s ease;
       z-index: 9999;
-      font-size: clamp(0.8rem, 1.2vw, 1rem); /* Адаптивный размер шрифта */
+      font-size: clamp(0.8rem, 1.2vw, 1rem); 
     }
     
     .notification.show {
@@ -453,7 +452,6 @@
       background: rgba(52, 152, 219, 0.9);
     }
 
-    /* Улучшения для сверхмалых экранов */
     @media (max-width: 400px) {
       .clock {
         font-size: 1.8rem;
@@ -484,44 +482,39 @@
         margin-bottom: 0.5rem;
       }
       
-      /* Увеличиваем размер бегущей строки на маленьких экранах */
       .marquee-content {
         font-size: 1rem;
       }
     }
 
-    /* Улучшения для больших экранов */
     @media (min-width: 1600px) {
       .ticket-number, .ticket-cabinet {
-        font-size: 6rem; /* Увеличиваем размер на больших экранах */
+        font-size: 4rem; 
       }
       
       .column-title {
-        font-size: 2rem; /* Увеличиваем размер на больших экранах */
+        font-size: 2rem; 
       }
       
       .ticket-label {
-        font-size: 1.5rem; /* Увеличиваем размер на больших экранах */
+        font-size: 1.5rem; 
       }
       
-      /* Увеличиваем размер бегущей строки на больших экранах */
       .marquee-content {
         font-size: 1.5rem;
       }
     }
   
-    /* Стили для бегущей строки - улучшенные */
     .marquee-container {
       width: 100%;
-      background-color: rgba(26, 188, 156, 0.3); /* Более заметный фон */
+      background-color: rgba(26, 188, 156, 0.3); 
       overflow: hidden;
       position: fixed;
       bottom: 0;
       left: 0;
-      padding: 0.8rem 0; /* Больше вертикального пространства */
+      padding: 0.8rem 0; 
       border-top: 1px solid rgba(255, 255, 255, 0.3);
       z-index: 100;
-      /* Добавляем градиентные края для плавного появления текста */
       -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
       mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
     }
@@ -529,21 +522,18 @@
     .marquee-content {
       display: inline-block;
       white-space: nowrap;
-      /* Уменьшаем скорость анимации */
       animation: marquee 80s linear infinite;
-      font-size: clamp(1.1rem, 1.8vw, 1.4rem); /* Увеличенный адаптивный размер шрифта */
+      font-size: clamp(1.1rem, 1.8vw, 1.4rem); 
       color: var(--light);
-      /* Делаем текст более заметным */
       text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     }
     
     .marquee-content span {
       display: inline-block;
-      padding-right: 120px; /* Увеличиваем расстояние между секциями текста */
+      padding-right: 120px; 
       position: relative;
     }
     
-    /* Добавляем разделители между элементами бегущей строки */
     .marquee-content span:not(:last-child)::after {
       content: "•";
       position: absolute;
@@ -561,7 +551,6 @@
       font-weight: bold;
     }
     
-    /* Делаем более заметными иконки */
     .marquee-content i {
       color: var(--secondary);
       margin-right: 8px;
@@ -576,7 +565,6 @@
       }
     }
 
-    /* Добавляем кнопку громкости для видео */
     .volume-control {
       position: absolute;
       bottom: 10px;
@@ -603,7 +591,6 @@
       position: relative;
     }
 
-    /* Стили для индикатора загрузки видео */
     .video-loading {
       position: absolute;
       top: 50%;
