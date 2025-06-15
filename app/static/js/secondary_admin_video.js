@@ -1,6 +1,5 @@
-// Объявляем функцию loadDiskSpaceInfo в глобальной области видимости
 function loadDiskSpaceInfo() {
-    console.log('Начало загрузки информации о диске'); // Отладочный log
+    console.log('Начало загрузки информации о диске');
 
     const diskSpaceInfo = document.getElementById('disk-space-info');
     const refreshBtn = document.getElementById('refreshDiskSpaceBtn');
@@ -9,25 +8,22 @@ function loadDiskSpaceInfo() {
         refreshBtn.disabled = true;
         refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Обновление...';
     }
-
-    // Получаем CSRF-токен из мета-тега
     const csrfToken = $('meta[name=csrf-token]').attr('content');
 
     $.ajax({
         url: '/secondary_admin/get_disk_space',
         method: 'GET',
         xhrFields: {
-            withCredentials: true  // Важно для корректной работы с куками и сессией
+            withCredentials: true
         },
         beforeSend: function(xhr) {
-            console.log('Отправка AJAX-запроса'); // Отладочный log
-            // Добавление CSRF-токена
+            console.log('Отправка AJAX-запроса');
             if (csrfToken) {
                 xhr.setRequestHeader('X-CSRFToken', csrfToken);
             }
         },
         success: function(response) {
-            console.log('Успешный ответ:', response); // Отладочный log
+            console.log('Успешный ответ:', response);
 
             if (response.status === 'success' && diskSpaceInfo) {
                 const usedPercentage = response.used_percentage;
@@ -95,16 +91,12 @@ function loadDiskSpaceInfo() {
             if (refreshBtn) {
                 refreshBtn.disabled = false;
                 refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Обновить';
-                
-                // Удаляем предыдущие обработчики и добавляем новый
                 refreshBtn.removeEventListener('click', loadDiskSpaceInfo);
                 refreshBtn.addEventListener('click', loadDiskSpaceInfo);
             }
         }
     });
 }
-
-// Функция для инициализации видео-функционала админки
 function initAdminVideo() {
     let currentPath = '';
     const folderTemplate = document.getElementById('folder-card-template');
@@ -120,8 +112,6 @@ function initAdminVideo() {
     const folderCountText = document.getElementById('folder-count-text');
     const currentDirForNewFolder = document.getElementById('current-dir-for-new-folder');
     const currentDirForUpload = document.getElementById('current-dir-for-upload');
-
-    // Функция для отображения уведомлений
     function showVideoNotification(message, type) {
         if (typeof showNotification === 'function') {
             showNotification(message, type);
@@ -129,8 +119,6 @@ function initAdminVideo() {
             alert(message);
         }
     }
-
-    // Функция обновления отображения пути
     function updatePathDisplay() {
         if (currentPathDisplay) currentPathDisplay.textContent = currentPath || '/';
         if (currentDirForNewFolder) currentDirForNewFolder.textContent = currentPath || '/';
@@ -142,11 +130,8 @@ function initAdminVideo() {
         try {
             localStorage.setItem('videoCurrentPath', currentPath);
         } catch (e) {
-            // Игнорируем ошибки localStorage
         }
     }
-
-    // Функция обновления "хлебных крошек"
     function updateBreadcrumbs() {
         if (!breadcrumbPath) return;
         
@@ -179,32 +164,21 @@ function initAdminVideo() {
             breadcrumbPath.appendChild(listItem);
         });
     }
-
-    // Функция загрузки содержимого директории
     function loadDirectoryContents(path = '') {
         currentPath = path;
-        
-        // Показываем индикатор загрузки
         if (foldersContainer) {
             foldersContainer.innerHTML = '<div class="col-12 text-center py-3"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Загрузка...</p></div>';
         }
         if (videosContainer) {
             videosContainer.innerHTML = '';
         }
-        
-        // Обновляем отображение пути
         updatePathDisplay();
-        
-        // Получаем CSRF-токен из мета-тега
         const csrfToken = $('meta[name=csrf-token]').attr('content');
-
-        // Запрашиваем содержимое директории с сервера
         $.ajax({
             url: '/secondary_admin/get_directory_contents',
             method: 'GET',
             data: { path: path },
             beforeSend: function(xhr) {
-                // Добавление CSRF-токена
                 if (csrfToken) {
                     xhr.setRequestHeader('X-CSRFToken', csrfToken);
                 }
@@ -222,25 +196,16 @@ function initAdminVideo() {
             }
         });
     }
-
-    // Функция рендеринга содержимого директории
     function renderDirectoryContents(data) {
-        // Проверяем структуру данных
         if (!data || !data.folders || !data.files) {
             console.error('Invalid data structure:', data);
             showVideoNotification('Неверная структура данных', 'danger');
             return;
         }
-        
-        // Обновляем информацию о директории
         if (fileCountText) fileCountText.textContent = `Файлов: ${data.files.length}`;
         if (folderCountText) folderCountText.textContent = `Папок: ${data.folders.length}`;
-        
-        // Очищаем контейнеры
         if (foldersContainer) foldersContainer.innerHTML = '';
         if (videosContainer) videosContainer.innerHTML = '';
-        
-        // Рендерим папки
         if (data.folders.length === 0) {
             if (foldersContainer) {
                 foldersContainer.innerHTML = `
@@ -255,8 +220,6 @@ function initAdminVideo() {
                 renderFolderCard(folder);
             });
         }
-        
-        // Рендерим видео
         if (data.files.length === 0) {
             if (videosContainer) {
                 videosContainer.innerHTML = `
@@ -271,12 +234,8 @@ function initAdminVideo() {
                 renderVideoCard(file);
             });
         }
-        
-        // Обновляем список папок для перемещения
         updateFoldersList();
     }
-
-    // Функция рендеринга карточки папки
     function renderFolderCard(folder) {
         if (!folderTemplate || !foldersContainer) return;
         
@@ -290,11 +249,7 @@ function initAdminVideo() {
         
         if (folderNameText) folderNameText.textContent = folder.name;
         if (folderInfoText) folderInfoText.textContent = `Создана: ${folder.created || 'Н/Д'}`;
-        
-        // Полный путь к папке
         const folderPath = currentPath ? `${currentPath}/${folder.name}` : folder.name;
-        
-        // Устанавливаем data-path атрибуты
         if (openFolderBtn) openFolderBtn.setAttribute('data-path', folderPath);
         if (renameBtn) renameBtn.setAttribute('data-path', folderPath);
         if (moveBtn) moveBtn.setAttribute('data-path', folderPath);
@@ -302,8 +257,6 @@ function initAdminVideo() {
         
         foldersContainer.appendChild(folderCard);
     }
-
-    // Функция рендеринга карточки видео
     function renderVideoCard(video) {
         if (!videoTemplate || !videosContainer) return;
         
@@ -326,8 +279,6 @@ function initAdminVideo() {
         const dbName = $('.container').data('database-name');
 
         const videoUrl = `/static/video/${dbName}/${videoPath}`;
-        
-        // Устанавливаем data-path и data-url атрибуты
         if (previewBtn) {
             previewBtn.setAttribute('data-path', videoPath);
             previewBtn.setAttribute('data-url', videoUrl);
@@ -342,8 +293,6 @@ function initAdminVideo() {
         
         videosContainer.appendChild(videoCard);
     }
-
-    // Функция форматирования размера файла
     function formatFileSize(bytes) {
         if (bytes === 0) return '0 Байт';
         const k = 1024;
@@ -351,17 +300,13 @@ function initAdminVideo() {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
-
-    // Функция обновления списка папок для перемещения
     function updateFoldersList() {
-        // Получаем CSRF-токен из мета-тега
         const csrfToken = $('meta[name=csrf-token]').attr('content');
 
         $.ajax({
             url: '/secondary_admin/get_folders_list',
             method: 'GET',
             beforeSend: function(xhr) {
-                // Добавление CSRF-токена
                 if (csrfToken) {
                     xhr.setRequestHeader('X-CSRFToken', csrfToken);
                 }
@@ -386,8 +331,6 @@ function initAdminVideo() {
             }
         });
     }
-
-    // Функция отображения модального окна переименования
     function showRenameModal(type, path, currentName) {
         const modal = $('#renameModal');
         const renameItemType = document.getElementById('renameItemType');
@@ -400,8 +343,6 @@ function initAdminVideo() {
         
         modal.modal('show');
     }
-
-    // Функция отображения модального окна перемещения
     function showMoveModal(type, path) {
         const modal = $('#moveModal');
         const moveItemType = document.getElementById('moveItemType');
@@ -413,13 +354,9 @@ function initAdminVideo() {
         updateFoldersList();
         modal.modal('show');
     }
-
-    // Функция отображения модального окна предпросмотра видео
     function showVideoPreview(path) {
         const modal = $('#previewVideoModal');
         const videoPlayer = document.getElementById('previewVideoPlayer');
-
-        // Получаем имя базы данных из data-атрибута контейнера, который мы добавили в HTML
         const dbName = $('.container').data('database-name');
 
         if (!dbName) {
@@ -427,19 +364,15 @@ function initAdminVideo() {
             showVideoNotification('Критическая ошибка: не удалось определить путь к видео.', 'danger');
             return;
         }
-        
-        // Формируем ПРАВИЛЬНЫЙ URL для видео
         const videoUrl = `/static/video/${dbName}/${path}`;
         
         if (videoPlayer) {
-            console.log('Установка URL для видеоплеера:', videoUrl); // Отладочный log
+            console.log('Установка URL для видеоплеера:', videoUrl);
             videoPlayer.src = videoUrl;
             videoPlayer.load();
         }
         
         modal.modal('show');
-        
-        // Останавливаем видео при закрытии модального окна
         modal.on('hidden.bs.modal', function() {
             if (videoPlayer) {
                 videoPlayer.pause();
@@ -447,8 +380,6 @@ function initAdminVideo() {
             }
         });
     }
-
-    // Функция отображения подтверждения удаления
     function showDeleteConfirmation(type, path, name) {
         const modal = $('#confirmDeleteModal');
         const confirmText = document.getElementById('confirmDeleteText');
@@ -463,23 +394,14 @@ function initAdminVideo() {
         
         modal.modal('show');
     }
-
-    // Обработчики событий
     $(document).ready(function() {
-        // Кнопка создания папки
         $('#createFolderBtn').off('click').on('click', function() {
             $('#createFolderModal').modal('show');
         });
-        
-        // Кнопка загрузки видео
         $('#uploadVideoBtn').off('click').on('click', function() {
             $('#uploadVideoModal').modal('show');
         });
-        
-        // Получаем CSRF-токен из мета-тега
         const csrfToken = $('meta[name=csrf-token]').attr('content');
-
-        // Форма создания папки
         $('#createFolderForm').off('submit').on('submit', function(e) {
             e.preventDefault();
             
@@ -497,7 +419,6 @@ function initAdminVideo() {
                     name: folderName
                 },
                 beforeSend: function(xhr) {
-                    // Добавление CSRF-токена
                     if (csrfToken) {
                         xhr.setRequestHeader('X-CSRFToken', csrfToken);
                     }
@@ -518,9 +439,6 @@ function initAdminVideo() {
                 }
             });
         });
-        
-
-        // Сброс формы при открытии модального окна
         $('#uploadVideoModal').on('show.bs.modal', function () {
             $('#uploadVideoForm')[0].reset();
             $('.custom-file-label').text('Выберите файлы...');
@@ -528,13 +446,10 @@ function initAdminVideo() {
             $('#upload-progress-list').html('');
             $('#uploadSubmitBtn').prop('disabled', false).html('<i class="fas fa-upload mr-1"></i> Загрузить');
             $('#uploadCancelBtn').prop('disabled', false).text('Отмена');
-            // Убедимся, что кнопка отмены работает как надо
             $('#uploadCancelBtn').off('click').on('click', function() {
                 $('#uploadVideoModal').modal('hide');
             });
         });
-
-        // Новая форма загрузки видео с поддержкой нескольких файлов
         $('#uploadVideoForm').off('submit').on('submit', function(e) {
             e.preventDefault();
             
@@ -548,8 +463,6 @@ function initAdminVideo() {
             const progressList = $('#upload-progress-list');
             const submitBtn = $('#uploadSubmitBtn');
             const cancelBtn = $('#uploadCancelBtn');
-
-            // Блокируем кнопки и показываем прогресс
             submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Загрузка...');
             cancelBtn.prop('disabled', true);
             progressList.html('');
@@ -559,11 +472,8 @@ function initAdminVideo() {
             let errorCount = 0;
             const totalFiles = files.length;
             const csrfToken = $('meta[name=csrf-token]').attr('content');
-
-            // Создаем массив промисов для отслеживания завершения всех загрузок
             const uploadPromises = Array.from(files).map((file, index) => {
                 return new Promise((resolve, reject) => {
-                    // Создаем DOM-элементы для прогресс-бара этого файла
                     const fileId = `file-progress-${index}`;
                     const progressItem = $(`
                         <div class="mb-2">
@@ -628,8 +538,6 @@ function initAdminVideo() {
                     });
                 });
             });
-
-            // Когда все загрузки завершены (успешно или с ошибкой)
             Promise.allSettled(uploadPromises).then(() => {
                 let message = `Загрузка завершена. Успешно: ${uploadedCount} из ${totalFiles}.`;
                 let type = 'success';
@@ -640,25 +548,16 @@ function initAdminVideo() {
                 }
 
                 showVideoNotification(message, type);
-
-                // Обновляем список файлов в текущей директории
                 if (uploadedCount > 0) {
                     loadDirectoryContents(currentPath);
                 }
-                
-                // Возвращаем кнопки в рабочее состояние
                 submitBtn.prop('disabled', false).html('<i class="fas fa-upload mr-1"></i> Загрузить еще');
                 cancelBtn.prop('disabled', false).text('Закрыть');
-
-                // Теперь кнопка "Отмена" становится кнопкой "Закрыть"
                 cancelBtn.off('click').on('click', function() {
                     $('#uploadVideoModal').modal('hide');
                 });
             });
         });
-
-        
-        // Форма переименования
         $('#renameForm').off('submit').on('submit', function(e) {
             e.preventDefault();
             
@@ -680,7 +579,6 @@ function initAdminVideo() {
                     new_name: newName
                 },
                 beforeSend: function(xhr) {
-                    // Добавление CSRF-токена
                     if (csrfToken) {
                         xhr.setRequestHeader('X-CSRFToken', csrfToken);
                     }
@@ -700,8 +598,6 @@ function initAdminVideo() {
                 }
             });
         });
-        
-        // Форма перемещения
         $('#moveForm').off('submit').on('submit', function(e) {
             e.preventDefault();
             
@@ -718,7 +614,6 @@ function initAdminVideo() {
                     target_folder: targetFolder
                 },
                 beforeSend: function(xhr) {
-                    // Добавление CSRF-токена
                     if (csrfToken) {
                         xhr.setRequestHeader('X-CSRFToken', csrfToken);
                     }
@@ -738,8 +633,6 @@ function initAdminVideo() {
                 }
             });
         });
-        
-        // Кнопка подтверждения удаления
         $('#confirmDeleteBtn').off('click').on('click', function() {
             const type = $('#deleteItemType').val();
             const path = $('#deleteItemPath').val();
@@ -752,7 +645,6 @@ function initAdminVideo() {
                     path: path
                 },
                 beforeSend: function(xhr) {
-                    // Добавление CSRF-токена
                     if (csrfToken) {
                         xhr.setRequestHeader('X-CSRFToken', csrfToken);
                     }
@@ -784,32 +676,22 @@ function initAdminVideo() {
                 $(this).next('.custom-file-label').text('Выберите файлы...');
             }
         });
-        
-        // Обработчик поиска видео
         $('#videoSearchInput').off('keyup').on('keyup', function() {
             const searchValue = $(this).val().toLowerCase();
-            
-            // Поиск по папкам
             $('.folder-card').each(function() {
                 const folderName = $(this).find('.folder-name-text').text().toLowerCase();
                 $(this).toggle(folderName.indexOf(searchValue) > -1);
             });
-            
-            // Поиск по видео
             $('.video-card').each(function() {
                 const videoName = $(this).find('.video-name-text').text().toLowerCase();
                 $(this).toggle(videoName.indexOf(searchValue) > -1);
             });
-            
-            // Проверяем, есть ли видимые папки
             const visibleFolders = $('.folder-card:visible').length;
             if (visibleFolders === 0) {
                 $('#no-folders-message').show();
             } else {
                 $('#no-folders-message').hide();
             }
-            
-            // Проверяем, есть ли видимые видео
             const visibleVideos = $('.video-card:visible').length;
             if (visibleVideos === 0) {
                 $('#no-videos-message').show();
@@ -821,7 +703,7 @@ function initAdminVideo() {
         $(document).off('click', '.rename-folder').on('click', '.rename-folder', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            const path = String($(this).data('path') || ''); // Приводим к строке
+            const path = String($(this).data('path') || '');
             if (!path) {
                 showVideoNotification('Некорректный путь', 'danger');
                 return;
@@ -833,7 +715,7 @@ function initAdminVideo() {
         $(document).off('click', '.rename-video').on('click', '.rename-video', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            const path = String($(this).data('path') || ''); // Приводим к строке
+            const path = String($(this).data('path') || '');
             if (!path) {
                 showVideoNotification('Некорректный путь', 'danger');
                 return;
@@ -845,7 +727,7 @@ function initAdminVideo() {
         $(document).off('click', '.move-folder').on('click', '.move-folder', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            const path = String($(this).data('path') || ''); // Приводим к строке
+            const path = String($(this).data('path') || '');
             if (!path) {
                 showVideoNotification('Некорректный путь', 'danger');
                 return;
@@ -856,7 +738,7 @@ function initAdminVideo() {
         $(document).off('click', '.move-video').on('click', '.move-video', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            const path = String($(this).data('path') || ''); // Приводим к строке
+            const path = String($(this).data('path') || '');
             if (!path) {
                 showVideoNotification('Некорректный путь', 'danger');
                 return;
@@ -867,7 +749,7 @@ function initAdminVideo() {
         $(document).off('click', '.delete-folder').on('click', '.delete-folder', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            const path = String($(this).data('path') || ''); // Приводим к строке
+            const path = String($(this).data('path') || '');
             if (!path) {
                 showVideoNotification('Некорректный путь', 'danger');
                 return;
@@ -879,7 +761,7 @@ function initAdminVideo() {
         $(document).off('click', '.delete-video').on('click', '.delete-video', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            const path = String($(this).data('path') || ''); // Приводим к строке
+            const path = String($(this).data('path') || '');
             if (!path) {
                 showVideoNotification('Некорректный путь', 'danger');
                 return;
@@ -891,7 +773,7 @@ function initAdminVideo() {
         $(document).off('click', '.preview-video, .preview-video-btn').on('click', '.preview-video, .preview-video-btn', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            const videoPath = String($(this).data('path') || ''); // Приводим к строке
+            const videoPath = String($(this).data('path') || '');
             if (!videoPath) {
                 showVideoNotification('Некорректный путь', 'danger');
                 return;
@@ -901,28 +783,21 @@ function initAdminVideo() {
 
         $(document).off('click', '.folder-link').on('click', '.folder-link', function(e) {
             e.preventDefault();
-            const path = String($(this).data('path') || ''); // Приводим к строке
+            const path = String($(this).data('path') || '');
             loadDirectoryContents(path);
         });
 
         $(document).off('click', '.open-folder').on('click', '.open-folder', function(e) {
             e.preventDefault();
-            const folderPath = String($(this).data('path') || ''); // Приводим к строке
+            const folderPath = String($(this).data('path') || '');
             loadDirectoryContents(folderPath);
         });
-
-        // Обработчики для dropdown меню (более специфичные селекторы)
         $(document).off('click', '.video-item .dropdown-toggle, .folder-item .dropdown-toggle').on('click', '.video-item .dropdown-toggle, .folder-item .dropdown-toggle', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
-            // Закрываем все другие dropdown
             $('.video-item .dropdown-menu, .folder-item .dropdown-menu').removeClass('show');
-            // Открываем текущий
             $(this).siblings('.dropdown-menu').addClass('show');
         });
-
-        // Обработчик для закрытия dropdown при клике вне них
         $(document).off('click.video-dropdown').on('click.video-dropdown', function(e) {
             if (!$(e.target).closest('.video-item .dropdown, .folder-item .dropdown').length) {
                 $('.video-item .dropdown-menu, .folder-item .dropdown-menu').removeClass('show');
@@ -936,11 +811,8 @@ function initAdminVideo() {
         $(document).off('click', '.video-item .dropdown-item, .folder-item .dropdown-item').on('click', '.video-item .dropdown-item, .folder-item .dropdown-item', function() {
             $(this).closest('.dropdown-menu').removeClass('show');
         });
-
-        // Загружаем содержимое при переключении на вкладку видео
         $('#videos-tab').off('shown.bs.tab').on('shown.bs.tab', function(e) {
             try {
-                // Загружаем информацию о диске при переключении на вкладку
                 loadDiskSpaceInfo();
                 
                 const savedPath = localStorage.getItem('videoCurrentPath') || '';
@@ -949,11 +821,8 @@ function initAdminVideo() {
                 loadDirectoryContents('');
             }
         });
-
-        // Загружаем содержимое корневой директории при загрузке страницы (если вкладка активна)
         if ($('#videos-tab').hasClass('active')) {
             setTimeout(function() {
-                // Загружаем информацию о диске при активной вкладке
                 loadDiskSpaceInfo();
                 
                 try {
@@ -964,9 +833,7 @@ function initAdminVideo() {
                 }
             }, 200);
         }
-    }); // ЗАКРЫВАЮЩАЯ СКОБКА ДЛЯ $(document).ready()
-
-    // Добавляем стили для dropdown меню
+    });
     const styleElement = document.createElement('style');
     styleElement.textContent = `
 
@@ -1144,24 +1011,16 @@ function initAdminVideo() {
         }    `;
     document.head.appendChild(styleElement);
 }
-
-// Автоматическая инициализация при загрузке страницы
 $(document).ready(function() {
     initAdminVideo();
-    
-    // Добавляем кнопке обновления информации о диске обработчик события
     $(document).on('click', '#refreshDiskSpaceBtn', function() {
         loadDiskSpaceInfo();
     });
-    
-    // Проверяем, активна ли вкладка "Видео" и загружаем информацию о диске
     if ($('#videos-tab').hasClass('active')) {
         setTimeout(function() {
             loadDiskSpaceInfo();
         }, 300);
     }
-    
-    // Добавляем обработчик события переключения на вкладку "Видео"
     $('#videos-tab').on('shown.bs.tab', function(e) {
         loadDiskSpaceInfo();
     });

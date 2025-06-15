@@ -59,7 +59,7 @@
                                 <p><strong>Название:</strong> <span id="org-name">{{ secondary_admins[0].organization_name }}</span></p>
                                 <p><strong>Логин админа:</strong> <span id="org-username">{{ secondary_admins[0].username }}</span></p>
                                 <p><strong>Дата создания:</strong> <span id="org-created">{{ secondary_admins[0].created_at.strftime('%d.%m.%Y %H:%M') }}</span></p>
-                                <p><strong>Лимит диска:</strong> <span id="org-disk-limit">{{ (secondary_admins[0].disk_space_limit // (1024*1024*1024)) if secondary_admins[0].disk_space_limit else 1 }} ГБ</span></p>
+                                <p><strong>Лимит диска:</strong> <span id="org-disk-limit">{{ (secondary_admins[0].disk_space_limit
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Адрес:</strong> <span id="org-address">{{ secondary_admins[0].organization_address or 'Не указан' }}</span></p>
@@ -578,9 +578,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
 <script>
     $(document).ready(function() {
-    // Функция для отображения уведомлений с новыми стилями
     function showNotification(message, type = 'info', duration = 5000) {
-        // Определяем заголовок и иконку в зависимости от типа уведомления
         let title, icon;
         switch (type) {
             case 'success':
@@ -591,7 +589,7 @@
             case 'error':
                 title = 'Ошибка';
                 icon = 'fas fa-exclamation-circle';
-                type = 'danger'; // Приводим error к danger для согласованности
+                type = 'danger';
                 break;
             case 'warning':
                 title = 'Предупреждение';
@@ -601,14 +599,10 @@
             default:
                 title = 'Информация';
                 icon = 'fas fa-info-circle';
-                type = 'info'; // Устанавливаем тип по умолчанию
+                type = 'info';
                 break;
         }
-        
-        // Создаем уникальный ID для уведомления
         const notificationId = 'notification-' + new Date().getTime();
-        
-        // Создаем HTML структуру уведомления
         const notificationHTML = `
             <div id="${notificationId}" class="custom-notification notification-${type}">
                 <div class="notification-header">
@@ -628,8 +622,6 @@
                 </div>
             </div>
         `;
-        
-        // Добавляем стили, если их еще нет
         if ($('#custom-notification-styles').length === 0) {
             $('head').append(`
                 <style id="custom-notification-styles">
@@ -771,43 +763,28 @@
                </style>
            `);
        }
-       
-       // Создаем контейнер для уведомлений, если его еще нет
        if ($('.custom-notification-container').length === 0) {
            $('body').append('<div class="custom-notification-container"></div>');
        }
-       
-       // Добавляем уведомление в контейнер
        $('.custom-notification-container').append(notificationHTML);
        const $notification = $(`#${notificationId}`);
-       
-       // Применяем анимацию появления (requestAnimationFrame для лучшей производительности)
        requestAnimationFrame(() => {
            $notification.addClass('active');
-           
-           // Запускаем анимацию прогресс-бара
            const $progressBar = $notification.find('.notification-progress-bar');
            setTimeout(() => {
                $progressBar.css('width', '0');
            }, 100);
        });
-       
-       // Обработчик закрытия
        $notification.find('.close-notification').on('click', function() {
            closeNotification($notification);
        });
-       
-       // Автоматическое закрытие через указанное время
        let autoCloseTimeout = setTimeout(() => {
            closeNotification($notification);
        }, duration);
-       
-       // Останавливаем автозакрытие при наведении
        $notification.on('mouseenter', function() {
            clearTimeout(autoCloseTimeout);
            $notification.find('.notification-progress-bar').css('width', '');
        }).on('mouseleave', function() {
-           // Возобновляем автозакрытие при уходе курсора
            const remainingTime = duration * ($notification.find('.notification-progress-bar').width() / $notification.width());
            $notification.find('.notification-progress-bar').css('width', '0');
            
@@ -815,21 +792,17 @@
                closeNotification($notification);
            }, remainingTime);
        });
-       
-       // Функция закрытия уведомления
        function closeNotification($notification) {
            $notification.removeClass('active');
            setTimeout(() => {
                $notification.remove();
-           }, 300); // Время соответствует transition в CSS
+           }, 300);
        }
        
-       return $notification; // Возвращаем jQuery объект для возможного дальнейшего взаимодействия
+       return $notification;
    }
-
-   // Обработчик для кнопки активации/деактивации
    $(document).on('click', '#toggle-active-btn', function(e) {
-       e.preventDefault(); // Предотвращаем стандартное поведение
+       e.preventDefault();
        
        const adminId = $('.admin-item.active').data('admin-id');
        if (!adminId) {
@@ -838,11 +811,7 @@
        }
        
        console.log('Отправка запроса для admin_id:', adminId);
-       
-       // Показываем индикатор загрузки
        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Обработка...');
-       
-       // Добавляем заголовок CSRF, если он используется в Flask
        const csrfToken = $('meta[name="csrf-token"]').attr('content');
        const headers = {};
        if (csrfToken) {
@@ -853,36 +822,25 @@
            url: `/main_admin/api/toggle_secondary_admin/${adminId}`,
            type: 'POST',
            headers: headers,
-           contentType: 'application/json',  // Укажем явно content type
-           data: JSON.stringify({}),         // Пустой объект, но в формате JSON
+           contentType: 'application/json',
+           data: JSON.stringify({}),
            success: function(response) {
                console.log('Ответ от сервера:', response);
-               
-               // Обновляем состояние интерфейса
                const isActive = response.active;
-               
-               // Обновляем текст и класс статуса в панели деталей
                $('#org-active')
                    .text(isActive ? 'Активен' : 'Неактивен')
                    .removeClass('status-active status-inactive')
                    .addClass(isActive ? 'status-active' : 'status-inactive');
-               
-               // Обновляем текст на кнопке
                $('#toggle-active-btn')
                    .prop('disabled', false)
                    .html(`<i class="fas fa-power-off"></i> ${isActive ? 'Деактивировать' : 'Активировать'}`);
-               
-               // Обновляем статус в списке организаций
                $(`.admin-item[data-admin-id="${adminId}"] .status-badge`)
                    .text(isActive ? 'Активен' : 'Неактивен')
                    .removeClass('status-active status-inactive')
                    .addClass(isActive ? 'status-active' : 'status-inactive');
-               
-               // Показываем уведомление
                showNotification(response.message, 'success');
            },
            error: function(xhr, status, error) {
-               // Восстанавливаем кнопку
                $('#toggle-active-btn')
                    .prop('disabled', false)
                    .html(`<i class="fas fa-power-off"></i> ${$('#org-active').text() === 'Активен' ? 'Деактивировать' : 'Активировать'}`);
@@ -908,8 +866,6 @@
            }
        });
    });
-
-   // Обработчик для кнопки редактирования
    $(document).on('click', '#edit-org-btn', function() {
        const adminId = $('.admin-item.active').data('admin-id');
        if (!adminId) {
@@ -918,8 +874,6 @@
        }
        
        console.log('Открытие модального окна редактирования для admin_id:', adminId);
-       
-       // Показываем индикатор загрузки на кнопке
        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Загрузка...');
        
        const form = $('#editOrgForm');
@@ -929,7 +883,6 @@
            url: `/main_admin/api/organization/${adminId}`,
            type: 'GET',
            success: function(resp) {
-               // Восстанавливаем кнопку
                $('#edit-org-btn').prop('disabled', false).html('<i class="fas fa-edit"></i> Редактировать');
                
                const org = resp.organization;
@@ -946,12 +899,9 @@
                
                $('#edit-password, #edit-confirm_password').val('');
                $('#edit-password-match-error').addClass('d-none');
-               
-               // Открываем модальное окно
                $('#editOrgModal').modal('show');
            },
            error: function(xhr) {
-               // Восстанавливаем кнопку
                $('#edit-org-btn').prop('disabled', false).html('<i class="fas fa-edit"></i> Редактировать');
                
                showNotification(xhr.responseJSON?.error || 'Не удалось загрузить данные для редактирования.', 'danger');
@@ -959,12 +909,7 @@
            }
        });
    });
-
-
-
-// Функции для работы с настройками стилей
 $(document).ready(function() {
-    // Добавляем кнопку настройки стилей в панель управления организацией
     if ($('#style-settings-btn').length === 0) {
         $('.org-info .btn-group').append(`
             <button type="button" class="btn btn-info" id="style-settings-btn">
@@ -972,13 +917,9 @@ $(document).ready(function() {
             </button>
         `);
     }
-    
-    // Получаем CSRF-токен из мета-тегов
     const getCSRFToken = function() {
         return $('meta[name="csrf-token"]').attr('content');
     };
-    
-    // Настраиваем глобальные параметры AJAX для передачи CSRF-токена
     $.ajaxSetup({
         beforeSend: function(xhr, settings) {
             if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
@@ -986,28 +927,20 @@ $(document).ready(function() {
             }
         }
     });
-    
-    // Обработчик открытия модального окна настройки стилей
     $(document).on('click', '#style-settings-btn', function() {
         const adminId = $('.admin-item.active').data('admin-id');
         if (!adminId) {
             showNotification('Не удалось определить ID организации', 'danger');
             return;
         }
-        
-        // Получаем информацию о стилях организации
         loadStyleSettings(adminId);
     });
-    
-    // Обработчик сохранения настроек стилей
     $(document).on('click', '#save-style-settings-btn', function() {
         const adminId = $('.admin-item.active').data('admin-id');
         if (!adminId) {
             showNotification('Не удалось определить ID организации', 'danger');
             return;
         }
-        
-        // Проверяем наличие необходимых файлов стилей
         const rolesToCheck = [];
         
         if ($('#admin_style').val() === 'custom') {
@@ -1022,14 +955,10 @@ $(document).ready(function() {
         if ($('#terminal_style').val() === 'custom') {
             rolesToCheck.push('terminal');
         }
-        
-        // Получаем список существующих файлов
         const existingFiles = [];
         $('#style-files-container li').each(function() {
             existingFiles.push($(this).text());
         });
-        
-        // Проверяем наличие необходимых файлов
         const missingFiles = [];
         rolesToCheck.forEach(function(role) {
             const fileName = `${role}.css`;
@@ -1037,30 +966,19 @@ $(document).ready(function() {
                 missingFiles.push(fileName);
             }
         });
-        
-        // Если есть отсутствующие файлы, показываем предупреждение и не выполняем сохранение
         if (missingFiles.length > 0) {
-            // Формируем список отсутствующих файлов для сообщения
             const missingFilesList = missingFiles.join(', ');
-            
-            // Показываем уведомление
             showNotification(`Отсутствуют необходимые файлы стилей: ${missingFilesList}. Создайте файлы перед сохранением.`, 'danger');
-            
-            // Обновляем список отсутствующих файлов в модальном окне
             $('#missing-files-list').empty();
             missingFiles.forEach(function(file) {
                 $('#missing-files-list').append(`<li>${file}</li>`);
             });
             $('#style-files-warning').show();
             
-            return; // Прерываем выполнение
+            return;
         }
-        
-        // Если нет отсутствующих файлов, отправляем форму для сохранения настроек
         saveStyleSettings(adminId);
     });
-
-    // Обработчик создания папки для стилей
     $(document).on('click', '#create-style-folder-btn', function() {
         const adminId = $('.admin-item.active').data('admin-id');
         if (!adminId) {
@@ -1080,7 +998,6 @@ $(document).ready(function() {
                 
                 if (response.success) {
                     showNotification(response.message, 'success');
-                    // Обновляем список файлов
                     loadStyleFilesList(adminId);
                 } else {
                     showNotification(response.message, 'danger');
@@ -1093,8 +1010,6 @@ $(document).ready(function() {
             }
         });
     });
-    
-    // Обработчик обновления списка файлов стилей
     $(document).on('click', '#refresh-style-files-btn', function() {
         const adminId = $('.admin-item.active').data('admin-id');
         if (!adminId) {
@@ -1108,41 +1023,24 @@ $(document).ready(function() {
             $('#refresh-style-files-btn').prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Обновить список');
         });
     });
-    
-    // Обработчик изменения выбора стиля
     $(document).on('change', '#admin_style, #user_style, #tablo_style, #terminal_style', function() {
         checkStyleFiles();
     });
-    
-    // Функция загрузки настроек стилей
     function loadStyleSettings(adminId) {
-        // Сбрасываем форму
         $('#styleSettingsForm')[0].reset();
         $('#style-files-warning').hide();
-        
-        // Устанавливаем действие формы
         $('#styleSettingsForm').attr('action', `/main_admin/update_org_styles/${adminId}`);
-        
-        // Устанавливаем CSRF токен
         $('#style-settings-csrf').val(getCSRFToken());
-        
-        // Получаем данные стилей
         $.ajax({
             url: `/main_admin/style_settings/${adminId}`,
             type: 'GET',
             success: function(response) {
                 const orgUsername = response.org_admin.username;
-                
-                // Устанавливаем путь к папке стилей
                 $('#style-folder-path').text(`app/static/css/${orgUsername}`);
-                
-                // Устанавливаем значения в форму
                 $('#admin_style').val(response.style_settings.admin);
                 $('#user_style').val(response.style_settings.user);
                 $('#tablo_style').val(response.style_settings.tablo);
                 $('#terminal_style').val(response.style_settings.terminal);
-                
-                // Обновляем список файлов
                 $('#style-files-container').empty();
                 
                 if (response.style_files && response.style_files.length > 0) {
@@ -1155,11 +1053,7 @@ $(document).ready(function() {
                     $('#no-style-files').show();
                     $('#style-files-container').hide();
                 }
-                
-                // Проверяем наличие необходимых файлов стилей
                 checkStyleFiles();
-                
-                // Открываем модальное окно
                 $('#styleSettingsModal').modal('show');
             },
             error: function(xhr) {
@@ -1168,14 +1062,11 @@ $(document).ready(function() {
             }
         });
     }
-    
-    // Функция загрузки списка файлов стилей
     function loadStyleFilesList(adminId, callback) {
         $.ajax({
             url: `/main_admin/style_settings/${adminId}`,
             type: 'GET',
             success: function(response) {
-                // Обновляем список файлов
                 $('#style-files-container').empty();
                 
                 if (response.style_files && response.style_files.length > 0) {
@@ -1188,8 +1079,6 @@ $(document).ready(function() {
                     $('#no-style-files').show();
                     $('#style-files-container').hide();
                 }
-                
-                // Проверяем наличие необходимых файлов стилей
                 checkStyleFiles();
                 
                 if (callback) callback();
@@ -1201,8 +1090,6 @@ $(document).ready(function() {
             }
         });
     }
-    
-    // Функция проверки наличия необходимых файлов стилей
     function checkStyleFiles() {
         const rolesToCheck = [];
         
@@ -1218,20 +1105,14 @@ $(document).ready(function() {
         if ($('#terminal_style').val() === 'custom') {
             rolesToCheck.push('terminal');
         }
-        
-        // Если нет кастомных стилей, скрываем предупреждение
         if (rolesToCheck.length === 0) {
             $('#style-files-warning').hide();
             return;
         }
-        
-        // Получаем список файлов в папке стилей
         const existingFiles = [];
         $('#style-files-container li').each(function() {
             existingFiles.push($(this).text());
         });
-        
-        // Проверяем наличие необходимых файлов
         const missingFiles = [];
         
         rolesToCheck.forEach(function(role) {
@@ -1240,8 +1121,6 @@ $(document).ready(function() {
                 missingFiles.push(fileName);
             }
         });
-        
-        // Показываем предупреждение, если есть отсутствующие файлы
         if (missingFiles.length > 0) {
             $('#missing-files-list').empty();
             missingFiles.forEach(function(file) {
@@ -1252,16 +1131,9 @@ $(document).ready(function() {
             $('#style-files-warning').hide();
         }
     }
-    
-    // Функция сохранения настроек стилей с улучшенной обработкой ошибок
     function saveStyleSettings(adminId) {
-        // Показываем индикатор загрузки на кнопке
         $('#save-style-settings-btn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Сохранение...');
-        
-        // Формируем данные формы
         const formData = new FormData($('#styleSettingsForm')[0]);
-        
-        // Проверяем наличие необходимых файлов стилей перед отправкой
         const rolesToCheck = [];
         let missingFilesWarning = '';
         
@@ -1269,14 +1141,10 @@ $(document).ready(function() {
         if ($('#user_style').val() === 'custom') rolesToCheck.push('user');
         if ($('#tablo_style').val() === 'custom') rolesToCheck.push('tablo');
         if ($('#terminal_style').val() === 'custom') rolesToCheck.push('terminal');
-        
-        // Получаем список существующих файлов
         const existingFiles = [];
         $('#style-files-container li').each(function() {
             existingFiles.push($(this).text());
         });
-        
-        // Проверяем наличие необходимых файлов
         const missingFiles = [];
         rolesToCheck.forEach(function(role) {
             const fileName = `${role}.css`;
@@ -1284,8 +1152,6 @@ $(document).ready(function() {
                 missingFiles.push(fileName);
             }
         });
-        
-        // Если есть отсутствующие файлы, выводим предупреждение и не отправляем запрос
         if (missingFiles.length > 0) {
             $('#save-style-settings-btn').prop('disabled', false).html('Сохранить настройки');
             
@@ -1293,18 +1159,14 @@ $(document).ready(function() {
                 '. Создайте эти файлы перед сохранением настроек.';
             
             showNotification(missingFilesWarning, 'danger');
-            
-            // Показываем предупреждение в модальном окне
             $('#missing-files-list').empty();
             missingFiles.forEach(function(file) {
                 $('#missing-files-list').append(`<li>${file}</li>`);
             });
             $('#style-files-warning').show();
             
-            return; // Прерываем выполнение функции
+            return;
         }
-        
-        // Отправляем запрос на сервер
         $.ajax({
             url: `/main_admin/update_org_styles/${adminId}`,
             type: 'POST',
@@ -1312,26 +1174,16 @@ $(document).ready(function() {
             processData: false,
             contentType: false,
             success: function(response) {
-                // Восстанавливаем кнопку
                 $('#save-style-settings-btn').prop('disabled', false).html('Сохранить настройки');
-                
-                // Проверяем успешность операции
                 if (response.success) {
-                    // Закрываем модальное окно
                     $('#styleSettingsModal').modal('hide');
-                    
-                    // Показываем уведомление об успешном сохранении
                     showNotification(response.message || 'Настройки стилей успешно сохранены', 'success');
                 } else {
-                    // Показываем уведомление об ошибке
                     showNotification(response.error || 'Не удалось сохранить настройки стилей', 'danger');
                 }
             },
             error: function(xhr) {
-                // Восстанавливаем кнопку
                 $('#save-style-settings-btn').prop('disabled', false).html('Сохранить настройки');
-                
-                // Показываем уведомление об ошибке
                 let errorMessage = 'Ошибка при сохранении настроек стилей';
                 
                 try {
@@ -1342,7 +1194,6 @@ $(document).ready(function() {
                             errorMessage = xhr.responseJSON.message;
                         }
                     } else if (xhr.responseText) {
-                        // Пытаемся распарсить текст ответа
                         try {
                             const response = JSON.parse(xhr.responseText);
                             if (response.error) {
@@ -1351,19 +1202,13 @@ $(document).ready(function() {
                                 errorMessage = response.message;
                             }
                         } catch (e) {
-                            // Если не можем распарсить, просто логируем ошибку
                             console.error('Не удалось распарсить ответ:', e);
                         }
                     }
-                    
-                    // Проверка на наличие отсутствующих файлов в сообщении об ошибке
                     if (errorMessage.includes('Отсутствуют необходимые файлы стилей')) {
-                        // Извлекаем список файлов из сообщения
                         const missingFilesMatch = errorMessage.match(/Отсутствуют необходимые файлы стилей: (.*?)\./);
                         if (missingFilesMatch && missingFilesMatch[1]) {
                             const missingFiles = missingFilesMatch[1].split(', ');
-                            
-                            // Обновляем список в предупреждении
                             $('#missing-files-list').empty();
                             missingFiles.forEach(function(file) {
                                 $('#missing-files-list').append(`<li>${file}</li>`);
@@ -1381,9 +1226,6 @@ $(document).ready(function() {
         });
     }
 });
-
-
-   // Обработчик отправки формы редактирования
    $(document).on('click', '#edit-org-submit', function() {
        let isValid = true;
        const nameInput = $('#edit-organization_name');
@@ -1393,8 +1235,6 @@ $(document).ready(function() {
        const diskLimitInput = $('#edit-disk_space_limit');
        const pwdError = $('#edit-password-match-error');
        const form = $('#editOrgForm');
-       
-       // Проверяем, установлен ли action для формы
        if (!form.attr('action')) {
            showNotification('Ошибка: не указан URL для отправки данных', 'danger');
            console.error('Отсутствует атрибут action в форме редактирования');
@@ -1430,8 +1270,6 @@ $(document).ready(function() {
        }
 
        if (!isValid) return;
-
-       // Показываем индикатор загрузки на кнопке
        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Сохранение...');
 
        const diskSpaceGB = parseInt(diskLimitInput.val());
@@ -1448,22 +1286,16 @@ $(document).ready(function() {
            processData: false,
            contentType: false,
            success: function(resp) {
-               // Восстанавливаем кнопку
                $('#edit-org-submit').prop('disabled', false).html('Сохранить изменения');
                
                $('#editOrgModal').modal('hide');
                showNotification('Организация успешно обновлена!', 'success');
-               
-               // Обновляем информацию на странице без перезагрузки
                const adminId = $('.admin-item.active').data('admin-id');
                loadOrgData(adminId);
-               
-               // Обновляем название в списке
                $(`.admin-item[data-admin-id="${adminId}"] .admin-name`).text(nameInput.val());
                $(`.admin-item[data-admin-id="${adminId}"] small`).text(userInput.val());
            },
            error: function(xhr) {
-               // Восстанавливаем кнопку
                $('#edit-org-submit').prop('disabled', false).html('Сохранить изменения');
                
                showNotification(xhr.responseJSON?.error || 'Ошибка при сохранении изменений.', 'danger');
@@ -1471,8 +1303,6 @@ $(document).ready(function() {
            }
        });
    });
-
-   // Навигация по Enter в модальном окне редактирования
    $('#editOrgModal input').on('keydown', function(e) {
        if (e.key === 'Enter' && !e.shiftKey) {
            e.preventDefault();
@@ -1486,8 +1316,6 @@ $(document).ready(function() {
            $('#edit-org-submit').click();
        }
    });
-
-   // Обработчик создания организации
    $('#create-org-submit').on('click', function() {
        let isValid = true;
        
@@ -1520,13 +1348,8 @@ $(document).ready(function() {
        }
        
        if (isValid) {
-           // Показываем индикатор загрузки
            $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Создание...');
-           
-           // Отправляем форму через AJAX
            const formData = new FormData($('#createOrgForm')[0]);
-           
-           // Переводим ГБ в байты
            const diskSpaceGB = parseInt($('#disk_space_limit').val());
            const diskSpaceBytes = diskSpaceGB * 1024 * 1024 * 1024;
            formData.set('disk_space_limit', diskSpaceBytes);
@@ -1541,8 +1364,6 @@ $(document).ready(function() {
                    $('#create-org-submit').prop('disabled', false).html('Создать организацию');
                    $('#createOrgModal').modal('hide');
                    showNotification('Организация успешно создана!', 'success');
-                   
-                   // Перезагружаем страницу для отображения новой организации
                    location.reload();
                },
                error: function(xhr) {
@@ -1551,7 +1372,7 @@ $(document).ready(function() {
                }
            });
            
-           return false; // Предотвращаем стандартную отправку формы
+           return false;
        }
    });
    
@@ -1561,8 +1382,6 @@ $(document).ready(function() {
            $('#create-org-submit').click();
        }
    });
-   
-   // Обработчик выбора организации в списке
    $('.admin-item').on('click', function(e) {
        e.preventDefault();
        
@@ -1573,8 +1392,6 @@ $(document).ready(function() {
        
        loadOrgData(adminId);
    });
-   
-   // Поиск по организациям
    $('#adminSearch').on('keyup', function() {
        const searchText = $(this).val().toLowerCase();
        
@@ -1589,8 +1406,6 @@ $(document).ready(function() {
            }
        });
    });
-   
-   // Обработчик сброса пароля
    $('#reset-password-submit').on('click', function() {
        const adminId = $('#reset-admin-id').val();
        const newPassword = $('#new-password').val();
@@ -1602,8 +1417,6 @@ $(document).ready(function() {
        }
        
        $('#password-match-error').addClass('d-none');
-       
-       // Показываем индикатор загрузки
        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Сброс...');
        
        $.ajax({
@@ -1626,8 +1439,6 @@ $(document).ready(function() {
            }
        });
    });
-   
-   // Функция загрузки данных организации
    function loadOrgData(adminId) {
        console.log('Загрузка данных организации с ID:', adminId);
        
@@ -1654,12 +1465,8 @@ $(document).ready(function() {
                    .text(isActive ? 'Активен' : 'Неактивен')
                    .removeClass('status-active status-inactive')
                    .addClass(isActive ? 'status-active' : 'status-inactive');
-               
-               // Обновляем текст на кнопке активации/деактивации
                $('#toggle-active-btn')
                    .html(`<i class="fas fa-power-off"></i> ${isActive ? 'Деактивировать' : 'Активировать'}`);
-               
-               // Обновляем ID для сброса пароля
                $('#reset-admin-id').val(data.organization.id);
                
                $('#org-expiry').text(data.organization.access_expiry_date ? 
@@ -1719,8 +1526,6 @@ $(document).ready(function() {
            }
        });
    }  
-         
-   // Инициализация графика
    function initTicketChart(ticketsData) {
        setTimeout(function() {
            $('#chart-empty').hide();
@@ -1806,8 +1611,6 @@ $(document).ready(function() {
            }
        }, 100);
    }
-   
-   // Загрузка информации о системе
    function loadSystemInfo() {
        $.ajax({
            url: '/main_admin/api/system_info',
@@ -1853,18 +1656,12 @@ $(document).ready(function() {
            }
        });
    }
-
-   // Инициализация страницы
    {% if secondary_admins %}
        loadOrgData({{ secondary_admins[0].id }});
    {% endif %}
    
    loadSystemInfo();
-   
-   // Периодическое обновление системной информации
    setInterval(loadSystemInfo, 30000);
-   
-   // Обновление графика при переключении на вкладку статистики
    $('#orgTabs a').on('shown.bs.tab', function (e) {
        if (e.target.id === 'stats-tab') {
            if (window.ticketChart) {

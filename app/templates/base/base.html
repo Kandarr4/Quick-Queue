@@ -117,7 +117,6 @@
 
 <script>
 $(document).ready(function() {
-    // Функция для обновления статуса авторизации
     function updateAuthStatus() {
         $.ajax({
             url: "{{ url_for('main.check_auth_status') }}",
@@ -126,7 +125,6 @@ $(document).ready(function() {
                 const authDropdown = $('#auth-dropdown');
                 
                 if (data.authenticated) {
-                    // Пользователь авторизован
                     const userType = data.user_type === 'org_user' ? 'Пользователь' : 'Администратор';
                     const roleText = data.role ? ` (${data.role})` : '';
                     
@@ -152,7 +150,6 @@ $(document).ready(function() {
                         </div>
                     `);
                 } else {
-                    // Пользователь не авторизован
                     authDropdown.html(`
                         <a class="nav-link" href="{{ url_for('main.login') }}">
                             <i class="fas fa-right-to-bracket mr-1"></i>
@@ -162,7 +159,6 @@ $(document).ready(function() {
                 }
             },
             error: function() {
-                // В случае ошибки показываем кнопку входа
                 const authDropdown = $('#auth-dropdown');
                 authDropdown.html(`
                     <a class="nav-link" href="{{ url_for('main.login') }}">
@@ -173,14 +169,8 @@ $(document).ready(function() {
             }
         });
     }
-    
-    // Обновляем статус при загрузке страницы
     updateAuthStatus();
-    
-    // Обновляем статус каждые 30 секунд (для случаев истечения сессии)
     setInterval(updateAuthStatus, 30000);
-    
-    // Обновляем статус при переходах между страницами (если используется AJAX)
     $(window).on('focus', function() {
         updateAuthStatus();
     });

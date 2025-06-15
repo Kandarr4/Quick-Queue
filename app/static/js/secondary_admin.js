@@ -1,6 +1,5 @@
-// Функция назначения роли
 function assignRole(userId) {
-    var selectedRole = $('#userRoleSelect').val(); // Выбранная роль
+    var selectedRole = $('#userRoleSelect').val();
 
     $.ajax({
         url: '/secondary_admin/assign-role/' + userId,
@@ -8,19 +7,14 @@ function assignRole(userId) {
         data: { role: selectedRole },
         success: function(response) {
             $('#roleAssignModal').modal('hide');
-            
-            // Использование существующей функции showNotification
             if (typeof showNotification === 'function') {
                 showNotification(response.message, 'success');
             } else {
                 alert(response.message);
             }
-            
-            // Перезагрузка страницы для отображения обновлённых данных
             location.reload(); 
         },
         error: function(xhr) {
-            // Использование существующей функции showNotification для ошибок
             var errorMessage = 'Ошибка при назначении роли';
             
             try {
@@ -29,7 +23,6 @@ function assignRole(userId) {
                     errorMessage = response.message;
                 }
             } catch(e) {
-                // Используем стандартное сообщение об ошибке
             }
             
             if (typeof showNotification === 'function') {
@@ -42,8 +35,6 @@ function assignRole(userId) {
         }
     });
 }
-
-// Функция для инициализации функционала админки
 function initAdminCore() {
     function showNotification(message, type) {
         $('.custom-notification').remove();
@@ -292,7 +283,7 @@ function initAdminCore() {
         const scheduleData = { schedule };
         
         $.ajax({
-            url: `/secondary_admin//service/${currentServiceId}/schedule`,
+            url: `/secondary_admin
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(scheduleData),
@@ -317,7 +308,7 @@ function initAdminCore() {
         button.addEventListener('click', function() {
             const serviceId = this.getAttribute('data-service-id');
             currentServiceId = serviceId;
-            fetch(`/secondary_admin//service/${serviceId}/schedule`)
+            fetch(`/secondary_admin
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -430,23 +421,13 @@ function initAdminCore() {
         $('a[data-toggle="pill"]').on('shown.bs.tab', function(e) {
             saveActiveTab();
         });
-        
-        // Обработчик для кнопки управления услугами пользователя
         $('.show-dependencies-btn, .assign-service-btn').off('click').on('click', function() {
             var userId = $(this).data('user-id');
             $('#userIdField').val(userId);
-            
-            // Загружаем назначенные услуги
             loadUserServices(userId);
-            
-            // Сбрасываем активную вкладку на "Назначенные услуги"
             $('#assigned-services-tab').tab('show');
-            
-            // Показываем модальное окно
             $('#userServicesModal').modal('show');
         });
-        
-        // Функция для загрузки назначенных услуг пользователя
         function loadUserServices(userId) {
             $('#loadingServices').show();
             $('#noAssignedServices').hide();
@@ -478,8 +459,6 @@ function initAdminCore() {
                     } else {
                         $('#noAssignedServices').show();
                     }
-                    
-                    // Когда загружены назначенные услуги, загружаем доступные услуги при переключении на вкладку
                     $('#available-services-tab').off('shown.bs.tab').on('shown.bs.tab', function() {
                         loadAvailableServices(userId);
                     });
@@ -492,26 +471,19 @@ function initAdminCore() {
                 }
             });
         }
-        
-        // Функция для загрузки доступных услуг
         function loadAvailableServices(userId) {
             $('#loadingAvailableServices').show();
             $('#noAvailableServices').hide();
             $('#availableServicesList .available-service-card').remove();
-            
-            // Получаем список всех услуг
             $.ajax({
                 url: '/secondary_admin/load-services',
                 method: 'GET',
                 success: function(allServices) {
-                    // Получаем список назначенных услуг
                     $.ajax({
                         url: `/secondary_admin/user_service_tree/${userId}`,
                         method: 'GET',
                         success: function(assignedServices) {
                             $('#loadingAvailableServices').hide();
-                            
-                            // Фильтруем все услуги, исключая уже назначенные
                             const assignedServiceIds = assignedServices.map(item => item.serviceId);
                             const availableServices = allServices.filter(service => 
                                 !assignedServices.some(assigned => assigned.service === service.name)
@@ -532,8 +504,6 @@ function initAdminCore() {
                                         </div>
                                     `);
                                 });
-                                
-                                // Добавляем обработчик клика для выбора услуги
                                 $('.available-service-card').off('click').on('click', function() {
                                     $(this).toggleClass('selected');
                                 });
@@ -557,8 +527,6 @@ function initAdminCore() {
                 }
             });
         }
-        
-        // Обработчик для кнопки назначения выбранных услуг
         $('#assignSelectedServices').off('click').on('click', function() {
             const userId = $('#userIdField').val();
             const selectedServices = $('.available-service-card.selected');
@@ -603,15 +571,11 @@ function initAdminCore() {
                     } else {
                         showNotification('Ошибка при назначении услуг', 'danger');
                     }
-                    
-                    // Перезагружаем списки услуг
                     $('#assigned-services-tab').tab('show');
                     loadUserServices(userId);
                 }
             }
         });
-        
-        // Поиск по назначенным услугам
         $('#searchAssignedServices').off('keyup').on('keyup', function() {
             const searchValue = $(this).val().toLowerCase();
             
@@ -619,8 +583,6 @@ function initAdminCore() {
                 const serviceName = $(this).data('service-name');
                 $(this).toggle(serviceName.indexOf(searchValue) > -1);
             });
-            
-            // Проверяем, есть ли видимые услуги
             const visibleServices = $('.service-item:visible').length;
             if (visibleServices === 0 && $('.service-item').length > 0) {
                 if (!$('#noMatchingServices').length) {
@@ -637,8 +599,6 @@ function initAdminCore() {
                 $('#noMatchingServices').hide();
             }
         });
-        
-        // Поиск по доступным услугам
 $('#searchAvailableServices').off('keyup').on('keyup', function() {
     const searchValue = $(this).val().toLowerCase();
     
@@ -646,8 +606,6 @@ $('#searchAvailableServices').off('keyup').on('keyup', function() {
         const serviceName = $(this).data('service-name');
         $(this).toggle(serviceName.indexOf(searchValue) > -1);
     });
-    
-    // Проверяем, есть ли видимые услуги
     const visibleServices = $('.available-service-card:visible').length;
     if (visibleServices === 0 && $('.available-service-card').length > 0) {
         if (!$('#noMatchingAvailableServices').length) {
@@ -664,8 +622,6 @@ $('#searchAvailableServices').off('keyup').on('keyup', function() {
         $('#noMatchingAvailableServices').hide();
     }
 });
-
-// Обработчик удаления назначения услуги
 $(document).off('click', '.delete-service-btn').on('click', '.delete-service-btn', function() {
     const assignmentId = $(this).data('assignment-id');
     const serviceItem = $(this).closest('.service-item');
@@ -677,17 +633,11 @@ $(document).off('click', '.delete-service-btn').on('click', '.delete-service-btn
             method: 'POST',
             success: function(response) {
                 showNotification('Назначение услуги успешно удалено', 'success');
-                
-                // Удаляем элемент из DOM
                 serviceItem.fadeOut(300, function() {
                     $(this).remove();
-                    
-                    // Проверяем, остались ли еще услуги
                     if ($('.service-item').length === 0) {
                         $('#noAssignedServices').show();
                     }
-                    
-                    // Обновляем список доступных услуг, если вкладка активна
                     if ($('#available-services-tab').hasClass('active')) {
                         const userId = $('#userIdField').val();
                         loadAvailableServices(userId);
@@ -708,7 +658,7 @@ $('#addUserModal form').submit(function(e) {
     var formData = $(this).serialize();
     var username = $(this).find('input[name="username"]').val().trim();
     
-    console.log('Отправляем данные пользователя:', username); // Для отладки
+    console.log('Отправляем данные пользователя:', username);
     
     $.ajax({
         url: $(this).attr('action'),
@@ -718,27 +668,21 @@ $('#addUserModal form').submit(function(e) {
             'X-Requested-With': 'XMLHttpRequest'
         },
         success: function(response) {
-            console.log('Успешный ответ:', response); // Для отладки
+            console.log('Успешный ответ:', response);
             $('#addUserModal').modal('hide');
-            
-            // Определяем сообщение для показа
             var message = 'Пользователь успешно добавлен';
             if (response && response.message) {
                 message = response.message;
             }
             
             showNotification(message, 'success');
-            
-            // Очищаем форму
             $('#addUserModal form')[0].reset();
-            
-            // Перезагружаем страницу для отображения нового пользователя
             setTimeout(function() {
                 location.reload();
             }, 1500);
         },
         error: function(xhr) {
-            console.log('Ошибка:', xhr); // Для отладки
+            console.log('Ошибка:', xhr);
             
             var errorMessage = 'Ошибка при добавлении пользователя';
             
@@ -748,7 +692,6 @@ $('#addUserModal form').submit(function(e) {
                     errorMessage = response.message;
                 }
             } catch(e) {
-                // Если не удалось распарсить JSON, проверяем статус ошибки
                 if (xhr.status === 400) {
                     errorMessage = 'Ошибка валидации данных';
                 } else if (xhr.status === 500) {
@@ -765,8 +708,6 @@ $('#addUserModal form').submit(function(e) {
         }
     });
 });
-
-// Добавляем callback в качестве аргумента
 function loadVideoFolders(callback) {
     $.ajax({
         url: '/secondary_admin/get_video_folders',
@@ -774,24 +715,17 @@ function loadVideoFolders(callback) {
         success: function(response) {
             if (response.status === 'success') {
                 var folderSelect = $('#editVideoFolder');
-                var currentValue = folderSelect.val(); // Сохраняем текущее значение
+                var currentValue = folderSelect.val();
                 
-                folderSelect.empty(); // Полностью очищаем список
-                
-                // Добавляем опции
+                folderSelect.empty();
                 response.folders.forEach(function(folder) {
-                    // Используем / в качестве значения для корневой папки для ясности
                     const folderValue = folder === 'default' ? '/' : folder;
                     const folderText = folder === 'default' ? 'Корневая папка' : folder;
                     folderSelect.append(`<option value="${folderValue}">${folderText}</option>`);
                 });
-                
-                // Пытаемся восстановить старое значение, если оно есть
                 if (currentValue && folderSelect.find(`option[value="${currentValue}"]`).length) {
                     folderSelect.val(currentValue);
                 }
-                
-                // Вызываем callback, если он передан
                 if (typeof callback === 'function') {
                     callback();
                 }
@@ -819,27 +753,18 @@ $('#editUserModal').on('show.bs.modal', function(event) {
     var modal = $(this);
     modal.find('#editUserId').val(userId);
     modal.find('#editUsername').val(username);
-    
-    // --- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ---
-    // Устанавливаем правильное значение для выпадающего списка ролей
     modal.find('#editRole').val(role); 
-    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
     
     modal.find('#editCabinet').val(cabinet);
     modal.find('#editPassword').val('');
-    
-    // Показываем или скрываем настройки видео в зависимости от роли
     if (role === 'tablo') {
         $('#videoSettingsContainer').slideDown();
-        
-        // Загружаем папки и затем устанавливаем значение
         loadVideoFolders(function() {
             var showVideo = video && video !== '0' && video !== '';
             $('#editShowVideo').prop('checked', showVideo);
 
             if (showVideo) {
                 $('#videoFolderContainer').show();
-                // Устанавливаем выбранную папку
                 $('#editVideoFolder').val(video);
             } else {
                 $('#videoFolderContainer').hide();
@@ -880,13 +805,12 @@ $('#editUserForm').on('submit', function(e) {
     e.preventDefault();
     userId = $('#editUserId').val();
     var username = $('#editUsername').val();
-    var role = $('#editRole').val(); // Используем правильный ID 'editRole'
+    var role = $('#editRole').val();
     var cabinet = $('#editCabinet').val();
     var password = $('#editPassword').val();
     
     var videoValue = '0';
     if (role === 'tablo' && $('#editShowVideo').is(':checked')) {
-        // Убедимся, что значение не null, если папка не выбрана
         videoValue = $('#editVideoFolder').val() || '/'; 
     }
     
@@ -919,7 +843,6 @@ $('#editUserForm').on('submit', function(e) {
                     errorMessage = response.message;
                 }
             } catch(e) {
-                // Используем стандартное сообщение об ошибке
             }
             showNotification(errorMessage, 'danger');
             console.error(xhr.responseText);

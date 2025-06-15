@@ -62,14 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.service-card');
     const notification = document.getElementById('notification');
     const refreshButton = document.getElementById('refresh-button');
-    
-    // Добавляем обработчик события для кнопки обновления
     refreshButton.addEventListener('click', function() {
-        // Добавляем анимацию вращения при клике
         const refreshIcon = this.querySelector('.refresh-icon');
         refreshIcon.style.animationPlayState = 'running';
-        
-        // Обновляем страницу после небольшой задержки
         setTimeout(() => {
             location.reload();
         }, 600);
@@ -80,11 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (this.classList.contains('unavailable')) {
                 return;
             }
-            
-            // Добавляем анимацию клика
             this.style.animation = 'clickAnimation 0.5s ease forwards';
-            
-            // Удаляем анимацию после завершения
             setTimeout(() => {
                 this.style.animation = '';
             }, 500);
@@ -93,7 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    // Если получен ответ с ошибкой, перезагружаем страницу
                     if (data.error) {
                         location.reload();
                         return;
@@ -154,10 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => console.error('Error:', error));
         });
     });
-
-    // Функция для обновления карточек
     function updateCards() {
-        // Использовать правильный URL с префиксом /terminal
         fetch('{{ url_for("terminal.check_service_availability") }}')
             .then(response => response.json())
             .then(data => {
@@ -166,8 +153,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (card) {
                         if (service.is_available) {
                             card.classList.remove('unavailable');
-                            
-                            // Обновляем иконку
                             const iconElement = card.querySelector('.card-icon i');
                             if (iconElement) {
                                 iconElement.className = 'fas fa-ticket-alt';
@@ -179,8 +164,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         } else {
                             card.classList.add('unavailable');
-                            
-                            // Обновляем иконку
                             const iconElement = card.querySelector('.card-icon i');
                             if (iconElement) {
                                 iconElement.className = 'fas fa-ban';
@@ -201,19 +184,12 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => console.error('Error:', error));
     }
-
-    // Обновляем карточки каждую минуту
     setInterval(updateCards, 60000);
     updateCards();
 
     function showNotification(ticket_number) {
-        // Обновляем содержимое уведомления
         document.querySelector('.notification-title').textContent = 'Талон №' + ticket_number + ' взят';
-        
-        // Показываем уведомление
         notification.classList.add('show');
-        
-        // Скрываем уведомление через 5 секунд
         setTimeout(() => {
             notification.classList.remove('show');
         }, 5000);

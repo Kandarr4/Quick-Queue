@@ -623,22 +623,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Установка текущей даты
         const currentDate = new Date();
         document.getElementById('date-input').value = currentDate.toISOString().split('T')[0];
-        
-        // Установка текущего месяца
         const currentMonthYear = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
         document.getElementById('month-input').value = currentMonthYear;
 
         let minTime, maxTime;
         let defaultMinTime, defaultMaxTime;
-
-        // Создание и настройка графиков
         const dailyCtx = document.getElementById('dailyChart').getContext('2d');
         const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-
-        // Создаем базовые настройки для графиков
         function createScatterChart(ctx, label, isMonthly = false) {
             return new Chart(ctx, {
                 type: 'scatter',
@@ -776,12 +769,8 @@
                 }
             });
         }
-
-        // Создаем графики
         const dailyChart = createScatterChart(dailyCtx, 'Ежедневная статистика');
         const monthlyChart = createScatterChart(monthlyCtx, 'Ежемесячная статистика', true);
-
-        // Устанавливаем обработчики кнопок сброса масштаба
         document.getElementById('reset-daily-zoom').addEventListener('click', function() {
             dailyChart.resetZoom();
         });
@@ -789,8 +778,6 @@
         document.getElementById('reset-monthly-zoom').addEventListener('click', function() {
             monthlyChart.resetZoom();
         });
-
-        // Функция для расчета статистики
         function calculateStats(data) {
             let totalTickets = 0;
             let servedTickets = 0;
@@ -802,8 +789,6 @@
                     
                     if (stat.call_time) {
                         servedTickets++;
-                        
-                        // Рассчитываем время ожидания в минутах
                         const issueTime = luxon.DateTime.fromISO(`${stat.date}T${stat.issue_time}`);
                         const callTime = luxon.DateTime.fromISO(`${stat.date}T${stat.call_time}`);
                         const waitTime = callTime.diff(issueTime, 'minutes').minutes;
@@ -821,47 +806,31 @@
                 avgWait: avgWaitTime
             };
         }
-
-        // Функция для обновления графика
         function updateScatterChart(chart, label, issuedData, calledData, linesData, stats, type) {
-            // Обновляем данные графика
             chart.data.datasets[0].data = issuedData;
             chart.data.datasets[1].data = calledData;
             chart.data.datasets[2].data = linesData.flat();
-            
-            // Устанавливаем временные границы
             chart.options.scales.x.min = defaultMinTime;
             chart.options.scales.x.max = defaultMaxTime;
-            
-            // Обновляем график
             chart.update();
-            
-            // Обновляем статистику
             document.getElementById(`${type}-total`).textContent = stats.total;
             document.getElementById(`${type}-served`).textContent = stats.served;
             document.getElementById(`${type}-avg-wait`).textContent = `${stats.avgWait} мин`;
             document.getElementById(`${type}-tickets-count`).textContent = stats.total;
-            
-            // Скрываем пустое состояние и показываем график
             document.getElementById(`${type}-empty-state`).style.display = 'none';
         }
-
-        // Функция для установки временных границ
         function setDefaultTimeBounds() {
             if (minTime && maxTime) {
                 const timeRange = maxTime.getTime() - minTime.getTime();
-                const padding = timeRange * 0.05; // 5% отступ
+                const padding = timeRange * 0.05;
                 defaultMinTime = new Date(minTime.getTime() - padding);
                 defaultMaxTime = new Date(maxTime.getTime() + padding);
             } else {
-                // Значения по умолчанию если данных нет
                 const now = new Date();
                 defaultMinTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0);
                 defaultMaxTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 0, 0);
             }
         }
-
-        // Загрузка ежедневной статистики
         document.getElementById('load-daily-stats').addEventListener('click', function() {
             const serviceId = document.getElementById('service-select').value;
             const selectedDate = document.getElementById('date-input').value;
@@ -870,8 +839,6 @@
                 showNotification('Пожалуйста, выберите дату', 'warning');
                 return;
             }
-            
-            // Показываем индикатор загрузки
             document.getElementById('daily-loading').style.display = 'flex';
             
             fetch(`/secondary_admin/api/statistics/${serviceId}/daily?date=${selectedDate}`)
@@ -914,14 +881,8 @@
                     });
 
                     setDefaultTimeBounds();
-                    
-                    // Рассчитываем статистику
                     const stats = calculateStats(data);
-                    
-                    // Обновляем график
                     updateScatterChart(dailyChart, `Статистика за ${selectedDate}`, issuedData, calledData, linesData, stats, 'daily');
-                    
-                    // Скрываем индикатор загрузки
                     document.getElementById('daily-loading').style.display = 'none';
                     
                     if (data.length === 0) {
@@ -939,8 +900,6 @@
                     showNotification('Ошибка при загрузке данных: ' + error.message, 'danger');
                 });
         });
-
-        // Загрузка ежемесячной статистики
         document.getElementById('load-monthly-stats').addEventListener('click', function() {
             const serviceId = document.getElementById('service-select').value;
             const selectedMonth = document.getElementById('month-input').value;
@@ -949,8 +908,6 @@
                 showNotification('Пожалуйста, выберите месяц', 'warning');
                 return;
             }
-            
-            // Показываем индикатор загрузки
             document.getElementById('monthly-loading').style.display = 'flex';
             
             fetch(`/secondary_admin/api/statistics/${serviceId}/monthly?month=${selectedMonth}`)
@@ -993,14 +950,8 @@
                     });
 
                     setDefaultTimeBounds();
-                    
-                    // Рассчитываем статистику
                     const stats = calculateStats(data);
-                    
-                    // Обновляем график
                     updateScatterChart(monthlyChart, `Статистика за ${selectedMonth}`, issuedData, calledData, linesData, stats, 'monthly');
-                    
-                    // Скрываем индикатор загрузки
                     document.getElementById('monthly-loading').style.display = 'none';
                     
                     if (data.length === 0) {
@@ -1018,13 +969,8 @@
                     showNotification('Ошибка при загрузке данных: ' + error.message, 'danger');
                 });
         });
-
-        // Функция отображения уведомлений
         function showNotification(message, type) {
-            // Удаляем предыдущие уведомления с тем же классом
             $('.custom-notification').remove();
-            
-            // Определяем цвет и иконку в зависимости от типа
             let bgColor, icon, title;
             
             switch(type) {
@@ -1050,8 +996,6 @@
                     title = 'Информация';
                     break;
             }
-            
-            // Создаем элемент для уведомления с анимацией
             var notification = $(`
                 <div class="custom-notification" style="
                     position: fixed;
@@ -1115,45 +1059,29 @@
                     </div>
                 </div>
             `);
-            
-            // Добавляем элемент в body
             $('body').append(notification);
-            
-            // Анимируем появление
             setTimeout(function() {
                 notification.css({
                     'transform': 'translateX(0)',
                     'opacity': '1'
                 });
-                
-                // Запускаем анимацию прогресс-бара
                 notification.find('.notification-progress > div').css('width', '0');
             }, 10);
-            
-            // Обработчик закрытия
             notification.find('.close-notification').on('click', function() {
                 hideNotification(notification);
             });
-            
-            // Скрываем через 5 секунд
             var timer = setTimeout(function() {
                 hideNotification(notification);
             }, 5000);
-            
-            // Пауза таймера при наведении
             notification.hover(
                 function() {
                     clearTimeout(timer);
-                    // Останавливаем анимацию прогресс-бара
                     notification.find('.notification-progress > div').css('transition', 'none');
                 },
                 function() {
-                    // Возобновляем таймер и анимацию
                     timer = setTimeout(function() {
                         hideNotification(notification);
                     }, 5000);
-                    
-                    // Продолжаем анимацию прогресс-бара с оставшегося места
                     var progress = notification.find('.notification-progress > div');
                     var currentWidth = progress.width() / progress.parent().width() * 100;
                     var timeLeft = 5000 * (currentWidth / 100);
@@ -1164,8 +1092,6 @@
                     });
                 }
             );
-            
-            // Функция скрытия уведомления
             function hideNotification(element) {
                 element.css({
                     'transform': 'translateX(400px)',
@@ -1177,8 +1103,6 @@
                 }, 300);
             }
         }
-
-        // Загружаем данные за текущую дату при загрузке страницы
         document.getElementById('load-daily-stats').click();
     </script>
 </body>

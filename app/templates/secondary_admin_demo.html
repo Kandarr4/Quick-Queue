@@ -1118,8 +1118,6 @@ if (!window.adminScriptLoaded) {
     window.adminScriptLoaded = true;
     
     document.addEventListener('DOMContentLoaded', function() {
-        
-        // --- УТИЛИТА ДЛЯ УВЕДОМЛЕНИЙ ---
         function showNotification(message, type = 'success') {
             const container = $('#notification-container');
             const icon = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' }[type];
@@ -1128,32 +1126,24 @@ if (!window.adminScriptLoaded) {
             container.append(notification);
             setTimeout(() => notification.fadeOut(500, () => notification.remove()), 5000);
         }
-
-        // --- ЛОГИКА ВКЛАДКИ "ПОЛЬЗОВАТЕЛИ" ---
-        // Удаление пользователя
         $(document).on('click', '.delete-user-btn', function() {
             if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
                 $(this).closest('.user-row').fadeOut(500, function() { $(this).remove(); });
                 showNotification('Пользователь успешно удален', 'success');
             }
         });
-
-        // Открытие модального окна редактирования
         $(document).on('click', '.edit-user-btn', function() {
             const button = $(this);
             $('#editUserId').val(button.data('id'));
             $('#editUsername').val(button.data('username'));
             $('#editRole').val(button.data('role')).trigger('change');
             $('#editCabinet').val(button.data('cabinet'));
-            
-            // Логика для настроек видео
             if (button.data('role') === 'tablo') {
                 $('#videoSettingsContainer').show();
                 const showVideo = button.data('video') === true || button.data('video') === 'True' || button.data('video') === 'true';
                 $('#editShowVideo').prop('checked', showVideo);
                 if(showVideo) {
                     $('#videoFolderContainer').show();
-                    // Симуляция загрузки папок
                     $('#editVideoFolder').html('<option value="">Загрузка...</option>');
                     setTimeout(() => {
                         const folders = '<option value="">- Не выбрано -</option><option value="promo">promo</option><option value="education">education</option>';
@@ -1166,8 +1156,6 @@ if (!window.adminScriptLoaded) {
                 $('#videoSettingsContainer').hide();
             }
         });
-        
-        // Показ/скрытие выбора папки с видео при изменении роли или чекбокса
         $('#editRole, #editShowVideo').on('change', function(){
             const isTablo = $('#editRole').val() === 'tablo';
             const isChecked = $('#editShowVideo').is(':checked');
@@ -1179,21 +1167,15 @@ if (!window.adminScriptLoaded) {
                 $('#videoSettingsContainer').hide();
             }
         });
-
-        // Сохранение изменений пользователя (симуляция)
         $('#saveUserChangesBtn').on('click', function() {
             showNotification('Изменения успешно сохранены!', 'success');
             $('#editUserModal').modal('hide');
         });
-
-        // Раскрытие/сворачивание групп
         $(document).on('click', '.toggle-group', function() {
             const groupId = $(this).data('group-id');
             $(`.group-${groupId}`).toggle();
             $(this).find('i').toggleClass('fa-plus fa-minus');
         });
-        
-        // --- ЛОГИКА ВКЛАДКИ "УСЛУГИ" ---
         $(document).on('click', '.delete-service-btn', function() {
             if (confirm('Вы уверены, что хотите удалить эту услугу?')) {
                 $(this).closest('.service-row').fadeOut(500, function() { $(this).remove(); });
@@ -1206,8 +1188,6 @@ if (!window.adminScriptLoaded) {
                  showNotification('Все талоны для услуги удалены', 'warning');
             }
         });
-
-        // --- ЛОГИКА ВКЛАДКИ "ВИДЕО" (СИМУЛЯТОР ФАЙЛОВОГО МЕНЕДЖЕРА) ---
         const fileSystem = {
             '/': {
                 folders: [{ name: 'promo', files: 1, size: '150 МБ' }, { name: 'education', files: 2, size: '320 МБ' }],
@@ -1233,8 +1213,6 @@ if (!window.adminScriptLoaded) {
             const breadcrumb = $('#breadcrumb-container').empty();
             
             const content = fileSystem[path] || fileSystem['/'];
-
-            // Рендер "хлебных крошек"
             let currentPath = '';
             const pathParts = path.split('/').filter(p => p);
             breadcrumb.append(`<li class="breadcrumb-item"><a href="#" class="folder-link" data-path="/">Корень</a></li>`);
@@ -1242,8 +1220,6 @@ if (!window.adminScriptLoaded) {
                 currentPath += `/${part}`;
                 breadcrumb.append(`<li class="breadcrumb-item"><a href="#" class="folder-link" data-path="${currentPath}/">${part}</a></li>`);
             });
-
-            // Рендер папок
             if (content.folders.length) {
                 content.folders.forEach(folder => {
                     const card = $(`<div class="col-md-3 mb-4 folder-card">
@@ -1260,8 +1236,6 @@ if (!window.adminScriptLoaded) {
             } else {
                 foldersContainer.html('<div class="col-12 text-center text-muted"><p>Нет папок</p></div>');
             }
-
-            // Рендер видео
             if (content.videos.length) {
                 content.videos.forEach(video => {
                     const card = $(`<div class="col-md-3 mb-4 video-card">
@@ -1285,15 +1259,11 @@ if (!window.adminScriptLoaded) {
                 videosContainer.html('<div class="col-12 text-center text-muted"><p>Нет видео</p></div>');
             }
         }
-
-        // Навигация по папкам
         $(document).on('click', '.folder-link, .open-folder', function(e) {
             e.preventDefault();
             const path = $(this).data('path') || $(this).closest('.folder-item').data('path');
             renderFileSystem(path);
         });
-
-        // Удаление видео/папки (симуляция)
         $(document).on('click', '.delete-video-btn, .delete-folder-btn', function(e) {
             e.preventDefault();
              if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
@@ -1301,8 +1271,6 @@ if (!window.adminScriptLoaded) {
                 showNotification('Элемент удален', 'success');
             }
         });
-
-        // Инициализация при первом показе вкладки
         $('a[data-toggle="pill"][href="#videos"]').on('shown.bs.tab', function() {
             renderFileSystem('/');
         });

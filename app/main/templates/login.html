@@ -83,25 +83,18 @@
 {% block scripts %}
 <script>
     $(document).ready(function() {
-        // Инициализация данных для автозаполнения
         const adminUsernames = {{ admin_usernames|tojson }};
         let selectedIndex = -1;
         let showingAutocomplete = false;
-        
-        // Перемещаем выпадающий список в конец body для предотвращения проблем с z-index
         $('body').append('<div id="autocompleteDropdownContainer" class="autocomplete-dropdown"></div>');
         const originalDropdown = $('#autocompleteDropdown');
         const newDropdown = $('#autocompleteDropdownContainer');
-        
-        // Заменяем оригинальный выпадающий список на новый
         originalDropdown.remove();
-        
-        // Функция для отображения выпадающего списка
         function showDropdown(input) {
             const dropdown = $('#autocompleteDropdownContainer');
             dropdown.empty();
             
-            if (input.length < 2) { // Уменьшаем минимальную длину для поиска
+            if (input.length < 2) {
                 hideDropdown();
                 return;
             }
@@ -114,8 +107,6 @@
                 hideDropdown();
                 return;
             }
-            
-            // Добавляем заголовок к выпадающему списку
             dropdown.append('<div class="autocomplete-header">Выберите администратора</div>');
             
             matches.forEach((username, index) => {
@@ -124,10 +115,8 @@
                     .attr('data-username', username);
                 
                 item.click(function() {
-                    // Always append @ when selecting from dropdown for organization users
                     $('#username').val($(this).attr('data-username') + '@');
                     hideDropdown();
-                    // Установить курсор в конец строки
                     const input = $('#username')[0];
                     input.focus();
                     input.selectionStart = input.selectionEnd = input.value.length;
@@ -139,91 +128,67 @@
             dropdown.addClass('show');
             showingAutocomplete = true;
             selectedIndex = -1;
-            
-            // Позиционируем выпадающий список
             positionDropdown();
         }
-        
-        // Функция для позиционирования выпадающего списка
         function positionDropdown() {
             const input = $('#username');
             const dropdown = $('#autocompleteDropdownContainer');
-            
-            // Получаем позицию и размеры поля ввода
             const inputPos = input.offset();
             const inputHeight = input.outerHeight();
             const inputWidth = input.outerWidth();
-            
-            // Устанавливаем позицию выпадающего списка
             dropdown.css({
                 'width': inputWidth + 'px',
                 'top': (inputPos.top + inputHeight + 5) + 'px',
                 'left': inputPos.left + 'px'
             });
         }
-        
-        // Функция для скрытия выпадающего списка
         function hideDropdown() {
             $('#autocompleteDropdownContainer').removeClass('show').empty();
             showingAutocomplete = false;
             selectedIndex = -1;
         }
-        
-        // Отслеживание ввода в поле логина
         $('#username').on('input', function() {
             const value = $(this).val();
-            
-            // Если в поле есть @ или нет, показываем разные подсказки
             if (value.includes('@')) {
-                // Не показываем автозаполнение после @
             } else {
-                // Показываем автозаполнение для первой части (логин админа)
                 showDropdown(value);
             }
         });
-        
-        // Обработка клика вне выпадающего списка
         $(document).on('click touchstart', function(e) {
             if (!$(e.target).closest('.autocomplete-container').length && 
                 !$(e.target).closest('.autocomplete-dropdown').length) {
                 hideDropdown();
             }
         });
-        
-        // Обработка навигации по клавишам
         $('#username').keydown(function(e) {
             if (!showingAutocomplete) return;
             
             const items = $('.autocomplete-item');
             
             switch(e.keyCode) {
-                case 40: // Down arrow
+                case 40: 
                     e.preventDefault();
                     selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
                     break;
-                case 38: // Up arrow
+                case 38: 
                     e.preventDefault();
                     selectedIndex = Math.max(selectedIndex - 1, 0);
                     break;
-                case 13: // Enter
+                case 13: 
                     e.preventDefault();
                     if (selectedIndex > -1) {
                         $(items[selectedIndex]).click();
                     }
                     return;
-                case 27: // Escape
+                case 27: 
                     hideDropdown();
                     return;
                 default:
                     return;
             }
-            
-            // Выделение выбранного элемента
             items.removeClass('active');
             if (selectedIndex > -1) {
                 $(items[selectedIndex]).addClass('active');
-                
-                // Прокручиваем до выбранного элемента, если он не видим
                 const selectedItem = $(items[selectedIndex]);
                 const dropdown = $('#autocompleteDropdownContainer');
                 
@@ -239,16 +204,12 @@
                 }
             }
         });
-        
-        // Добавляем простую анимацию при фокусе на поля
         $('input').focus(function() {
             $(this).parent().css('transform', 'translateX(5px)');
             setTimeout(() => {
                 $(this).parent().css('transform', 'translateX(0)');
             }, 300);
         });
-        
-        // Анимация кнопки при наведении
         $('input[type="submit"]').hover(
             function() {
                 $(this).css('background', 'linear-gradient(to right, #16a085, #1abc9c)');
@@ -257,25 +218,16 @@
                 $(this).css('background', 'linear-gradient(to right, #1abc9c, #16a085)');
             }
         );
-        
-        // Проверка формы перед отправкой
         $('form').submit(function() {
             console.log('Form submitted');
-            // Проверяем наличие CSRF-токена
             const csrfToken = $('input[name="csrf_token"]').val();
             console.log('CSRF Token:', csrfToken);
-            
-            // Проверяем поля формы
             const username = $('#username').val();
             const password = $('input[type="password"]').val();
             console.log('Username:', username);
             console.log('Password length:', password ? password.length : 0);
-            
-            // Возвращаем true, чтобы форма отправилась
             return true;
         });
-        
-        // При изменении размера окна обновляем позицию выпадающего списка
         $(window).resize(function() {
             if (showingAutocomplete) {
                 positionDropdown();
