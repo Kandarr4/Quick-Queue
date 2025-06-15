@@ -111,7 +111,7 @@
                                                 <td>
                                                     <span class="badge badge-pill badge-info">{{ user.role }}</span>
                                                 </td>
-                                                <!-- ИСПРАВЛЕННЫЙ БЛОК 1 -->
+                                                
                                                 <td>
                                                     {% if user.cabinet and user.cabinet|string != 'None' %}
                                                         <span class="badge badge-pill badge-secondary">
@@ -167,7 +167,7 @@
                             <td>
                                 <span class="badge badge-pill badge-info">{{ user.role }}</span>
                             </td>
-                            <!-- ИСПРАВЛЕННЫЙ БЛОК 2 -->
+                            
                             <td>
                                 {% if user.cabinet and user.cabinet|string != 'None' %}
                                     <span class="badge badge-pill badge-secondary">
@@ -276,7 +276,7 @@
         </div>
         
         
-        <!-- Содержимое вкладки "Видео" -->
+        
         <div class="tab-pane fade" id="videos" role="tabpanel" aria-labelledby="videos-tab">
             <div class="mb-4 d-flex justify-content-between align-items-center">                
                 <div>
@@ -310,7 +310,7 @@
                     </button>
                 </div>
             </div>               
-            <!-- Навигационная цепочка ("хлебные крошки") -->
+            
             <nav aria-label="breadcrumb" class="mb-3">
                 <ol class="breadcrumb" style="background-color: rgba(255,255,255,0.1);">
                     <li class="breadcrumb-item">
@@ -322,7 +322,7 @@
                 </ol>
             </nav>
 
-            <!-- Информация о текущем каталоге -->
+            
             <div class="alert alert-info mb-3 d-flex justify-content-between align-items-center" id="folder-info">
                 <div>
                     <i class="fas fa-info-circle mr-2"></i>
@@ -335,22 +335,22 @@
                 </div>
             </div>
 
-            <!-- Контейнер для отображения файлов и папок -->
+            
             <div class="video-container-wrapper mb-4">
-                <!-- Сначала отображаем папки -->
+                
                 <h5 class="mb-3"><i class="fas fa-folder mr-2"></i>Папки</h5>
                 <div class="row" id="folders-container">
-                    <!-- Папки будут вставлены сюда через JavaScript -->
+                    
                     <div id="no-folders-message" class="col-12 text-center py-3">
                         <i class="fas fa-folder-open fa-2x mb-2" style="opacity: 0.5;"></i>
                         <p>Нет папок в текущей директории</p>
                     </div>
                 </div>
 
-                <!-- Отображаем видеофайлы -->
+                
                 <h5 class="mb-3 mt-4"><i class="fas fa-film mr-2"></i>Видеофайлы</h5>
                 <div class="row" id="videos-container">
-                    <!-- Видео будут вставлены сюда через JavaScript -->
+                    
                     <div id="no-videos-message" class="col-12 text-center py-3">
                         <i class="fas fa-film fa-2x mb-2" style="opacity: 0.5;"></i>
                         <p>Нет видеофайлов в текущей директории</p>
@@ -361,7 +361,7 @@
     </div>
 </div>
 
-	<!-- Модальное окно создания папки -->
+	
 	<div class="modal fade" id="createFolderModal" tabindex="-1" role="dialog" aria-labelledby="createFolderModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -392,9 +392,9 @@
 		</div>
 	</div>
 
-	<!-- Модальное окно загрузки видео -->
+	
 	<div class="modal fade" id="uploadVideoModal" tabindex="-1" role="dialog" aria-labelledby="uploadVideoModalLabel" aria-hidden="true">
-		<div class="modal-dialog modal-lg" role="document"> <!-- Добавлен modal-lg для большего пространства -->
+		<div class="modal-dialog modal-lg" role="document"> 
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="uploadVideoModalLabel"><i class="fas fa-upload mr-2"></i>Загрузить видео</h5>
@@ -407,7 +407,7 @@
 						<div class="form-group">
 							<label for="videoFile">Выберите видеофайлы</label>
 							<div class="custom-file">
-								<!-- Добавлен атрибут 'multiple' -->
+								
 								<input type="file" class="custom-file-input" id="videoFile" name="video" accept="video/*" required multiple>
 								<label class="custom-file-label" for="videoFile">Выберите файлы...</label>
 							</div>
@@ -415,11 +415,11 @@
 							<small class="form-text text-muted">Видео будет загружено в директорию: <span id="current-dir-for-upload">/</span></small>
 						</div>
 						
-						<!-- Новый контейнер для отображения прогресса -->
+						
 						<div id="uploadProgressContainer" class="mt-3" style="display: none;">
 							<h6 class="mb-2">Прогресс загрузки:</h6>
 							<div id="upload-progress-list">
-								<!-- Сюда будут добавляться индикаторы прогресса для каждого файла -->
+								
 							</div>
 						</div>
 						
@@ -437,7 +437,7 @@
 		</div>
 	</div>
 
-	<!-- Модальное окно для переименования -->
+	
 	<div class="modal fade" id="renameModal" tabindex="-1" role="dialog" aria-labelledby="renameModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -469,7 +469,7 @@
 		</div>
 	</div>
 
-	<!-- Модальное окно для перемещения файла/папки -->
+	
 	<div class="modal fade" id="moveModal" tabindex="-1" role="dialog" aria-labelledby="moveModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -487,7 +487,7 @@
 							<label for="targetFolder">Выберите целевую папку</label>
 							<select class="form-control" id="targetFolder" required>
 								<option value="/">/</option>
-								<!-- Другие папки будут добавлены через JavaScript -->
+								
 							</select>
 						</div>
 						<div class="modal-footer">
@@ -504,7 +504,7 @@
 		</div>
 	</div>
 
-	<!-- Модальное окно для предпросмотра видео -->
+	
 	<div class="modal fade" id="previewVideoModal" tabindex="-1" role="dialog" aria-labelledby="previewVideoModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
@@ -531,7 +531,7 @@
 		</div>
 	</div>
 
-	<!-- Модальное окно для подтверждения удаления -->
+	
 	<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -561,7 +561,7 @@
 		</div>
 	</div>
 
-	<!-- Шаблоны для карточек файлов и папок -->
+	
 	<template id="folder-card-template">
 		<div class="col-md-4 col-lg-3 mb-4 folder-card">
 			<div class="card bg-dark text-light folder-item">
@@ -635,7 +635,7 @@
 		</div>
 	</template>
 
-    <!-- Модальное окно для создания группы -->
+    
     <div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="groupModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -735,10 +735,10 @@
 							<input type="text" class="form-control" id="editUsername" name="username" required>
 						</div>
                         <div class="form-group">
-                            <label for="editRole"> <!-- Используем ID 'editRole' -->
+                            <label for="editRole"> 
                                 <i class="fas fa-user-tag mr-1"></i> Роль
                             </label>
-                            <!-- Устанавливаем ID 'editRole' для единообразия с JS -->
+                            
                             {{ user_form.role(class_='form-control', id='editRole') }}
                         </div>
 
@@ -753,7 +753,7 @@
 							<hr>
 							<h6><i class="fas fa-video mr-1"></i> Настройки видео</h6>
 							<div class="form-check mb-2">
-								<!-- Убедились, что чекбокс только один -->
+								
 								<input type="checkbox" class="form-check-input" id="editShowVideo" name="show_video">
 								<label class="form-check-label" for="editShowVideo">Показывать видео</o>
 							</div>
@@ -762,7 +762,7 @@
 									<i class="fas fa-folder-open mr-1"></i> Папка с видео
 								</label>
 								<select class="form-control" id="editVideoFolder" name="video_folder">
-                                    <!-- Опции будут загружаться динамически -->
+                                    
 								</select>
 								<small class="form-text text-muted">
 									Выберите папку в директории <strong>static/video/{{current_user.database_name}}/</strong>
@@ -795,7 +795,7 @@
 		</div>
 	</div>
 
-    <!-- Объединенное модальное окно управления услугами пользователя -->
+    
     <div class="modal fade" id="userServicesModal" tabindex="-1" role="dialog" aria-labelledby="userServicesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -808,7 +808,7 @@
                 <div class="modal-body">
                     <input type="hidden" id="userIdField" value="">
                     
-                    <!-- Вкладки для переключения -->
+                    
                     <ul class="nav nav-pills mb-3" id="servicesTab" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active" id="assigned-services-tab" data-toggle="pill" href="#assigned-services" role="tab">
@@ -822,9 +822,9 @@
                         </li>
                     </ul>
                     
-                    <!-- Содержимое вкладок -->
+                    
                     <div class="tab-content" id="servicesTabContent">
-                        <!-- Вкладка назначенных услуг -->
+                        
                         <div class="tab-pane fade show active" id="assigned-services" role="tabpanel">
                             <div class="form-group">
                                 <div class="input-group mb-3">
@@ -837,7 +837,7 @@
                             
                             <div class="services-list">
                                 <div id="userServicesList">
-                                    <!-- Здесь будет список назначенных услуг -->
+                                    
                                     <div class="text-center p-4" id="loadingServices">
                                         <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
                                         <p>Загрузка услуг...</p>
@@ -850,7 +850,7 @@
                             </div>
                         </div>
                         
-                        <!-- Вкладка доступных услуг -->
+                        
                         <div class="tab-pane fade" id="available-services" role="tabpanel">
                             <div class="form-group">
                                 <div class="input-group mb-3">
@@ -863,7 +863,7 @@
                             
                             <div class="available-services-grid mb-3">
                                 <div id="availableServicesList">
-                                    <!-- Здесь будет список доступных услуг -->
+                                    
                                     <div class="text-center p-4" id="loadingAvailableServices">
                                         <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
                                         <p>Загрузка доступных услуг...</p>
@@ -940,7 +940,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно для редактирования услуги -->
+    
     <div class="modal fade" id="editServiceModal" tabindex="-1" role="dialog" aria-labelledby="editServiceModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -991,7 +991,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно лицензия -->
+    
     <div class="modal fade" id="licenseModal" tabindex="-1" role="dialog" aria-labelledby="licenseModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -1062,7 +1062,7 @@
         </div>
     </div>
     
-	<!-- Компактное модальное окно для редактирования расписания -->
+	
 	<div class="modal fade" id="scheduleServiceModal" tabindex="-1" role="dialog" aria-labelledby="scheduleServiceModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
@@ -1074,7 +1074,7 @@
 				</div>
 				<div class="modal-body">
 					<form id="scheduleForm">
-						<!-- Скрытое поле для хранения ID сервиса -->
+						
 						<input type="hidden" id="currentServiceIdField" value="">
 						
 						<div class="form-group">

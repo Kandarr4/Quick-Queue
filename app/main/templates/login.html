@@ -50,7 +50,7 @@
                 <div class="form-control-wrapper autocomplete-container">
                     <i class="fas fa-user form-control-icon"></i>
                     {{ form.username(class="form-control", placeholder="Введите имя пользователя", id="username") }}
-                    <!-- Этот div будет заменен в JavaScript на новый, перемещенный в body -->
+                    
                     <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
                 </div>
                 {% for error in form.username.errors %}

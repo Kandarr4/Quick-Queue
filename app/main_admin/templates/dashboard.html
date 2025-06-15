@@ -298,7 +298,7 @@
             </div>
             <div class="modal-body">
                 <form id="styleSettingsForm" method="POST" action="">
-                    <!-- Здесь будет CSRF токен -->
+                    
                     <input type="hidden" id="style-settings-csrf" name="csrf_token" value="">
                     
                     <div class="row mb-4">
@@ -340,7 +340,7 @@
                                     <p><strong>Путь:</strong> <span id="style-folder-path">app/static/css/...</span></p>
                                     <div id="style-files-list">
                                         <ul class="list-group" id="style-files-container">
-                                            <!-- Здесь будет список файлов стилей -->
+                                            
                                         </ul>
                                         <p id="no-style-files" class="text-warning">Папка не существует или не содержит файлов стилей.</p>
                                     </div>
@@ -361,7 +361,7 @@
                     <div id="style-files-warning" class="alert alert-warning" style="display: none;">
                         <h6>Внимание! Отсутствуют необходимые файлы стилей:</h6>
                         <ul id="missing-files-list">
-                            <!-- Здесь будет список отсутствующих файлов -->
+                            
                         </ul>
                         <p>
                             Вы не сможете сохранить настройки, пока все необходимые файлы не будут добавлены в папку стилей.
