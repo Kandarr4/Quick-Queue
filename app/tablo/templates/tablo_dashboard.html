@@ -24,7 +24,7 @@
     </div>
 
     <div class="content-container">
-      <!-- Таблица с билетами (адаптивный размер) -->
+      
       <div class="tablo-container" id="tabloContainer">
         <div class="tablo-header">
           <div class="header-columns">
@@ -38,7 +38,7 @@
         </div>
         
         <div id="ticketItems" class="tablo-items two-columns">
-          <!-- Тикеты будут отображаться здесь -->
+          
         </div>
         
         <div class="loading-indicator" id="loading-indicator">
@@ -55,7 +55,7 @@
         </div>
       </div>
       
-      <!-- Видеоплеер (справа) -->
+      
       <div class="video-container" id="videoContainer">
         <div class="video-header">
           <i class="fas fa-film mr-2"></i>Видео
@@ -63,7 +63,7 @@
         </div>
         <div class="video-player-wrapper">
           <video id="videoPlayer" class="video-player" controls autoplay loop>
-            <!-- Источник видео будет добавлен через JavaScript -->
+            
           </video>
           <div class="video-loading" id="videoLoading">Загрузка видео...</div>
           <button class="volume-control" id="volumeControl" title="Включить/выключить звук">
@@ -73,12 +73,12 @@
       </div>
     </div>
 
-    <!-- Скрытые поля для передачи информации в JavaScript -->
+    
     <input type="hidden" id="video_setting" value="{{ 'true' if show_video else 'false' }}">
     <input type="hidden" id="video_folder" value="{{ video_folder|default('') }}">
   </div>
 
-  <!-- Бегущая строка в нижней части страницы -->
+  
   <div class="marquee-container">
     <div class="marquee-content">
       <span><i class="fas fa-first-aid"></i> Добро пожаловать в КГП "Поликлиника №2" города Темиртау! <strong>Режим работы:</strong> Пн-Пт 8:00-19:00, Сб 8:00-13:00</span>
@@ -90,7 +90,7 @@
     </div>
   </div>
 
-  <!-- Скрипты -->
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
   <script>

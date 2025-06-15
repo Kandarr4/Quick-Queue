@@ -16,7 +16,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-dark text-light">
-<!-- Навигационная панель -->
+
 <nav class="navbar navbar-expand-lg navbar-dark navbar-admin">
     <div class="container-fluid">
         <a class="navbar-brand d-flex align-items-center" href="#">
@@ -29,28 +29,28 @@
         
         <div class="collapse navbar-collapse" id="adminNavbar">
             <ul class="navbar-nav ml-auto">
-                <!-- Динамический блок для статуса входа -->
+                
                 <li class="nav-item dropdown" id="auth-dropdown">
-                    <!-- Контент будет загружен через JavaScript -->
+                    
                 </li>             
             </ul>
         </div>
     </div>  
-    <!-- ИСПРАВЛЕННЫЙ БЛОК С ЛОГОТИПАМИ -->
+    
     <div class="logo_div">
         <img src="{{ url_for('static', filename='img/logo_organization.png') }}" class="logo logo-left" alt="Логотип организации">
         <img src="{{ url_for('static', filename='img/logo_qq.gif') }}" class="logo logo-right" alt="Логотип QQ">
     </div>        
 </nav>
 
-<!-- Основной контент -->
+
 <div class="container-fluid fade-in content-wrapper">
     {% block content %}
-    <!-- Контент дочерних шаблонов будет здесь -->
+    
     {% endblock %}
 </div>
     {% block modals %}{% endblock %}
-<!-- Footer -->
+
 <footer class="mainfooter py-5">
     <div class="container">
         <div class="row">
@@ -114,7 +114,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.min.js"></script>
 
 
-<!-- Скрипт для динамического обновления статуса авторизации -->
+
 <script>
 $(document).ready(function() {
     // Функция для обновления статуса авторизации

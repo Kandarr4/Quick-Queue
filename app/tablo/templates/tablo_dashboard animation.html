@@ -661,7 +661,7 @@
   </style>
 </head>
 <body>
-  <!-- Декоративные элементы -->
+  
   <div class="decorative-circle circle-1"></div>
   <div class="decorative-circle circle-2"></div>
   <div class="decorative-circle circle-3"></div>
@@ -678,9 +678,9 @@
       <img src="{{ url_for('static', filename='img/logo_qq.gif') }}" class="logo logo-right" alt="Логотип QQ">
     </div>
 
-	<!-- Исправленный код для content-container в tablo_dashboard.html -->
+	
 	<div class="content-container fade-in fade-in-delay-2">
-	  <!-- Таблица с билетами (адаптивный размер) -->
+	  
 	  <div class="tablo-container" {% if not show_video %}style="flex: 1;"{% else %}style="flex: 3;"{% endif %}>
 		<div class="tablo-header">
 		  <div class="header-columns">
@@ -694,7 +694,7 @@
 		</div>
 		
 		<div id="ticketItems" class="tablo-items two-columns">
-		  <!-- Тикеты будут отображаться здесь -->
+		  
 		</div>
 		
 		<div class="loading-indicator" id="loading-indicator">
@@ -711,7 +711,7 @@
 		</div>
 	  </div>
 	  
-	  <!-- Видеоплеер (справа) -->
+	  
 	  <div class="video-container fade-in fade-in-delay-3" {% if not show_video %}style="display: none;"{% endif %}>
 		<div class="video-header">
 		  <i class="fas fa-film mr-2"></i>Видео
@@ -726,11 +726,11 @@
 	  </div>
 	</div>
 
-	<!-- Скрытые поля для передачи информации в JavaScript -->
+	
 	<input type="hidden" id="video_setting" value="{{ 'true' if show_video else 'false' }}">
 	<input type="hidden" id="video_folder" value="{{ video_folder|default('') }}">
 
-	<!-- Отладочная информация (можно убрать в продакшене) -->
+	
 	<div style="display: none;" id="debug-info">
 	  <p>show_video: {{ show_video }}</p>
 	  <p>video_folder: {{ video_folder }}</p>

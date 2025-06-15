@@ -1,5 +1,5 @@
 {% block messenger_widget %}
-<!-- CSS стили для контактной панели и чата -->
+
 <style>
 /* Стили для контактной панели и чата */
 .contact-panel {
@@ -418,12 +418,12 @@ textarea.contact-form-control {
 }
 </style>
 
-<!-- HTML код контактной панели с чатом -->
+
 <div class="contact-panel" id="contactPanel">
     <div class="contact-panel-content" id="contactPanelContent">
         <button class="contact-panel-close" id="contactPanelClose">&times;</button>
         
-        <!-- Контактная форма (показывается сначала) -->
+        
         <div id="contactFormContainer">
             <h4 class="mb-2">Свяжитесь с нами</h4>
             <p class="text-muted mb-3">Напишите ваше сообщение, и мы ответим в течение нескольких минут.</p>
@@ -445,7 +445,7 @@ textarea.contact-form-control {
             </form>
         </div>
         
-        <!-- Чат (показывается после отправки формы) -->
+        
         <div id="chatContainer" style="display: none;">
             <div class="chat-header d-flex justify-content-between align-items-center mb-2">
                 <h5>Чат поддержки</h5>
@@ -453,7 +453,7 @@ textarea.contact-form-control {
             </div>
             
             <div class="chat-messages" id="chatMessages">
-                <!-- Сообщения будут добавляться здесь -->
+                
             </div>
             
             <div class="chat-input mt-2">
@@ -474,22 +474,22 @@ textarea.contact-form-control {
         <span>Задать вопрос</span>
     </div>
     
-    <!-- Индикатор непрочитанных сообщений -->
+    
     <div class="unread-badge" id="unreadBadge" style="display: none;">
         <span id="unreadCount">0</span>
     </div>
 </div>
 
-<!-- Добавляем индикатор состояния соединения -->
+
 <div id="connectionStatus" class="connection-status"></div>
 
-<!-- Загружаем Socket.IO клиент -->
+
 <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 
-<!-- Загружаем Font Awesome для иконок, если он не подключен -->
+
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous" onerror="console.log('Font Awesome failed to load')"></script>
 
-<!-- JavaScript для контактной панели и чата -->
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Initializing messenger widget...");
