@@ -149,7 +149,7 @@ if (!window.dashboardScriptLoaded) {
     }
     window.simulateNewTicket = function() {
         const sound = new Audio("https://cdn.jsdelivr.net/gh/ColorlibHQ/AdminLTE@main/dist/js/toastr/sounds/success.mp3");
-        sound.play().catch(e => console.error("Audio play failed:", e));
+        sound.play().catch(() => {});
 
         const ticketNumber = 'Т-' + Math.floor(100 + Math.random() * 900);
         showNotification(`Новый клиент! Талон №${ticketNumber} (Прием терапевта)`, 'success');

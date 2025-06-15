@@ -241,7 +241,6 @@
       }
 
       socket.on('connect', function() {
-        console.log('Socket connected on /voicing namespace');
         const userId = {{ current_user.id }};
         const assignedServiceIds = [];
         {% for assignment in assignments %}
@@ -251,23 +250,19 @@
           service_ids: assignedServiceIds
         }, function(response) {
           if (response && response.status === 'success') {
-            console.log('Joined personal room:', response.room);
             showNotification('Соединение установлено', 'success');
           } else {
-            console.error('Failed to join personal room');
             showNotification('Ошибка подключения к серверу уведомлений', 'error');
           }
         });
       });
 
       socket.on('disconnect', function(reason) {
-        console.warn('Socket disconnected:', reason);
         showNotification('Соединение потеряно. Перезагрузка...', 'error');
         setTimeout(logout, 3000);
       });
 
       socket.on('connect_error', function(error) {
-        console.error('Socket connection error:', error);
         showNotification('Ошибка соединения', 'error');
         setTimeout(logout, 3000);
       });
@@ -287,23 +282,19 @@
       function playNotificationSound() {
         notificationSound.currentTime = 0;
         notificationSound.play().catch(error => {
-          console.error('Ошибка воспроизведения звука:', error);
         });
       }
       socket.on('new_ticket', function(data) {
-        console.log('Получено событие new_ticket:', data);
         const assignedServiceIds = [];
         {% for assignment in assignments %}
           assignedServiceIds.push({{ assignment.service_id }});
         {% endfor %}
         if (assignedServiceIds.includes(data.serviceId)) {
-          console.log('Уведомление принято - услуга назначена этому оператору');
           playNotificationSound();
           showNotification(`Новый клиент! Талон №${data.ticketNumber} (${data.serviceName || ''})`, 'success');
           startRefreshTimer();
           highlightServiceSection(data.serviceId);
         } else {
-          console.log('Игнорируем уведомление - услуга не назначена этому оператору:', data.serviceId);
         }
       });
       function highlightServiceSection(serviceId) {
@@ -336,7 +327,6 @@
         });
       }
       socket.on('call_ticket', function(data) {
-        console.log('Получено событие call_ticket:', data);
         const assignedServiceIds = [];
         {% for assignment in assignments %}
           assignedServiceIds.push({{ assignment.service_id }});
@@ -347,7 +337,6 @@
         }
       });
       socket.on('delete_ticket', function(data) {
-        console.log('Получено событие delete_ticket:', data);
         const assignedServiceIds = [];
         {% for assignment in assignments %}
           assignedServiceIds.push({{ assignment.service_id }});
@@ -359,7 +348,6 @@
       });
 
       window.callCurrentTicket = function(ticketId, ticketNumber, userCabinet, serviceId) {
-        console.log(`Вызов тикета ID: ${ticketId}, Номер: ${ticketNumber}, Кабинет: ${userCabinet}`);
         
         if (ticketId === 0) {
           showNotification('Нет тикетов для вызова', 'warning');
@@ -373,7 +361,6 @@
           url: "{{ url_for('user.call_ticket', ticket_id=0) }}".replace('0', ticketId),
           method: 'POST',
           success: function(response) {
-            console.log('Тикет вызван успешно:', response);
             
             socket.emit('call_ticket', {
               ticketNumber: ticketNumber,
@@ -389,7 +376,6 @@
             }, 10000);
           },
           error: function(xhr, status, error) {
-            console.error('Ошибка вызова тикета:', xhr.responseText);
             enableButtons();
             showNotification('Ошибка вызова тикета', 'error');
           }
@@ -417,7 +403,6 @@
           url: "{{ url_for('user.remove_and_call_next_ticket', ticket_id=0) }}".replace('0', ticketId),
           method: 'POST',
           success: function(response) {
-            console.log('Следующий тикет вызван:', response);
             
             if (response.status === 'success' && response.announce) {
               var currentTicketDisplay = document.getElementById(`currentTicketDisplay${serviceId}`);
@@ -443,7 +428,6 @@
             }
           },
           error: function(xhr) {
-            console.error('Ошибка вызова следующего тикета:', xhr.responseText);
             enableButtons();
             showNotification('Ошибка вызова следующего тикета', 'error');
           }
@@ -456,14 +440,12 @@
             url: "{{ url_for('user.delete_ticket', ticket_id=0) }}".replace('0', ticketId),
             type: 'POST',
             success: function(response) {
-              console.log('Тикет удалён:', response);
               showNotification('Тикет успешно удален', 'success');
               startRefreshTimer();
               
               location.reload();
             },
             error: function(xhr) {
-              console.error('Ошибка удаления тикета:', xhr.responseText);
               showNotification('Ошибка удаления тикета', 'error');
             }
           });

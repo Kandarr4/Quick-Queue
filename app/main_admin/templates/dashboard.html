@@ -810,7 +810,6 @@
            return;
        }
        
-       console.log('Отправка запроса для admin_id:', adminId);
        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Обработка...');
        const csrfToken = $('meta[name="csrf-token"]').attr('content');
        const headers = {};
@@ -825,7 +824,6 @@
            contentType: 'application/json',
            data: JSON.stringify({}),
            success: function(response) {
-               console.log('Ответ от сервера:', response);
                const isActive = response.active;
                $('#org-active')
                    .text(isActive ? 'Активен' : 'Неактивен')
@@ -845,10 +843,6 @@
                    .prop('disabled', false)
                    .html(`<i class="fas fa-power-off"></i> ${$('#org-active').text() === 'Активен' ? 'Деактивировать' : 'Активировать'}`);
                
-               console.error('Ошибка при выполнении запроса:', xhr);
-               console.error('Статус:', status);
-               console.error('Ошибка:', error);
-               console.error('Ответ сервера:', xhr.responseText);
                
                let errorMsg = 'Произошла ошибка при изменении статуса организации';
                try {
@@ -859,7 +853,6 @@
                        if (response.error) errorMsg = response.error;
                    }
                } catch (e) {
-                   console.error('Ошибка при парсинге ответа:', e);
                }
                
                showNotification(errorMsg, 'danger');
@@ -873,7 +866,6 @@
            return;
        }
        
-       console.log('Открытие модального окна редактирования для admin_id:', adminId);
        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Загрузка...');
        
        const form = $('#editOrgForm');
@@ -905,7 +897,6 @@
                $('#edit-org-btn').prop('disabled', false).html('<i class="fas fa-edit"></i> Редактировать');
                
                showNotification(xhr.responseJSON?.error || 'Не удалось загрузить данные для редактирования.', 'danger');
-               console.error('Ошибка при загрузке данных для редактирования:', xhr);
            }
        });
    });
@@ -1004,7 +995,6 @@ $(document).ready(function() {
                 }
             },
             error: function(xhr) {
-                console.error('Ошибка при создании папки для стилей:', xhr);
                 $('#create-style-folder-btn').prop('disabled', false).html('<i class="fas fa-folder-plus"></i> Создать папку для стилей');
                 showNotification('Ошибка при создании папки для стилей', 'danger');
             }
@@ -1057,7 +1047,6 @@ $(document).ready(function() {
                 $('#styleSettingsModal').modal('show');
             },
             error: function(xhr) {
-                console.error('Ошибка при загрузке настроек стилей:', xhr);
                 showNotification('Ошибка при загрузке настроек стилей', 'danger');
             }
         });
@@ -1084,7 +1073,6 @@ $(document).ready(function() {
                 if (callback) callback();
             },
             error: function(xhr) {
-                console.error('Ошибка при загрузке списка файлов стилей:', xhr);
                 showNotification('Ошибка при загрузке списка файлов стилей', 'danger');
                 if (callback) callback();
             }
@@ -1202,7 +1190,6 @@ $(document).ready(function() {
                                 errorMessage = response.message;
                             }
                         } catch (e) {
-                            console.error('Не удалось распарсить ответ:', e);
                         }
                     }
                     if (errorMessage.includes('Отсутствуют необходимые файлы стилей')) {
@@ -1217,10 +1204,8 @@ $(document).ready(function() {
                         }
                     }
                 } catch (e) {
-                    console.error('Ошибка при обработке ответа:', e);
                 }
                 
-                console.error('Ошибка при сохранении настроек стилей:', xhr);
                 showNotification(errorMessage, 'danger');
             }
         });
@@ -1237,7 +1222,6 @@ $(document).ready(function() {
        const form = $('#editOrgForm');
        if (!form.attr('action')) {
            showNotification('Ошибка: не указан URL для отправки данных', 'danger');
-           console.error('Отсутствует атрибут action в форме редактирования');
            return;
        }
 
@@ -1299,7 +1283,6 @@ $(document).ready(function() {
                $('#edit-org-submit').prop('disabled', false).html('Сохранить изменения');
                
                showNotification(xhr.responseJSON?.error || 'Ошибка при сохранении изменений.', 'danger');
-               console.error('Ошибка при сохранении изменений:', xhr);
            }
        });
    });
@@ -1440,7 +1423,6 @@ $(document).ready(function() {
        });
    });
    function loadOrgData(adminId) {
-       console.log('Загрузка данных организации с ID:', adminId);
        
        $('#chart-loading').show();
        $('#chart-error').hide();
@@ -1607,7 +1589,6 @@ $(document).ready(function() {
                    }
                });
            } catch (e) { 
-               console.error('Ошибка при инициализации графика:', e);
            }
        }, 100);
    }
@@ -1652,7 +1633,6 @@ $(document).ready(function() {
                });
            },
            error: function(xhr, status, error) {
-               console.error('Ошибка при загрузке системной информации:', error);
            }
        });
    }

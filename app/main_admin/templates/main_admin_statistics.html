@@ -895,7 +895,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     document.getElementById('daily-loading').style.display = 'none';
                     showNotification('Ошибка при загрузке данных: ' + error.message, 'danger');
                 });
@@ -964,7 +963,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     document.getElementById('monthly-loading').style.display = 'none';
                     showNotification('Ошибка при загрузке данных: ' + error.message, 'danger');
                 });

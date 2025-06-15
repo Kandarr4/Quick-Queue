@@ -219,13 +219,9 @@
             }
         );
         $('form').submit(function() {
-            console.log('Form submitted');
             const csrfToken = $('input[name="csrf_token"]').val();
-            console.log('CSRF Token:', csrfToken);
             const username = $('#username').val();
             const password = $('input[type="password"]').val();
-            console.log('Username:', username);
-            console.log('Password length:', password ? password.length : 0);
             return true;
         });
         $(window).resize(function() {

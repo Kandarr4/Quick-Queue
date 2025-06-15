@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         showNotification(data.ticket_number);
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(() => {});
         });
     });
     function updateCards() {
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             })
-            .catch(error => console.error('Error:', error));
+            .catch(() => {});
     }
     setInterval(updateCards, 60000);
     updateCards();

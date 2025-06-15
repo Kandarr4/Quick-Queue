@@ -487,12 +487,11 @@ textarea.contact-form-control {
 <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 
 
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous" onerror="console.log('Font Awesome failed to load')"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("Initializing messenger widget...");
     const BASE_URL = 'https://somnium.kz';
     const GUEST_MODE = true;
     const contactPanelButton = document.getElementById('contactPanelButton');
@@ -607,9 +606,7 @@ document.addEventListener('DOMContentLoaded', function() {
         contactPanelClose.addEventListener('click', toggleChatPanel);
     }
 	function initializeSocket() {
-		console.log("Initializing Socket.IO connection...");
 		if (typeof io === 'undefined') {
-			console.error("Socket.IO not found! Loading it dynamically...");
 			updateConnectionStatus('Socket.IO не найден. Загрузка...', 'warning');
 			const script = document.createElement('script');
 			script.src = 'https://cdn.socket.io/4.6.0/socket.io.min.js';
@@ -617,11 +614,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			script.crossOrigin = 'anonymous';
 			
 			script.onload = function() {
-				console.log("Socket.IO loaded successfully!");
 				updateConnectionStatus('Socket.IO загружен', 'success');
 				const socket = initializeSocket();
 				if (activeChat) {
-					console.log(`Joining chat room: chat_${activeChat}`);
 					setTimeout(() => {
 						socket.emit('join_chat', { chat_id: activeChat });
 					}, 1000);
@@ -629,7 +624,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			};
 			
 			script.onerror = function() {
-				console.error("Failed to load Socket.IO");
 				updateConnectionStatus('Не удалось загрузить Socket.IO', 'error');
 			};
 			
@@ -637,11 +631,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			return null;
 		}
 		if (socket) {
-			console.log("Disconnecting existing socket connection...");
 			socket.disconnect();
 		}
 		const socketURL = BASE_URL;
-		console.log("Connecting to Socket.IO server at:", socketURL);
 		
 		try {
 			let newSocket = io(socketURL + '/messenger', {
@@ -659,12 +651,9 @@ document.addEventListener('DOMContentLoaded', function() {
 				}
 			});
 			
-			console.log("Socket.IO instance created, waiting for connection...");
 			newSocket.on('connect', function() {
-				console.log('Socket.IO: CONNECTED! Socket ID:', newSocket.id);
 				updateConnectionStatus('Подключено', 'success');
 				if (activeChat) {
-					console.log(`Joining chat room: chat_${activeChat}`);
 					newSocket.emit('join_chat', { chat_id: activeChat });
 				}
 				if (reconnectInterval) {
@@ -674,13 +663,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 			
 			newSocket.on('disconnect', function(reason) {
-				console.log('Socket.IO: DISCONNECTED! Reason:', reason);
 				updateConnectionStatus('Соединение потеряно: ' + reason, 'warning');
 				if (!reconnectInterval) {
 					reconnectInterval = setInterval(function() {
 						if (!newSocket.connected) {
 							reconnectAttempts++;
-							console.log(`Reconnection attempt #${reconnectAttempts}...`);
 							updateConnectionStatus(`Переподключение: попытка ${reconnectAttempts}`, 'warning');
 							
 							if (reconnectAttempts > 5) {
@@ -696,15 +683,12 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 			
 			newSocket.on('connect_error', function(error) {
-				console.error('Socket.IO: CONNECTION ERROR!', error);
 				updateConnectionStatus('Ошибка подключения', 'error');
 			});
 			newSocket.on('joined_chat', function(data) {
-				console.log(`Successfully joined chat room: chat_${data.chat_id}`);
 			});
 			
 			newSocket.on('new_message', function(data) {
-				console.log('Received new message:', data);
 				
 				if (data.chat_id == activeChat) {
 					const isMyMessage = (data.sender_type === 'user' && !GUEST_MODE) || 
@@ -740,7 +724,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 			
 			newSocket.on('new_chat_notification', function(data) {
-				console.log('Received new chat notification:', data);
 				
 				if (!contactPanelContent.classList.contains('active') || data.chat_id != activeChat) {
 					unreadBadge.style.display = 'flex';
@@ -763,7 +746,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			
 			newSocket.on('chat_closed', function(data) {
 				if (data.chat_id == activeChat) {
-					console.log('Received chat closed event:', data);
 					isChatClosed = true;
 					addClosedChatNotification();
 					
@@ -782,7 +764,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			
 			newSocket.on('chat_reopened', function(data) {
 				if (data.chat_id == activeChat) {
-					console.log('Received chat reopened event:', data);
 					isChatClosed = false;
 					
 					const notificationElement = document.getElementById('closedChatNotification');
@@ -812,7 +793,6 @@ document.addEventListener('DOMContentLoaded', function() {
 				}
 			});
 			newSocket.on('guest_chats', function(data) {
-				console.log('Received guest chats:', data);
 				if (data.chats && data.chats.length > 0) {
 					const lastChat = data.chats[0];
 					activeChat = lastChat.id;
@@ -828,7 +808,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			
 			return newSocket;
 		} catch (error) {
-			console.error("Error creating Socket.IO instance:", error);
 			updateConnectionStatus('Ошибка создания Socket.IO', 'error');
 			return null;
 		}
@@ -845,7 +824,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return 'guest-csrf-token-' + new Date().getTime();
     }
     function createNewChat(customTitle = '') {
-        console.log("Создание нового чата...");
         if (!customTitle) {
             const savedUserInfo = localStorage.getItem('user_info');
             if (savedUserInfo) {
@@ -864,7 +842,6 @@ document.addEventListener('DOMContentLoaded', function() {
             headers['X-CSRFToken'] = csrfToken;
         }
         
-        console.log("Создание нового чата с заголовком:", customTitle);
         return fetch(BASE_URL + '/messenger/create_chat', {
             method: 'POST',
             headers: headers,
@@ -876,10 +853,8 @@ document.addEventListener('DOMContentLoaded', function() {
             credentials: 'include'
         })
         .then(response => {
-            console.log("Статус ответа создания чата:", response.status);
             const contentType = response.headers.get('Content-Type');
             if (contentType && contentType.includes('text/html')) {
-                console.warn("Сервер вернул HTML вместо JSON. Возможно, проблема с CSRF-токеном.");
                 throw new Error('Сервер вернул HTML вместо JSON. Возможно, проблема с настройками CORS или CSRF.');
             }
             
@@ -890,12 +865,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            console.log("Данные после создания чата:", data);
             return data;
         })
         .catch(error => {
-            console.error("Ошибка при создании чата:", error);
-            console.log("Создаем локальный чат для обхода ошибки");
             const localChatId = 'local_' + new Date().getTime();
             return {
                 success: true,
@@ -909,7 +881,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     function loadChat(chatId) {
-        console.log("Загрузка чата с ID:", chatId);
         
         activeChat = chatId;
         localStorage.setItem('active_chat_id', chatId);
@@ -917,15 +888,12 @@ document.addEventListener('DOMContentLoaded', function() {
             socket = initializeSocket();
         }
         if (socket && socket.connected) {
-            console.log(`Emitting join_chat with chat_id: ${chatId}`);
             socket.emit('join_chat', { chat_id: chatId });
         } else {
-            console.warn("Socket.IO не подключен, невозможно присоединиться к комнате чата");
         }
         if (contactFormContainer) contactFormContainer.style.display = 'none';
         if (chatContainer) chatContainer.style.display = 'flex';
         if (!chatMessages) {
-            console.error("Элемент chatMessages не найден");
             return;
         }
         
@@ -945,15 +913,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const isLocalChat = chatId.startsWith('local_');
         const cachedMessages = getMessagesFromLocalStorage(chatId);
         if (isLocalChat || (cachedMessages && cachedMessages.length > 0)) {
-            console.log("Используем локальные или кэшированные сообщения");
             loadingIndicator.remove();
             const chatStatus = localStorage.getItem('chat_status_' + chatId) || 'open';
             if (chatStatus === 'resolved' || chatStatus === 'closed') {
-                console.log("Чат закрыт, статус:", chatStatus);
                 isChatClosed = true;
                 addClosedChatNotification();
             } else {
-                console.log("Чат активен, статус:", chatStatus);
                 isChatClosed = false;
                 if (chatInputContainer) {
                     chatInputContainer.style.display = 'block';
@@ -997,7 +962,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 localStorage.setItem('chat_status_' + chatId, data.chat.status);
                                 
                                 if (data.chat.status === 'resolved' || data.chat.status === 'closed') {
-                                    console.log("Чат закрыт, статус:", data.chat.status);
                                     isChatClosed = true;
                                     addClosedChatNotification();
                                 }
@@ -1006,7 +970,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             const newMessages = data.messages.filter(m => !existingIds.includes(m.id));
                             
                             if (newMessages.length > 0) {
-                                console.log("Получены новые сообщения:", newMessages.length);
                                 newMessages.forEach(message => {
                                     const messageObj = {
                                         id: message.id,
@@ -1025,10 +988,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     })
                     .catch(error => {
-                        console.warn("Не удалось загрузить сообщения с сервера:", error);
                     });
                 } catch (e) {
-                    console.error("Ошибка при загрузке сообщений:", e);
                 }
             }
             
@@ -1043,14 +1004,12 @@ document.addEventListener('DOMContentLoaded', function() {
             credentials: 'include'
         })
         .then(response => {
-            console.log("Статус ответа:", response.status);
             if (!response.ok) {
                 throw new Error(`Server response: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log("Данные чата:", data);
             loadingIndicator.remove();
             
             if (data.success) {
@@ -1058,11 +1017,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.setItem('chat_status_' + chatId, data.chat.status);
                 }
                 if (data.chat && (data.chat.status === 'resolved' || data.chat.status === 'closed')) {
-                    console.log("Чат закрыт, статус:", data.chat.status);
                     isChatClosed = true;
                     addClosedChatNotification();
                 } else {
-                    console.log("Чат активен, статус:", data.chat ? data.chat.status : "неизвестен");
                     isChatClosed = false;
                     if (chatInputContainer) {
                         chatInputContainer.style.display = 'block';
@@ -1084,7 +1041,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         saveMessageToLocalStorage(chatId, messageObj);
                     });
                 } else {
-                    console.log("Нет сообщений в чате");
                     const welcomeMessage = {
                         text: "Здравствуйте! Чем мы можем помочь вам сегодня?",
                         sender_type: 'admin',
@@ -1103,7 +1059,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('Error loading chat:', error);
             loadingIndicator.remove();
             const errorMessage = document.createElement('div');
             errorMessage.className = 'alert alert-danger my-3';
@@ -1111,7 +1066,6 @@ document.addEventListener('DOMContentLoaded', function() {
             chatMessages.appendChild(errorMessage);
             const cachedMessages = getMessagesFromLocalStorage(chatId);
             if (cachedMessages && cachedMessages.length > 0) {
-                console.log("Используем кэшированные сообщения:", cachedMessages.length);
                 
                 setTimeout(() => {
                     errorMessage.remove();
@@ -1140,12 +1094,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     function addClosedChatNotification() {
-        console.log("Добавляем уведомление о закрытом чате");
         if (chatInputContainer) {
             chatInputContainer.style.display = 'none';
         }
         if (document.getElementById('closedChatNotification')) {
-            console.log("Уведомление о закрытом чате уже существует");
             return;
         }
         const notificationElement = document.createElement('div');
@@ -1164,7 +1116,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const reopenButton = document.getElementById('reopenChatBtn');
         if (reopenButton) {
             reopenButton.addEventListener('click', function() {
-                console.log("Нажата кнопка создания нового чата");
                 
                 const notification = document.getElementById('closedChatNotification');
                 if (notification) {
@@ -1180,7 +1131,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     function sendMessage(chatId, messageText) {
-        console.log("Отправка сообщения в чат:", chatId);
         const csrfToken = getCSRFToken();
         const extraParams = GUEST_MODE ? { guest_id: guestSessionId } : {};
         
@@ -1200,14 +1150,12 @@ document.addEventListener('DOMContentLoaded', function() {
             credentials: 'include'
         })
         .then(response => {
-            console.log("Статус ответа:", response.status);
             if (!response.ok) {
                 throw new Error(`Ошибка отправки: ${response.status}`);
             }
             return response.json();
         })
         .catch(error => {
-            console.error("Ошибка при отправке сообщения:", error);
             return {
                 success: true,
                 message_id: 'local_' + new Date().getTime(),
@@ -1221,7 +1169,6 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             if (!activeChat) {
-                console.error("No active chat found!");
                 if (typeof showNotification === 'function') {
                     showNotification('Ошибка', 'Чат не найден', 'error');
                 } else {
@@ -1233,9 +1180,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const messageText = chatMessageInput.value.trim();
             if (!messageText) return;
             
-            console.log("Отправка сообщения в чат:", activeChat, "Текст:", messageText);
             if (isChatClosed) {
-                console.warn("Chat is closed, cannot send message");
                 if (typeof showNotification === 'function') {
                     showNotification('Внимание', 'Чат закрыт. Пожалуйста, нажмите кнопку "Создать новый чат", чтобы продолжить.', 'warning');
                 } else {
@@ -1268,7 +1213,6 @@ document.addEventListener('DOMContentLoaded', function() {
             chatMessageInput.value = '';
             sendMessage(activeChat, messageText)
                 .then(data => {
-                    console.log("Сообщение успешно отправлено:", data);
                     
                     if (data.success) {
                         const messages = getMessagesFromLocalStorage(activeChat);
@@ -1280,7 +1224,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     } else {
-                        console.error("Ошибка отправки сообщения:", data);
                         const messageElements = chatMessages.querySelectorAll('.message');
                         const lastElement = messageElements[messageElements.length - 1];
                         if (lastElement && (lastElement.classList.contains('user-message') || lastElement.classList.contains('guest-message'))) {
@@ -1311,7 +1254,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 })
                 .catch(error => {
-                    console.error('Ошибка отправки сообщения:', error);
                 });
         });
     }
@@ -1361,7 +1303,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 
@@ -1440,7 +1381,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.appendChild(soundElement);
         }
         soundElement.play().catch(error => {
-            console.log('Error playing notification sound:', error);
         });
     }
     function markMessagesAsRead() {
@@ -1452,13 +1392,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadChatHistory() {
         const activeChatId = localStorage.getItem('active_chat_id');
         if (activeChatId) {
-            console.log("Загрузка истории сообщений для чата:", activeChatId);
             loadChat(activeChatId);
         }
     }
     function checkConnection() {
         if (socket && !socket.connected) {
-            console.log("Socket.IO соединение потеряно, пытаемся переподключиться...");
             updateConnectionStatus("Переподключение...", "warning");
             socket.connect();
         }
@@ -1518,7 +1456,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(checkConnection, 10000);
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden && (!socket || !socket.connected)) {
-            console.log("Страница стала видимой, проверяем соединение");
             socket = initializeSocket();
             if (activeChat) {
                 loadChat(activeChat);
@@ -1527,7 +1464,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     setInterval(function() {
         if (activeChat && (!socket || !socket.connected)) {
-            console.log("Polling for new messages...");
             fetch(`${BASE_URL}/messenger/chat/${activeChat}`, {
                 method: 'GET',
                 headers: {
@@ -1542,7 +1478,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     renderChatMessages(data.messages);
                 }
             })
-            .catch(error => console.error("Error polling messages:", error));
+            .catch(() => {});
         }
     }, 5000);
     function renderChatMessages(messages) {
@@ -1551,7 +1487,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const newMessages = messages.filter(message => !existingIds.includes(message.id));
         
         if (newMessages.length > 0) {
-            console.log(`Found ${newMessages.length} new messages`);
             
             newMessages.forEach(message => {
                 const messageObj = {
@@ -1569,10 +1504,8 @@ document.addEventListener('DOMContentLoaded', function() {
             scrollChatToBottom();
         }
     }
-    console.log("Checking for active chat on page load...");
     const activeChatId = localStorage.getItem('active_chat_id');
     if (activeChatId) {
-        console.log("Found active chat:", activeChatId);
         activeChat = activeChatId;
         
         if (!contactPanelContent.classList.contains('active')) {
@@ -1594,7 +1527,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     socket = initializeSocket();
     
-    console.log("Messenger widget initialized!");
 });
 
 </script>

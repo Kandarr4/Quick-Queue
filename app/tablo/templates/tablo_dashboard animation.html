@@ -776,7 +776,6 @@ $(document).ready(function() {
       return;
     }
     
-    console.log("Отключаем звук видео");
     videoPlayer.muted = true;
     window.audioPlaying = true;
     if (window.unmuteTimer) {
@@ -791,13 +790,11 @@ $(document).ready(function() {
     }
     if (!isPlaying && playQueue.length === 0) {
       if (window.audioPlaying) {
-        console.log("Включаем звук видео");
         videoPlayer.muted = false;
         videoPlayer.volume = videoVolume;
         window.audioPlaying = false;
       }
     } else {
-      console.log("Не включаем звук - еще воспроизводится аудио");
     }
   }
   if (showVideo && videoPlayer) {
@@ -805,7 +802,6 @@ $(document).ready(function() {
       videoPlayer.muted = false;
       videoPlayer.volume = videoVolume;
       window.audioPlaying = false;
-      console.log("Первоначальная инициализация видео - звук включен");
     }, 5000);
   }
   var socket = io.connect(window.location.origin + '/voicing', {
@@ -821,22 +817,18 @@ $(document).ready(function() {
     if (jqXHR.status === 403) {
       logout();
     } else {
-      console.error('Ошибка при получении назначенных услуг:', jqXHR.statusText);
       $('#loading-indicator').html('<p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Ошибка загрузки данных</p>');
     }
   });
   socket.on('connect', function() {
-    console.log('Socket connected on /voicing namespace');
   });
   
   socket.on('disconnect', function(reason) {
-    console.warn('Socket disconnected:', reason);
     showNotification('Соединение потеряно. Перезагрузка...', 'warning');
     setTimeout(logout, 3000);
   });
   
   socket.on('connect_error', function(error) {
-    console.error('Socket connection error:', error);
     showNotification('Ошибка соединения!', 'danger');
     setTimeout(logout, 3000);
   });
@@ -857,7 +849,6 @@ $(document).ready(function() {
   }
   socket.on('play_audio', function(data) {
     if (assignedServices.includes(data.serviceId)) {
-      console.log("Получен play_audio сигнал");
       muteVideo();
       if (!isPlaying) {
         isPlaying = true;
@@ -875,12 +866,10 @@ $(document).ready(function() {
       playAudioSequence(nextSequence);
     } else {
       isPlaying = false;
-      console.log("Аудио очередь пуста, включаем звук видео через 1 секунду");
       setTimeout(function() {
         unmuteVideo();
         setTimeout(function() {
           if (showVideo && videoPlayer && videoPlayer.muted && !isPlaying && playQueue.length === 0 && window.audioPlaying) {
-            console.log("Дополнительная проверка: видео все еще без звука - пробуем включить еще раз");
             unmuteVideo();
           }
         }, 3000);
@@ -889,7 +878,6 @@ $(document).ready(function() {
   }
   
   function playAudioSequence(sequence) {
-    console.log("Запуск последовательности: ", sequence);
     
     if (!sequence || sequence.length === 0) {
       isPlaying = false;
@@ -906,20 +894,17 @@ $(document).ready(function() {
           resolve(url);
         }, { once: true });
         tempAudio.addEventListener('error', () => {
-          console.error(`Ошибка загрузки аудио: ${name}`);
           reject(new Error(`Не удалось загрузить: ${name}`));
         }, { once: true });
         tempAudio.load();
       });
     });
     Promise.allSettled(loadPromises).then(results => {
-      console.log("Все файлы предзагружены");
       const validUrls = results
         .filter(result => result.status === 'fulfilled')
         .map(result => result.value);
       
       if (validUrls.length === 0) {
-        console.error("Ни один аудиофайл не был загружен");
         isPlaying = false;
         processQueue();
         return;
@@ -929,9 +914,7 @@ $(document).ready(function() {
       
       function playNextLoaded() {
         audio.play().then(() => {
-          console.log(`Воспроизводится файл: ${index + 1}/${validUrls.length}`);
         }).catch(e => {
-          console.error("Ошибка воспроизведения:", e);
           nextFile();
         });
       }
@@ -944,7 +927,6 @@ $(document).ready(function() {
           audio.onerror = nextFile;
           playNextLoaded();
         } else {
-          console.log("Последовательность аудио завершена");
           processQueue();
         }
       }
@@ -955,7 +937,6 @@ $(document).ready(function() {
   }
   socket.on('call_ticket', function(data) {
     if (assignedServices.includes(data.serviceId)) {
-      console.log("Получен call_ticket сигнал");
       updateTicketsDisplay();
     }
   });
@@ -1031,15 +1012,13 @@ $(document).ready(function() {
             } else {
               var ticketDiv = document.createElement('div');
               ticketDiv.className = 'tablo-item new-item animate__animated animate__bounceInDown animate__headShake';
-              console.log("Новый тикет: отключаем звук видео");
               muteVideo();
               if (document.documentElement.hasAttribute('data-user-interacted')) {
                 let audioNotice = new Audio();
                 audioNotice.src = window.location.origin + '/static/audio/notice.mp3';
                 try {
-                  audioNotice.play().catch(e => console.log('Автозапуск аудио заблокирован браузером'));
+                  audioNotice.play().catch(() => {});
                 } catch(e) {
-                  console.log('Ошибка проигрывания аудио');
                 }
               }
               ticketDiv.innerHTML = `<div class="ticket-number">${ticket.number}</div><div class="ticket-cabinet">${ticket.cabinet}</div>`;
@@ -1069,7 +1048,6 @@ $(document).ready(function() {
         displayedTickets = newDisplayedTickets;
       })
       .catch(error => {
-        console.error('Fetch error:', error);
       });
   }
   $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
@@ -1089,17 +1067,14 @@ $(document).ready(function() {
     if (showVideo && videoPlayer) {
       videoPlayer.muted = false;
       videoPlayer.volume = videoVolume;
-      console.log("Клик пользователя: включаем звук видео");
     }
   }, { once: true });
   setInterval(function() {
     if (!isPlaying && playQueue.length === 0) {
       if (window.audioPlaying) {
-        console.log("Несоответствие состояния: аудио не играет, но флаг активен - сбрасываем");
         window.audioPlaying = false;
       }
       if (showVideo && videoPlayer && videoPlayer.muted) {
-        console.log("Периодическая проверка: видео без звука, хотя нет активного аудио - включаем звук");
         videoPlayer.muted = false;
         videoPlayer.volume = videoVolume;
       }
@@ -1109,18 +1084,15 @@ $(document).ready(function() {
 $(document).ready(function() {
   var showVideo = $('#video_setting').val() === 'true';
   if (!showVideo) {
-    console.log('Воспроизведение видео отключено в настройках пользователя');
     return;
   }
   var videoFiles = [];
   var currentVideoIndex = 0;
   var videoPlayer = document.getElementById('videoPlayer');
   if (!videoPlayer) {
-    console.log('Элемент видеоплеера не найден в DOM');
     return;
   }
   videoPlayer.addEventListener('volumechange', function() {
-    console.log('Изменение звука видео:', videoPlayer.muted ? 'заглушено' : 'звук включен', 'громкость:', videoPlayer.volume);
   });
   function fetchVideoList() {
     $.ajax({
@@ -1133,11 +1105,9 @@ $(document).ready(function() {
           playVideo(0);
         } else {
           $('.video-container').hide();
-          console.log('Видеофайлы не найдены в указанной директории');
         }
       },
       error: function(error) {
-        console.error('Ошибка при получении списка видео:', error);
         $('.video-container').hide();
       }
     });
@@ -1159,17 +1129,15 @@ $(document).ready(function() {
     currentVideoIndex = index;
     const videoSrc = videoFiles[currentVideoIndex];
     const currentMuted = videoPlayer.muted || window.audioPlaying;
-    console.log("Загрузка нового видео, статус звука:", currentMuted ? "без звука" : "со звуком", 
-                "аудио активно:", window.audioPlaying ? "да" : "нет");
+    
     videoPlayer.querySelector('source').src = videoSrc;
     videoPlayer.load();
     videoPlayer.oncanplaythrough = function() {
       videoPlayer.muted = currentMuted;
       videoPlayer.play().catch(e => {
-        console.log('Автоматическое воспроизведение заблокировано браузером:', e);
         if (!document.documentElement.hasAttribute('data-video-interacted')) {
           $('body').one('click', function() {
-            videoPlayer.play().catch(e => console.log('Не удалось воспроизвести видео:', e));
+            videoPlayer.play().catch(() => {});
             document.documentElement.setAttribute('data-video-interacted', 'true');
           });
         }
@@ -1177,12 +1145,10 @@ $(document).ready(function() {
     };
   }
   videoPlayer.addEventListener('ended', function() {
-    console.log("Видео закончилось, статус звука:", videoPlayer.muted ? "без звука" : "со звуком");
     const shouldMute = window.audioPlaying;
     playVideo(currentVideoIndex + 1);
   });
   videoPlayer.addEventListener('error', function() {
-    console.error('Ошибка при загрузке видео:', videoFiles[currentVideoIndex]);
     playVideo(currentVideoIndex + 1);
   });
   fetchVideoList();

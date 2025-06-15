@@ -31,7 +31,6 @@ function assignRole(userId) {
                 alert(errorMessage);
             }
             
-            console.error('Error assigning role:', xhr.responseText);
         }
     });
 }
@@ -297,7 +296,6 @@ function initAdminCore() {
             },
             error: function(xhr) {
                 saveScheduleNotification('Ошибка при сохранении расписания', 'danger');
-                console.error('Error saving schedule:', xhr.responseText);
             }
         });
     };
@@ -335,7 +333,7 @@ function initAdminCore() {
                         $('#scheduleServiceModal').modal('show');
                     }
                 })
-                .catch(error => console.error('Error fetching schedule:', error));
+                .catch(() => {});
         });
     });
 	
@@ -467,7 +465,6 @@ function initAdminCore() {
                     $('#loadingServices').hide();
                     $('#noAssignedServices').show();
                     showNotification('Ошибка при загрузке услуг пользователя', 'danger');
-                    console.error('Error loading user services:', xhr.responseText);
                 }
             });
         }
@@ -515,7 +512,6 @@ function initAdminCore() {
                             $('#loadingAvailableServices').hide();
                             $('#noAvailableServices').show();
                             showNotification('Ошибка при загрузке назначенных услуг', 'danger');
-                            console.error('Error loading assigned services:', xhr.responseText);
                         }
                     });
                 },
@@ -523,7 +519,6 @@ function initAdminCore() {
                     $('#loadingAvailableServices').hide();
                     $('#noAvailableServices').show();
                     showNotification('Ошибка при загрузке списка услуг', 'danger');
-                    console.error('Error loading services:', xhr.responseText);
                 }
             });
         }
@@ -556,7 +551,6 @@ function initAdminCore() {
                     },
                     error: function(xhr) {
                         errorCount++;
-                        console.error('Error assigning service:', xhr.responseText);
                         checkCompletion();
                     }
                 });
@@ -646,7 +640,6 @@ $(document).off('click', '.delete-service-btn').on('click', '.delete-service-btn
             },
             error: function(xhr) {
                 showNotification('Ошибка при удалении назначения услуги', 'danger');
-                console.error('Error deleting service assignment:', xhr.responseText);
             }
         });
     }
@@ -658,7 +651,6 @@ $('#addUserModal form').submit(function(e) {
     var formData = $(this).serialize();
     var username = $(this).find('input[name="username"]').val().trim();
     
-    console.log('Отправляем данные пользователя:', username);
     
     $.ajax({
         url: $(this).attr('action'),
@@ -668,7 +660,6 @@ $('#addUserModal form').submit(function(e) {
             'X-Requested-With': 'XMLHttpRequest'
         },
         success: function(response) {
-            console.log('Успешный ответ:', response);
             $('#addUserModal').modal('hide');
             var message = 'Пользователь успешно добавлен';
             if (response && response.message) {
@@ -682,7 +673,6 @@ $('#addUserModal form').submit(function(e) {
             }, 1500);
         },
         error: function(xhr) {
-            console.log('Ошибка:', xhr);
             
             var errorMessage = 'Ошибка при добавлении пользователя';
             
@@ -704,7 +694,6 @@ $('#addUserModal form').submit(function(e) {
             }
             
             showNotification(errorMessage, 'danger');
-            console.error('Error adding user:', xhr.responseText);
         }
     });
 });
@@ -845,7 +834,6 @@ $('#editUserForm').on('submit', function(e) {
             } catch(e) {
             }
             showNotification(errorMessage, 'danger');
-            console.error(xhr.responseText);
         }
     });
 });  
@@ -893,7 +881,6 @@ $('#editServiceForm').on('submit', function(e) {
         },
         error: function(xhr, status, error) {
             showNotification('Произошла ошибка при редактировании услуги', 'danger');
-            console.error(xhr.responseText);
         }
     });
 });
@@ -1011,7 +998,6 @@ $('#changePasswordForm').on('submit', function(e) {
         },
         error: function(xhr, status, error) {
             showNotification('Произошла ошибка при смене пароля: ' + xhr.responseJSON.message, 'danger');
-            console.error(xhr.responseText);
         }
     });
 });

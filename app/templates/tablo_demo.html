@@ -107,7 +107,6 @@
                         });
 
                         socket.on('connect', function() {
-                            console.log('Connected to voicing namespace');
                             updateConnectionStatus(true);
                             socket.emit('register_tab', {
                                 tabId: 'demo-tab-' + Date.now(),
@@ -116,21 +115,17 @@
                         });
 
                         socket.on('disconnect', function() {
-                            console.log('Disconnected from voicing namespace');
                             updateConnectionStatus(false);
                         });
 
                         socket.on('connect_error', function(error) {
-                            console.error('Connection error:', error);
                             updateConnectionStatus(false);
                         });
                         socket.on('play_audio', function(data) {
-                            console.log('Received play_audio event:', data);
                             playAudioSequence(data.sequence);
                         });
 
                     } catch (error) {
-                        console.error('Socket initialization error:', error);
                         updateConnectionStatus(false);
                     }
                 }
@@ -152,7 +147,6 @@
                     const isKazakh = audioFiles.some(file => file.includes('woomen_kz/'));
                     const sequenceType = isKazakh ? 'kz' : 'ru';
                     
-                    console.log('Received audio sequence:', sequenceType, audioFiles);
                     pendingAudioSequences.push({
                         type: sequenceType,
                         files: [...audioFiles]
@@ -179,7 +173,6 @@
                     currentSequenceType = nextSequence.type;
                     audioQueue = [...nextSequence.files];
                     
-                    console.log(`Starting ${nextSequence.type} sequence:`, nextSequence.files);
                     
                     playNextAudio();
                     showAudioStatus(true);
@@ -187,7 +180,6 @@
 
                 function playNextAudio() {
                     if (audioQueue.length === 0) {
-                        console.log(`Finished ${currentSequenceType} sequence`);
                         if (currentAudio) {
                             currentAudio.pause();
                             currentAudio.removeEventListener('ended', currentAudio.onended);
@@ -202,7 +194,6 @@
                     isPlayingAudio = true;
 
                     const audioFile = audioQueue.shift();
-                    console.log('Playing audio:', audioFile);
                     if (currentAudio) {
                         currentAudio.pause();
                         currentAudio.removeEventListener('ended', currentAudio.onended);
@@ -219,27 +210,22 @@
                     currentAudio.volume = 1.0;
                     currentAudio.preload = 'auto';
                     currentAudio.onended = function() {
-                        console.log('Audio file finished:', audioFile);
                         setTimeout(playNextAudio, 300);
                     };
                     
                     currentAudio.onerror = function(e) {
-                        console.error('Audio playback error for file:', audioFile, e);
                         setTimeout(playNextAudio, 100);
                     };
                     
                     currentAudio.onloadstart = function() {
-                        console.log('Started loading:', audioFile);
                     };
                     
                     currentAudio.oncanplay = function() {
-                        console.log('Can play:', audioFile);
                     };
                     currentAudio.src = audioUrl;
                     setTimeout(() => {
                         if (currentAudio && currentAudio.src === audioUrl) {
                             currentAudio.play().catch(e => {
-                                console.error('Audio play failed for file:', audioFile, e);
                                 setTimeout(playNextAudio, 100);
                             });
                         }
@@ -255,7 +241,6 @@
                         videoContainer.style.display = 'none';
                     }
                     
-                    console.log('Video player disabled');
                 }
                 function addTicketToDisplay(ticket) {
                     while (ticketItemsContainer.children.length >= 10) {
@@ -281,7 +266,6 @@
                 }
                 function simulateCall() {
                     if (isPlayingAudio) {
-                        console.log('Audio is already playing, skipping simulation');
                         return;
                     }
                     const ticketNumber = Math.floor(1 + Math.random() * 999);
@@ -300,13 +284,11 @@
                             cabinetNumber: cabinetNumber,
                             serviceId: DEMO_SERVICE_ID
                         });
-                        console.log('Sent call_ticket event:', {
                             ticketNumber: ticketNumber,
                             cabinetNumber: cabinetNumber,
                             serviceId: DEMO_SERVICE_ID
                         });
                     } else {
-                        console.log('Socket not connected, simulating audio locally');
                         const demoAudioKZ = [
                             'woomen_kz/at_work.mp3',
                             'woomen_kz/клиент_номер.mp3',
@@ -331,7 +313,6 @@
                 initializeSocket();
                 simulationButton.addEventListener('click', simulateCall);
 
-                console.log('Tablo demo initialized (video disabled)');
             });
         }
     </script>

@@ -1,5 +1,4 @@
 function loadDiskSpaceInfo() {
-    console.log('Начало загрузки информации о диске');
 
     const diskSpaceInfo = document.getElementById('disk-space-info');
     const refreshBtn = document.getElementById('refreshDiskSpaceBtn');
@@ -17,13 +16,11 @@ function loadDiskSpaceInfo() {
             withCredentials: true
         },
         beforeSend: function(xhr) {
-            console.log('Отправка AJAX-запроса');
             if (csrfToken) {
                 xhr.setRequestHeader('X-CSRFToken', csrfToken);
             }
         },
         success: function(response) {
-            console.log('Успешный ответ:', response);
 
             if (response.status === 'success' && diskSpaceInfo) {
                 const usedPercentage = response.used_percentage;
@@ -60,9 +57,6 @@ function loadDiskSpaceInfo() {
             }
         },
         error: function(xhr, status, error) {
-            console.error('Статус ошибки:', status);
-            console.error('Ошибка:', error);
-            console.error('Полный ответ сервера:', xhr.responseText);
 
             let errorMessage = 'Неизвестная ошибка';
             try {
@@ -192,13 +186,11 @@ function initAdminVideo() {
             },
             error: function(xhr) {
                 showVideoNotification('Ошибка при загрузке содержимого директории', 'danger');
-                console.error('Error loading directory contents:', xhr.responseText);
             }
         });
     }
     function renderDirectoryContents(data) {
         if (!data || !data.folders || !data.files) {
-            console.error('Invalid data structure:', data);
             showVideoNotification('Неверная структура данных', 'danger');
             return;
         }
@@ -327,7 +319,6 @@ function initAdminVideo() {
                 }
             },
             error: function(xhr) {
-                console.error('Error loading folders list:', xhr.responseText);
             }
         });
     }
@@ -360,14 +351,12 @@ function initAdminVideo() {
         const dbName = $('.container').data('database-name');
 
         if (!dbName) {
-            console.error('Имя базы данных организации не найдено в атрибуте data-database-name!');
             showVideoNotification('Критическая ошибка: не удалось определить путь к видео.', 'danger');
             return;
         }
         const videoUrl = `/static/video/${dbName}/${path}`;
         
         if (videoPlayer) {
-            console.log('Установка URL для видеоплеера:', videoUrl);
             videoPlayer.src = videoUrl;
             videoPlayer.load();
         }
@@ -435,7 +424,6 @@ function initAdminVideo() {
                 },
                 error: function(xhr) {
                     showVideoNotification('Ошибка при создании папки', 'danger');
-                    console.error('Error creating folder:', xhr.responseText);
                 }
             });
         });
@@ -524,7 +512,6 @@ function initAdminVideo() {
                                 errorCount++;
                                 $(`#${fileId}-bar`).addClass('bg-danger');
                                 $(`#${fileId}-status`).html(`<i class="fas fa-times-circle text-danger"></i> Ошибка`);
-                                console.error('Ошибка загрузки файла ' + file.name + ':', response.message);
                                 reject(response);
                             }
                         },
@@ -532,7 +519,6 @@ function initAdminVideo() {
                             errorCount++;
                             $(`#${fileId}-bar`).addClass('bg-danger');
                             $(`#${fileId}-status`).html(`<i class="fas fa-times-circle text-danger"></i> Ошибка`);
-                            console.error('Ошибка загрузки файла ' + file.name + ':', xhr.responseText);
                             reject(xhr);
                         }
                     });
@@ -594,7 +580,6 @@ function initAdminVideo() {
                 },
                 error: function(xhr) {
                     showVideoNotification('Ошибка при переименовании', 'danger');
-                    console.error('Error renaming item:', xhr.responseText);
                 }
             });
         });
@@ -629,7 +614,6 @@ function initAdminVideo() {
                 },
                 error: function(xhr) {
                     showVideoNotification('Ошибка при перемещении', 'danger');
-                    console.error('Error moving item:', xhr.responseText);
                 }
             });
         });
@@ -660,7 +644,6 @@ function initAdminVideo() {
                 },
                 error: function(xhr) {
                     showVideoNotification('Ошибка при удалении', 'danger');
-                    console.error('Error deleting item:', xhr.responseText);
                 }
             });
         });

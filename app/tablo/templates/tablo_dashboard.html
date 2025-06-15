@@ -171,7 +171,6 @@
           return;
         }
         if (!videoIsMuted) {
-          console.log("Временно отключаем звук видео для аудио уведомления");
           videoPlayer.muted = true;
           window.audioPlaying = true;
         }
@@ -181,12 +180,10 @@
           return;
         }
         if (!videoIsMuted && !isPlaying && playQueue.length === 0) {
-          console.log("Включаем звук видео");
           videoPlayer.muted = false;
           videoPlayer.volume = videoVolume;
           window.audioPlaying = false;
         } else {
-          console.log("Не включаем звук видео: " + 
                      (videoIsMuted ? "пользователь отключил звук" : "ещё воспроизводится аудио"));
         }
       }
@@ -216,17 +213,14 @@
         if (jqXHR.status === 403) {
           logout();
         } else {
-          console.error('Ошибка при получении назначенных услуг:', jqXHR.statusText);
           $('#loading-indicator').html('<p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Ошибка загрузки данных</p>');
         }
       });
       socket.on('connect', function() {
-        console.log('Socket connected on /voicing namespace');
         showNotification('Соединение установлено', 'info');
       });
       
       socket.on('disconnect', function(reason) {
-        console.warn('Socket disconnected:', reason);
         showNotification('Соединение потеряно. Перезагрузка...', 'warning');
         setTimeout(function() {
           if (socket.disconnected) {
@@ -236,7 +230,6 @@
       });
       
       socket.on('connect_error', function(error) {
-        console.error('Socket connection error:', error);
         showNotification('Ошибка соединения!', 'danger');
         setTimeout(function() {
           window.location.reload();
@@ -261,7 +254,6 @@
       }
       socket.on('play_audio', function(data) {
         if (assignedServices.includes(data.serviceId)) {
-          console.log("Получен play_audio сигнал");
           muteVideo();
           if (!isPlaying) {
             isPlaying = true;
@@ -278,14 +270,12 @@
           playAudioSequence(nextSequence);
         } else {
           isPlaying = false;
-          console.log("Аудио очередь пуста, включаем звук видео через 1 секунду");
           setTimeout(function() {
             unmuteVideo();
           }, 1000);
         }
       }
       function playAudioSequence(sequence) {
-        console.log("Запуск последовательности аудио: ", sequence);
         
         if (!sequence || sequence.length === 0) {
           isPlaying = false;
@@ -305,7 +295,6 @@
           loadPromises.push(new Promise((resolve, reject) => {
             audio.addEventListener('canplaythrough', () => resolve(index), { once: true });
             audio.addEventListener('error', () => {
-              console.error(`Ошибка загрузки аудио: ${name}`);
               reject(`Не удалось загрузить: ${name}`);
             }, { once: true });
             audio.load();
@@ -313,12 +302,10 @@
         });
         Promise.allSettled(loadPromises)
           .then(() => {
-            console.log(`Предзагружено ${audioElements.length} аудиофайлов`);
             
             let currentIndex = 0;
             function playNext() {
               if (currentIndex >= audioElements.length) {
-                console.log("Последовательность аудио завершена");
                 processQueue();
                 return;
               }
@@ -330,16 +317,13 @@
               };
               
               currentAudio.onerror = () => {
-                console.error(`Ошибка воспроизведения файла ${currentIndex}`);
                 currentIndex++;
                 playNext();
               };
               currentAudio.play()
                 .then(() => {
-                  console.log(`Воспроизводится файл: ${currentIndex+1}/${audioElements.length}`);
                 })
                 .catch(error => {
-                  console.error("Ошибка запуска воспроизведения:", error);
                   currentIndex++;
                   playNext();
                 });
@@ -347,13 +331,11 @@
             playNext();
           })
           .catch(error => {
-            console.error("Ошибка предзагрузки аудио:", error);
             processQueue();
           });
       }
       socket.on('call_ticket', function(data) {
         if (assignedServices.includes(data.serviceId)) {
-          console.log("Получен call_ticket сигнал");
           updateTicketsDisplay();
         }
       });
@@ -452,7 +434,7 @@
                     const audioNotice = new Audio();
                     audioNotice.src = window.location.origin + '/static/audio/notice.mp3';
                     audioNotice.play()
-                      .catch(error => console.log('Автозапуск аудио заблокирован:', error));
+                      .catch(() => {});
                   }
                   ticketDiv.innerHTML = 
                     `<div class="ticket-number">${ticket.number}</div>` +
@@ -484,7 +466,6 @@
             displayedTickets = newDisplayedTickets;
           })
           .catch(error => {
-            console.error('Ошибка получения данных таблицы:', error);
           });
       }
       $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
@@ -499,7 +480,6 @@
         if (showVideo && videoPlayer && !videoIsMuted) {
           videoPlayer.muted = false;
           videoPlayer.volume = videoVolume;
-          console.log("Взаимодействие пользователя: включаем звук видео");
         }
       }
       document.addEventListener('click', enableUserInteraction, { once: true });
@@ -516,16 +496,13 @@
             method: 'GET',
             success: function(data) {
               if (data.videos && data.videos.length > 0) {
-                console.log("Получены URL видео:", JSON.stringify(data.videos));
                 
                 if (data.videos.length === 1) {
-                  console.warn("Внимание: получен только один видеофайл, смена видео невозможна");
                   videoFiles = data.videos;
                   currentVideoIndex = 0;
                   playVideo(currentVideoIndex);
                 } else {
                   videoFiles = [...data.videos];
-                  console.log("Получено видеофайлов:", videoFiles.length);
                   shuffleVideoArray();
                   currentVideoIndex = 0;
                   playVideo(currentVideoIndex);
@@ -534,7 +511,6 @@
                 if (videoContainer) {
                   videoContainer.style.display = 'none';
                 }
-                console.log('Видеофайлы не найдены');
                 showNotification('Видеофайлы не найдены', 'warning');
               }
               if (videoLoading) {
@@ -542,7 +518,6 @@
               }
             },
             error: function(error) {
-              console.error('Ошибка при получении списка видео:', error);
               
               if (videoContainer) {
                 videoContainer.style.display = 'none';
@@ -557,11 +532,9 @@
         }
         function shuffleVideoArray() {
           if (!videoFiles || videoFiles.length <= 1) {
-            console.warn("Недостаточно видеофайлов для перемешивания");
             return;
           }
           
-          console.log("Перемешивание массива видео. До:", JSON.stringify(videoFiles));
           const currentVideo = videoFiles[currentVideoIndex];
           for (let i = videoFiles.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -572,15 +545,12 @@
             [videoFiles[0], videoFiles[swapIndex]] = [videoFiles[swapIndex], videoFiles[0]];
           }
           
-          console.log("После перемешивания:", JSON.stringify(videoFiles));
         }
         function playVideo(index) {
           if (!videoFiles || videoFiles.length === 0) {
-            console.error("Нет доступных видеофайлов");
             return;
           }
           if (index >= videoFiles.length) {
-            console.log("Достигнут конец списка, перемешиваем и начинаем сначала");
             currentVideoIndex = 0;
             shuffleVideoArray();
           } else {
@@ -591,17 +561,14 @@
           }
           
           const videoSrc = videoFiles[currentVideoIndex];
-          console.log(`Воспроизведение видео ${currentVideoIndex + 1}/${videoFiles.length}: ${videoSrc}`);
           videoPlayer.src = videoSrc;
           videoPlayer.oncanplay = function() {
-            console.log("Видео готово к воспроизведению");
             if (videoLoading) {
               videoLoading.style.display = 'none';
             }
           };
           
           videoPlayer.onerror = function(e) {
-            console.error('Ошибка воспроизведения видео:', videoPlayer.error);
             if (videoLoading) {
               videoLoading.style.display = 'none';
             }
@@ -614,12 +581,11 @@
           const playPromise = videoPlayer.play();
           if (playPromise !== undefined) {
             playPromise.catch(error => {
-              console.warn('Автоматическое воспроизведение заблокировано:', error);
               if (!document.documentElement.hasAttribute('data-video-interacted')) {
                 showNotification('Нажмите на страницу для включения видео', 'info');
                 const activateVideo = function() {
                   videoPlayer.play()
-                    .catch(e => console.log('Не удалось воспроизвести видео:', e));
+                    .catch(() => {});
                   if (!videoIsMuted && !window.audioPlaying) {
                     videoPlayer.muted = false;
                   }
@@ -632,14 +598,12 @@
           }
         }
         videoPlayer.addEventListener('ended', function onVideoEnded() {
-          console.log("Событие 'ended': Видео закончилось, переходим к следующему");
           const nextIndex = currentVideoIndex + 1;
           setTimeout(() => {
             playVideo(nextIndex);
           }, 200);
         });
         videoPlayer.addEventListener('error', function(e) {
-          console.error('Событие ошибки видео:', videoPlayer.error);
           if (videoLoading) {
             videoLoading.style.display = 'none';
           }
@@ -650,7 +614,6 @@
               !videoPlayer.paused && 
               !videoPlayer.ended && 
               videoPlayer.currentTime + 0.5 >= videoPlayer.duration) {
-            console.log("Почти конец видео, готовимся к следующему");
           }
         });
         videoPlayer.addEventListener('waiting', function() {
@@ -665,10 +628,8 @@
           if (videoPlayer && !videoPlayer.paused && !videoPlayer.ended) {
             if (videoPlayer.currentTime === lastTimePosition && !videoPlayer.seeking) {
               stuckCounter++;
-              console.log(`Видео не прогрессирует: ${stuckCounter}/2`);
               
               if (stuckCounter >= 2) {
-                console.warn("Видео зависло, принудительно переходим к следующему");
                 stuckCounter = 0;
                 playVideo(currentVideoIndex + 1);
               }
@@ -678,11 +639,9 @@
             }
           } else if (videoPlayer && videoPlayer.paused && !videoPlayer.ended && 
                      document.documentElement.hasAttribute('data-user-interacted')) {
-            console.log("Обнаружена пауза видео - возобновляем воспроизведение");
             
             videoPlayer.play()
               .catch(error => {
-                console.log('Ошибка возобновления воспроизведения:', error);
               });
           }
         }, 3000);
@@ -692,11 +651,9 @@
         if (showVideo && videoPlayer) {
           if (!isPlaying && playQueue.length === 0) {
             if (window.audioPlaying) {
-              console.log("Несоответствие состояния: аудио не играет, но флаг активен - сбрасываем");
               window.audioPlaying = false;
             }
             if (videoPlayer.muted && !videoIsMuted) {
-              console.log("Периодическая проверка: видео без звука, хотя нет активного аудио - включаем звук");
               videoPlayer.muted = false;
               videoPlayer.volume = videoVolume;
             }
