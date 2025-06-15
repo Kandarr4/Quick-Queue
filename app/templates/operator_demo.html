@@ -119,13 +119,10 @@
 </div>
 
 <script>
-// Убедимся, что скрипт выполняется один раз
 if (!window.dashboardScriptLoaded) {
   window.dashboardScriptLoaded = true;
 
   document.addEventListener('DOMContentLoaded', function() {
-    
-    // --- Утилиты ---
     function showNotification(message, type = 'info') {
       if ($('#notification-container').length === 0) {
         $('body').append('<div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
@@ -150,18 +147,12 @@ if (!window.dashboardScriptLoaded) {
         document.querySelectorAll('.call-button, .btn-refresh, .btn-delete').forEach(button => button.disabled = false);
         document.getElementById('loading-animation').style.display = 'none';
     }
-
-    // --- Симуляция событий ---
-    
-    // Глобальная функция симуляции нового талона
     window.simulateNewTicket = function() {
-        const sound = new Audio("https://cdn.jsdelivr.net/gh/ColorlibHQ/AdminLTE@main/dist/js/toastr/sounds/success.mp3"); // Пример звука
+        const sound = new Audio("https://cdn.jsdelivr.net/gh/ColorlibHQ/AdminLTE@main/dist/js/toastr/sounds/success.mp3");
         sound.play().catch(e => console.error("Audio play failed:", e));
 
         const ticketNumber = 'Т-' + Math.floor(100 + Math.random() * 900);
         showNotification(`Новый клиент! Талон №${ticketNumber} (Прием терапевта)`, 'success');
-        
-        // Подсветка секции
         const serviceColumn = document.querySelector('.ticket-column[data-service-id="1"]');
         if (serviceColumn) {
             const currentTicket = serviceColumn.querySelector('.current-ticket');
@@ -179,8 +170,6 @@ if (!window.dashboardScriptLoaded) {
         }
     }
 
-    // --- Функции кнопок (симуляция) ---
-
     window.callCurrentTicket = function(ticketId, ticketNumber, userCabinet, serviceId) {
       if (ticketId === 0) {
         showNotification('Нет тикетов для вызова', 'warning');
@@ -188,8 +177,6 @@ if (!window.dashboardScriptLoaded) {
       }
       disableButtons();
       showNotification(`Симуляция: Вызов тикета ${ticketNumber} в каб. ${userCabinet}...`, 'info');
-      
-      // Симуляция ответа сервера
       setTimeout(() => {
         enableButtons();
         showNotification(`Тикет ${ticketNumber} успешно вызван`, 'success');
@@ -219,7 +206,6 @@ if (!window.dashboardScriptLoaded) {
             if (nextTicketRow.length > 0) {
                 const nextTicketNumber = nextTicketRow.find('td:first-child').text();
                 showNotification(`Следующий тикет ${nextTicketNumber} вызван`, 'success');
-                // Визуальное обновление интерфейса
                 column.find('tbody tr:first-child').remove();
                 column.find('.ticket-number').text(nextTicketNumber);
                 column.find('tbody tr:first-child .status').removeClass('issued').addClass('at-work').text('В работе');
@@ -232,15 +218,12 @@ if (!window.dashboardScriptLoaded) {
     window.deleteTicket = function(buttonElement, ticketId) {
       if (confirm(`Вы уверены, что хотите удалить тикет #${ticketId}?`)) {
         showNotification(`Симуляция: Удаление тикета #${ticketId}`, 'warning');
-        // Анимация и удаление строки из таблицы
         $(buttonElement).closest('tr').fadeOut(500, function() {
           $(this).remove();
           showNotification(`Тикет #${ticketId} удален`, 'success');
         });
       }
     };
-    
-    // --- Добавление динамических стилей для анимаций ---
     const style = document.createElement('style');
     style.textContent = `
       @keyframes pulseAnimation {

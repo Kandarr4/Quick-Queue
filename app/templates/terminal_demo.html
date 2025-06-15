@@ -43,15 +43,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Находим только те карточки, которые находятся внутри этого конкретного блока
     const serviceContainer = document.getElementById('service-cards');
-    if (!serviceContainer) return; // Если контейнер не найден, ничего не делаем
+    if (!serviceContainer) return;
 
     const cards = serviceContainer.querySelectorAll('.service-card');
     const notification = document.getElementById('notification');
     const refreshButton = document.getElementById('refresh-button');
-    
-    // Обработчик кнопки обновления
     if (refreshButton) {
         refreshButton.addEventListener('click', function() {
             const refreshIcon = this.querySelector('.refresh-icon');
@@ -61,31 +58,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 600);
         });
     }
-    
-    // Обработчики кликов по карточкам
     cards.forEach(card => {
         card.addEventListener('click', function() {
             if (this.classList.contains('unavailable')) {
-                return; // Не реагируем на недоступные карточки
+                return;
             }
-            
-            // Анимация клика
             this.style.animation = 'clickAnimation 0.5s ease forwards';
             setTimeout(() => { this.style.animation = ''; }, 500);
-            
-            // --- ДЕМОНСТРАЦИОННАЯ ЛОГИКА ---
-            // Вместо fetch-запроса генерируем данные на лету
-            
-            // Получаем данные из атрибутов карточки
             const serviceName = this.getAttribute('data-service-name');
             const cabinetNumber = this.getAttribute('data-cabinet');
-            
-            // Генерируем случайные данные для талона
-            const ticketNumber = String(Math.floor(100 + Math.random() * 900)); // Случайный номер от 100 до 999
+            const ticketNumber = String(Math.floor(100 + Math.random() * 900));
             const issueTime = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-            const activeTicketsBehind = Math.floor(Math.random() * 10); // Случайное число людей в очереди
-
-            // Формируем HTML для печати
+            const activeTicketsBehind = Math.floor(Math.random() * 10);
             const ticketContent = `
                 <div style="font-family: Arial, sans-serif; color: #000; margin: 0; padding: 0; width: 280px;">
                     <div style="text-align: center; padding: 5px; background-color: #fff;">
@@ -111,8 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
             `;
-            
-            // Печатаем талон
             if (typeof printJS !== 'undefined') {
                 printJS({
                     printable: ticketContent,
@@ -122,8 +104,6 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 console.error('PrintJS library is not loaded.');
             }
-            
-            // Показываем уведомление
             showNotification(ticketNumber);
         });
     });

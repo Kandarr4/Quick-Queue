@@ -555,9 +555,6 @@
 
 
 <script>
-
-    
-    // Плавная прокрутка для якорных ссылок
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -573,8 +570,6 @@
             }
         });
     });
-    
-    // Анимация появления элементов при прокрутке
     function checkVisibility() {
         const fadeElements = document.querySelectorAll('.fade-in');
         
@@ -588,21 +583,14 @@
             }
         });
     }
-    
-    // Инициализация анимаций
     window.addEventListener('load', function() {
-        // Установка начального состояния элементов
         const fadeElements = document.querySelectorAll('.fade-in');
         fadeElements.forEach(element => {
             element.style.opacity = '0';
             element.style.transform = 'translateY(20px)';
             element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         });
-        
-        // Проверка видимости элементов при загрузке
         checkVisibility();
-        
-        // Проверка видимости элементов при прокрутке
         window.addEventListener('scroll', checkVisibility);
     });
 </script>

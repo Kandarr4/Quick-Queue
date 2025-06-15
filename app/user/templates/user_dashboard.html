@@ -145,7 +145,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.min.js"></script>
 
 <script>
-    // Настройка AJAX для CSRF
     $.ajaxSetup({
       beforeSend: function(xhr, settings) {
         if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type)) {
@@ -159,7 +158,6 @@
     }
 
     function logout() {
-      // Показываем анимацию при выходе
       $('#loading-animation').show();
       $('.loading-text').text('Выход из системы...');
       
@@ -176,15 +174,10 @@
         setTimeout(logout, 2000);
       }
     });
-
-    // Функция для отображения уведомлений
     function showNotification(message, type = 'info') {
-      // Создаем элемент уведомления, если его еще нет
       if ($('#notification-container').length === 0) {
         $('body').append('<div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
       }
-      
-      // Определяем класс в зависимости от типа
       let alertClass = 'alert-info';
       let icon = 'info-circle';
       
@@ -198,8 +191,6 @@
         alertClass = 'alert-warning';
         icon = 'exclamation-triangle';
       }
-      
-      // Создаем и добавляем уведомление
       const notificationId = 'notification-' + Date.now();
       const notification = `
         <div id="${notificationId}" class="alert ${alertClass} fade-in" style="min-width: 300px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -208,34 +199,24 @@
       `;
       
       $('#notification-container').append(notification);
-      
-      // Удаляем уведомление через 5 секунд
       setTimeout(() => {
         $(`#${notificationId}`).fadeOut(500, function() {
           $(this).remove();
         });
       }, 5000);
     }
-
-    // Функция для обновления информации о времени последнего обновления
     function updateRefreshCounter() {
       const now = new Date();
       const timeString = now.toLocaleTimeString();
-      
-      // Проверяем, существует ли элемент с классом last-update
       if ($('.last-update').length === 0) {
-        // Если нет, создаем его
         if ($('.user-info').length) {
           $('.user-info').append('<div class="last-update" style="font-size: 0.8rem; color: #7f8c8d; margin-top: 5px;"></div>');
         }
       }
-      
-      // Обновляем текст
       $('.last-update').text(`Последнее обновление: ${timeString}`);
     }
 
     $(document).ready(function() {
-      // Подключаемся к Socket.IO
       var socket = io.connect(window.location.origin + '/voicing');
       var username = "{{ session['username'] }}";
 
@@ -261,17 +242,11 @@
 
       socket.on('connect', function() {
         console.log('Socket connected on /voicing namespace');
-        
-        // Получаем ID текущего пользователя
         const userId = {{ current_user.id }};
-        
-        // Получаем ID всех назначенных пользователю услуг
         const assignedServiceIds = [];
         {% for assignment in assignments %}
           assignedServiceIds.push({{ assignment.service_id }});
         {% endfor %}
-        
-        // Присоединяемся к персональной комнате оператора
         socket.emit('join_operator_room', {
           service_ids: assignedServiceIds
         }, function(response) {
@@ -296,103 +271,61 @@
         showNotification('Ошибка соединения', 'error');
         setTimeout(logout, 3000);
       });
-      
-      // Глобальные переменые для управления обновлением страницы
       let refreshTimer;
-      const REFRESH_INTERVAL = 30000; // 30 секунд до обновления страницы
-
-      // Запускаем таймер обновления страницы
+      const REFRESH_INTERVAL = 30000;
       function startRefreshTimer() {
-        // Очищаем предыдущий таймер, если он существует
         if (refreshTimer) clearTimeout(refreshTimer);
-        
-        // Устанавливаем новый таймер
         refreshTimer = setTimeout(function() {
           location.reload();
         }, REFRESH_INTERVAL);
-        
-        // Показываем счетчик до обновления
         updateRefreshCounter();
-        
-        // Запускаем обратный отсчет, если функция существует
         if (typeof startCountdown === 'function') {
           startCountdown();
         }
       }
-
-      // Создаем объект аудио для уведомления
       const notificationSound = new Audio("{{ url_for('static', filename='audio/notification.mp3') }}");
-
-      // Функция для воспроизведения звука уведомления
       function playNotificationSound() {
-        notificationSound.currentTime = 0; // Сбрасываем звук в начало
+        notificationSound.currentTime = 0;
         notificationSound.play().catch(error => {
           console.error('Ошибка воспроизведения звука:', error);
         });
       }
-
-      // Обработка события нового тикета
       socket.on('new_ticket', function(data) {
         console.log('Получено событие new_ticket:', data);
-        
-        // Получаем список ID услуг, назначенных текущему оператору
         const assignedServiceIds = [];
         {% for assignment in assignments %}
           assignedServiceIds.push({{ assignment.service_id }});
         {% endfor %}
-        
-        // Проверяем, относится ли это событие к услуге, назначенной данному оператору
         if (assignedServiceIds.includes(data.serviceId)) {
           console.log('Уведомление принято - услуга назначена этому оператору');
-          
-          // Воспроизводим звук уведомления
           playNotificationSound();
-          
-          // Показываем уведомление
           showNotification(`Новый клиент! Талон №${data.ticketNumber} (${data.serviceName || ''})`, 'success');
-          
-          // Перезапускаем таймер обновления страницы
           startRefreshTimer();
-          
-          // Обновляем интерфейс без полной перезагрузки страницы
           highlightServiceSection(data.serviceId);
         } else {
           console.log('Игнорируем уведомление - услуга не назначена этому оператору:', data.serviceId);
         }
       });
-
-      // Подсвечиваем секцию с новым тикетом
       function highlightServiceSection(serviceId) {
-        // Находим колонку с указанным service_id
         const serviceColumns = document.querySelectorAll('.ticket-column');
         
         serviceColumns.forEach(column => {
           const buttons = column.querySelectorAll('.call-button');
-          
-          // Проверяем, относится ли этот столбец к указанному serviceId
           if (buttons.length && buttons[0].onclick && buttons[0].onclick.toString().includes(serviceId)) {
             column.classList.add('fade-in');
-            
-            // Добавляем анимацию пульсации для текущего тикета
             const currentTicket = column.querySelector('.current-ticket');
             if (currentTicket) {
               currentTicket.style.animation = 'pulseAnimation 2s 3';
-              
-              // Добавляем бейдж "Новый"
               const badge = document.createElement('div');
               badge.className = 'new-ticket-badge';
               badge.textContent = 'Новый';
               currentTicket.appendChild(badge);
-              
-              // Удаляем бейдж через 8 секунд
               setTimeout(() => {
                 if (badge && badge.parentNode) {
                   badge.parentNode.removeChild(badge);
                 }
               }, 8000);
             }
-            
-            // Через 6 секунд убираем эффекты
             setTimeout(() => {
               column.classList.remove('fade-in');
               if (currentTicket) {
@@ -402,39 +335,25 @@
           }
         });
       }
-
-      // Обработка события вызова тикета
       socket.on('call_ticket', function(data) {
         console.log('Получено событие call_ticket:', data);
-        
-        // Получаем список ID услуг, назначенных текущему оператору
         const assignedServiceIds = [];
         {% for assignment in assignments %}
           assignedServiceIds.push({{ assignment.service_id }});
         {% endfor %}
-        
-        // Проверяем, относится ли это событие к услуге, назначенной данному оператору
         if (assignedServiceIds.includes(data.serviceId)) {
           showNotification(`Вызов тикета ${data.ticketNumber} в кабинет ${data.cabinetNumber}`, 'info');
-          // Сбрасываем таймер при получении события, относящегося к этому оператору
           startRefreshTimer();
         }
       });
-
-      // Обработка события удаления тикета
       socket.on('delete_ticket', function(data) {
         console.log('Получено событие delete_ticket:', data);
-        
-        // Получаем список ID услуг, назначенных текущему оператору
         const assignedServiceIds = [];
         {% for assignment in assignments %}
           assignedServiceIds.push({{ assignment.service_id }});
         {% endfor %}
-        
-        // Проверяем, относится ли это событие к услуге, назначенной данному оператору
         if (assignedServiceIds.includes(data.serviceId)) {
           showNotification(`Талон №${data.ticketNumber} удален`, 'warning');
-          // Сбрасываем таймер
           startRefreshTimer();
         }
       });
@@ -461,12 +380,8 @@
               cabinetNumber: userCabinet,
               serviceId: serviceId
             });
-            
-            // Изменяем анимацию для текущего тикета
             const ticketNumberElement = $(`button[onclick*="${ticketId}"]`).closest('.current-ticket').find('.ticket-number');
             ticketNumberElement.addClass('highlight');
-            
-            // Перезапускаем таймер обновления
             startRefreshTimer();
             
             setTimeout(function() {
@@ -517,8 +432,6 @@
               });
               
               showNotification(`Вызван следующий тикет: ${response.ticket.number}`, 'success');
-              
-              // Перезапускаем таймер обновления
               startRefreshTimer();
               
               setTimeout(function() {
@@ -545,8 +458,6 @@
             success: function(response) {
               console.log('Тикет удалён:', response);
               showNotification('Тикет успешно удален', 'success');
-              
-              // Перезапускаем таймер обновления
               startRefreshTimer();
               
               location.reload();
@@ -558,8 +469,6 @@
           });
         }
       };
-
-      // Улучшенная функция для проверки статуса авторизации
       function checkAuthStatus() {
         $.ajax({
           url: "{{ url_for('main.check_auth_status') }}",
@@ -577,8 +486,6 @@
           }
         });
       }
-
-      // Применяем эффекты при наведении к кнопкам
       $('.btn').hover(
         function() {
           $(this).css('transform', 'translateY(-2px)').css('box-shadow', '0 4px 12px rgba(0, 0, 0, 0.15)');
@@ -587,41 +494,27 @@
           $(this).css('transform', 'translateY(0)').css('box-shadow', '0 2px 5px rgba(0, 0, 0, 0.1)');
         }
       );
-
-      // Проверяем статус при загрузке и каждые 5 минут
       checkAuthStatus();
-      setInterval(checkAuthStatus, 300000); // 5 минут
-
-      // Обработка клика на тикет в таблице
+      setInterval(checkAuthStatus, 300000);
       $(document).on('click', 'tbody tr', function() {
         $(this).toggleClass('highlight');
         setTimeout(() => {
           $(this).removeClass('highlight');
         }, 2000);
       });
-      
-      // Создаем элемент для отображения таймера обновления
       const refreshTimerElement = document.createElement('div');
       refreshTimerElement.className = 'refresh-timer fade-in';
       refreshTimerElement.innerHTML = '<i class="fas fa-sync-alt"></i> <span id="refresh-countdown">30</span> сек. до обновления';
       document.body.appendChild(refreshTimerElement);
-
-      // Функция обратного отсчета
       function startCountdown() {
         const countdownElement = document.getElementById('refresh-countdown');
-        let seconds = 30; // Начальное значение
-        
-        // Очищаем предыдущий интервал, если он существует
+        let seconds = 30;
         if (window.countdownInterval) {
           clearInterval(window.countdownInterval);
         }
-        
-        // Обновляем текст каждую секунду
         window.countdownInterval = setInterval(() => {
           seconds--;
           countdownElement.textContent = seconds;
-          
-          // Визуальное оповещение, когда остается мало времени
           if (seconds <= 5) {
             refreshTimerElement.classList.add('countdown-active');
           } else {
@@ -633,8 +526,6 @@
           }
         }, 1000);
       }
-
-      // Добавление CSS для анимаций
       const style = document.createElement('style');
       style.textContent = `
         @keyframes pulseAnimation {
@@ -694,8 +585,6 @@
         }
       `;
       document.head.appendChild(style);
-
-      // Добавление кнопки для ручного сброса таймера
       const resetButton = document.createElement('button');
       resetButton.className = 'btn btn-sm btn-info';
       resetButton.style.position = 'fixed';
@@ -708,11 +597,7 @@
         showNotification('Таймер обновления сброшен', 'info');
       });
       document.body.appendChild(resetButton);
-
-      // Инициализация таймера при загрузке страницы
       startRefreshTimer();
-      
-      // Завершение инициализации
       showNotification('Система загружена успешно', 'success');
     });
 </script>
